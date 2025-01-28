@@ -5,9 +5,9 @@ import Footer from '@/components/Foter';
 
 
 export const metadata = {
-  title: "DZ Tabib ",
-  description: "DZ Tabib is your trusted platform to find doctors, psychologists, and healthcare services in Algeria. Your health, our priority.",
-  keywords: "DZ Tabib, Tabib DZ, doctors Algeria, psychologists Algeria, healthcare Algeria, find doctors, Algeria healthcare platform",
+  title: "Estin Bib",
+  description: "Estin Bib is the premier library platform for ESTIN students and faculty. Access a vast collection of books, research papers, and educational resources tailored to meet academic needs.",
+  keywords: "Estin Bib, ESTIN library, academic resources, books for ESTIN students, research papers, ESTIN Algeria, educational platform, find books, library ESTIN",
 };
 
 export default function RootLayout({
