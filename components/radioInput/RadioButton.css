@@ -1,5 +1,6 @@
 /* From Uiverse.io by gharsh11032000 */
 .radio-button-container {
+    
     display: flex;
     align-items: center;
     gap: 24px;
@@ -9,9 +10,11 @@
     display: inline-block;
     position: relative;
     cursor: pointer;
+    
 }
 
 .radio-button__input {
+    
     position: absolute;
     opacity: 0;
     width: 0;
@@ -19,12 +22,14 @@
 }
 
 .radio-button__label {
+    
     display: inline-block;
     padding-left: 30px;
     margin-bottom: 10px;
     position: relative;
     font-size: 15px;
-    color: #f2f2f2;
+   color: grey;
+   
     font-weight: 600;
     cursor: pointer;
     text-transform: uppercase;

@@ -4,7 +4,7 @@ import Image from "next/image";
 import DropdownImageMenu from "./Hamb"; // Assuming you have a DropdownImageMenu component
 
 const Header = () => {
-  const links = ["Home", "About", "Catalog", "Contact Us", "signup", "login"]; // Menu links
+  const links = ["home", "catalog", "contact-us", "login"]; // Menu links
 
 
   return (
@@ -23,7 +23,7 @@ const Header = () => {
       {/* Desktop Navigation */}
       <div className="hidden mr-auto lg:block">
         <ul className="menu-list">
-          {["Home", "About", "Catalog", "Contact Us"].map((menuItem, index) => (
+          {["Home", "Catalog", "Contact Us"].map((menuItem, index) => (
             <li key={index} className="menu-item">
               <Link href={`/${menuItem.toLowerCase().replace(" ", "-")}`} className="menu-link">
                 {menuItem}

@@ -24,6 +24,7 @@ export default function RootLayout({
         
 
             <Header />
+            <div className='mt-[100px]'></div>
             <main className="relative flex flex-col ">
               {children}
             </main>
