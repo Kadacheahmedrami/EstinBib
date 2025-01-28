@@ -85,19 +85,21 @@ export default function SearchBar({ searchInput, onSearch, isFilterOpen, setIsFi
   };
 
   return (
-    <>
+    <>  
+
+      
       <div 
         ref={searchBarRef}
         className={`w-full transition-all ${
           isSticky 
-            ? 'fixed top-[88px] left-0  z-0 py-4' 
+            ? 'fixed top-[88px] left-0  z-20 py-4' 
             : 'relative'
         }`}
       >
-        <div className="flex w-[100%] px-4 justify-center items-start gap-4 flex-row">
-          <div className="flex flex-col mx-auto w-full md:max-w-[600px]">
+        <div className="flex  w-[100%] px-4 justify-center items-start gap-4 flex-row">
+          <div className="flex  flex-col mx-auto w-full md:max-w-[600px]">
             {/* Search Bar */}
-            <div className={`flex items-center h-[57px] w-full bg-[#F8F7F7] rounded-[22px] shadow p-3 transition-all duration-300 ${
+            <div className={`flex  shadow items-center h-[57px] w-full bg-[#F8F7F7] rounded-[22px]  p-3 transition-all duration-300 ${
               isSticky ? 'shadow-lg' : ''
             }`}>
               <input
@@ -124,7 +126,7 @@ export default function SearchBar({ searchInput, onSearch, isFilterOpen, setIsFi
 
               <div
                 onClick={handleSearch}
-                className="flex items-center mr-2 gap-2 text-[#9B1616] cursor-pointer"
+                className="flex  items-center mr-2 gap-2 text-[#9B1616] cursor-pointer"
               >
                 <Search className="w-5 h-5" />
                 <span className="text-[16px] hidden md:block font-medium">Search</span>
@@ -134,7 +136,7 @@ export default function SearchBar({ searchInput, onSearch, isFilterOpen, setIsFi
             {/* Fixed height container for keywords */}
             <div className="h-[100px] relative">
               <div 
-                className={`w-full bg-white rounded-[22px] my-4 z-50 search-container absolute top-0 left-0 transition-all duration-300 ease-in-out ${
+                className={`w-full bg-white rounded-[22px] bg-opacity-40  z-50 search-container absolute top-0 left-0 transition-all duration-300 ease-in-out ${
                   isVisible && isFocused && previousKeywords.length > 0
                     ? 'opacity-100 transform translate-y-0 pointer-events-auto' 
                     : 'opacity-0 transform -translate-y-2 pointer-events-none'

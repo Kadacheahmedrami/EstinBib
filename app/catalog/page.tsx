@@ -1,16 +1,14 @@
 
 
 import Title from '@/components/Title';
-
 import ParentComponent from "@/components/FilterETSearch"
-
 export default function Catalog() {
  
 
     return (
         <>
         
-        <div className='mt-[100px]'></div>
+     
         <Title
       
       mainTitle="Library's Catalogue "

@@ -133,14 +133,17 @@ export default function ParentComponent() {
 
   return (
     <div>
-      <SearchBar 
+      <div className="h-[150px]">
+           <SearchBar 
         searchInput={searchInput}
         onSearch={handleSearch}
         isFilterOpen={isFilterOpen}
         setIsFilterOpen={setIsFilterOpen}
       />
-      <div className="flex flex-col md:flex-row w-full">
-        <div className={`${isFilterOpen ? "block" : "hidden"} z-60 md:block md:w-1/4`}>
+        </div>
+   
+      <div className="flex flex-col mt-[100px] md:flex-row w-full">
+        <div className={` w-0 lg:w-1/4`}>
           <BookFilter 
             isMobileOpen={isFilterOpen}
             onClose={() => setIsFilterOpen(false)}
@@ -149,8 +152,8 @@ export default function ParentComponent() {
           />
         </div>
 
-        <div className="w-full md:w-3/4">
-          <div className="m-8  flex flex-col z-0 gap-[80px]">
+        <div className="w-full lg:w-3/4">
+          <div className="m-8  relative flex flex-col  gap-[80px]">
             {books.map((book, index) => (
               <BookCard
                 key={index}

@@ -20,7 +20,7 @@ const DropdownImageMenu: React.FC<DropdownImageMenuProps> = ({ links }) => {
       {/* Arrow Icon with Background and Rotation */}
       <div
         onClick={toggleMenu}
-        className="cursor-pointer p-3 bg-[#F1413E] rounded-[10px]  transition-transform duration-300 hover:bg-red-600 "
+        className="cursor-pointer  p-3 bg-[#F1413E] rounded-[10px]  transition-transform duration-300 hover:bg-red-600 "
         style={{ transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)" }}
       >
         <svg
@@ -41,7 +41,7 @@ const DropdownImageMenu: React.FC<DropdownImageMenuProps> = ({ links }) => {
 
       {/* Dropdown Menu */}
       <div
-        className={`fixed top-0 left-0 w-full h-full bg-opacity-95 bg-white flex flex-col transition-all duration-500 ${
+        className={`fixed top-0 z-50 left-0 w-full h-full bg-opacity-95 bg-white flex flex-col transition-all duration-500 ${
           menuOpen ? "translate-y-[88px] opacity-100" : "-translate-y-full opacity-0"
         }`}
       >
