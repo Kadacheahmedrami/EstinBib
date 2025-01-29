@@ -3,14 +3,24 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const url = request.nextUrl.clone();
 
-  // Check if the URL starts with `/login`
-  if (pathname.startsWith('/login')) {
-    // Redirect to `/auth/login`
-    const url = request.nextUrl.clone();
-    url.pathname = '/auth/login';
+  if (pathname.startsWith('/') ) {
+   
+ 
+    url.pathname = '/home';
     return NextResponse.redirect(url);
+  }else {
+    if (pathname.startsWith('/login') ) {
+  
+      url.pathname = '/auth/login';
+      return NextResponse.redirect(url);
+    }
   }
+
+
+
+
 
   return NextResponse.next();
 }
