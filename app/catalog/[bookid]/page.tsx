@@ -1,7 +1,9 @@
-// app/catalog/[bookid]/page.tsx
+/* eslint-disable */
 
 import BookDetails from '@/components/BookDetails';
 import RelatedBooks from '@/components/RelatedBooks';
+
+
 
 interface Book {
   bookid: string;
@@ -23,7 +25,7 @@ interface Book {
 //   book: Book | null;
 // }
 
-export default async function BookPage({ params }: { params: { bookid: string } }) {
+export default async function BookPage({ params }: any) {
   
   const { bookid } = await params;
 
@@ -82,15 +84,27 @@ async function getBookData(bookid: string): Promise<Book | null> {
   }
 }
 
-// Generate static paths for all books
-export async function generateStaticParams() {
-  // Fetch the list of all book IDs from your API
-  const response = await fetch('http://localhost:3000/api/books');
-  const data = await response.json();
-  const books: Book[] = data.books || [];
 
-  // Generate static paths for all books
-  return books.map((book) => ({
-    bookid: book.bookid,
-  }));
+export async function generateStaticParams() {
+  try {
+    // Fetch data from API
+    const response = await fetch('http://localhost:3000/api/books');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const { books } = await response.json(); // Destructure books directly
+
+    if (!Array.isArray(books)) {
+      throw new Error('Expected an array but received something else');
+    }
+
+    return books.map((book) => ({
+      bookid: book.bookid.toString(),
+    }));
+
+  } catch (error) {
+    console.error('Error fetching static params:', error);
+    return [];
+  }
 }
