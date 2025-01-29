@@ -8,7 +8,7 @@ import { type Adapter } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "@/lib/db";
 
-type UserRole = "USER" | "ADMIN";
+type UserRole = "STUDENT" | "LIBRARIAN";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -46,9 +46,16 @@ export const authOptions: NextAuthOptions = {
         role: user.role,
       },
     }),
+    jwt: ({ token, user }) => {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+      }
+      return token;
+    },
   },
   session: {
-    strategy: "jwt", // ← This is the key setting
+    strategy: "jwt",
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
