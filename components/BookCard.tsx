@@ -1,8 +1,10 @@
 import React from "react"
 import Image from "next/image"
-import { Book, User, ListIcon as Category, FileText, Layers, Check, X, ArrowRight } from "lucide-react"
+import { redirect } from 'next/navigation'
+import {  User, ListIcon as Category, FileText, Layers, Check, X, ArrowRight } from "lucide-react"
 
 interface BookCardProps {
+  bookid: string
   title: string
   author: string
   category: string
@@ -12,28 +14,43 @@ interface BookCardProps {
   imageUrl: string
 }
 
-const BookCard = ({ title, author, category, description, pages, isAvailable, imageUrl }: BookCardProps) => {
+const BookCard = ({ bookid, title, author, category, description, pages, isAvailable, imageUrl }: BookCardProps) => {
+ 
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    // Only navigate if router is ready
+
+ 
+      redirect(`/catalog/${bookid}`) 
+ 
+  }
+
   return (
-    <div className="w-full z-0 bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
-      <div className="flex flex-col lg:flex-row">
+    <div 
+      className="lg:ml-auto lg:mr-[5%] border lg:w-[75%] lg:h-[480px] z-0 bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 cursor-pointer"
+      onClick={handleClick}
+    >
+      <div className="flex flex-col h-full lg:flex-row">
         {/* Left side - Book Image */}
-        <div className="w-full z-0 lg:w-2/5 lg:w-1/3 relative">
+        <div className="w-full z-0  lg:w-2/5 relative">
           <div className="aspect-w-3 aspect-h-4 lg:aspect-none lg:h-full">
             <Image
-              src={imageUrl || "/placeholder.svg"}
+              src={imageUrl || "svg/display.svg"}
               alt={title}
-              layout="fill"
-              objectFit="cover"
-              className="transition-opacity duration-300 hover:opacity-90"
+              height={200}
+              width={320}
+              className=" m-auto transition-opacity mt-4 duration-300 hover:opacity-90"
+              priority
             />
           </div>
-          <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
+          <div className="absolute top-10 shadow border  rounded-full left-20 bg-white   text-sm font-semibold ">
             {isAvailable ? (
-              <span className="text-green-500 flex items-center">
+              <span className="text-white rounded-full px-3 py-1 bg-green-500 flex items-center">
                 <Check size={16} className="mr-1" /> Available
               </span>
             ) : (
-              <span className="text-red-500 flex items-center">
+              <span className="text-white bg-red-500  rounded-full px-3 py-1 flex items-center">
                 <X size={16} className="mr-1" /> Not Available
               </span>
             )}
@@ -70,11 +87,26 @@ const BookCard = ({ title, author, category, description, pages, isAvailable, im
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
-            <button className="w-full sm:w-auto px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-300 flex items-center justify-center font-semibold">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation()
+                // Add your reserve logic here
+              }}
+              className="w-full sm:w-auto px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-300 flex items-center justify-center font-semibold"
+            >
               Reserve Now
             </button>
 
-            <button className="w-full sm:w-auto flex items-center justify-center text-red-500 hover:text-red-600 transition-colors duration-300 font-semibold">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation()
+      
+              
+                  redirect(`/catalog/${bookid}`) 
+                
+              }}
+              className="w-full sm:w-auto flex items-center justify-center text-red-500 hover:text-red-600 transition-colors duration-300 font-semibold"
+            >
               More Details
               <ArrowRight size={20} className="ml-2" />
             </button>
@@ -86,4 +118,3 @@ const BookCard = ({ title, author, category, description, pages, isAvailable, im
 }
 
 export default BookCard
-

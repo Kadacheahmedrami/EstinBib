@@ -6,6 +6,7 @@ import RadioButton from "@/components/radioInput/radiobutton"
 import { X } from "lucide-react"
 
 interface FilterState {
+  
   schoolYear: string[]
   size: string
   availability: string
@@ -221,7 +222,7 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
 
         {/* Apply Filter Button */}
         <button
-          className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg transition-all hover:bg-blue-700 mt-8"
+          className="w-full py-3 bg-[#F1413E] text-white font-semibold rounded-lg transition-all hover:bg-[#F1412E] mt-8"
           onClick={handleApplyFilter}
         >
           Apply Filters
