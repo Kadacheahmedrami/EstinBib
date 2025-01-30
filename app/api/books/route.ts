@@ -1,20 +1,26 @@
 // app/api/books/route.ts
 import { NextResponse } from 'next/server'
 
-// Define the Book type
-interface Book {
-  bookid: string
-  title: string
-  author: string
-  category: string
-  description: string
-  pages: number
-  isAvailable: boolean
-  imageUrl: string
+// Core Types
+export interface BaseBook {
+  bookid: string;
+  title: string;
+  author: string;
+  category: string;
+  description: string;
+  pages: number;
+  isAvailable: boolean;
+  imageUrl: string;
 }
 
-
-
+// Extended Book Types
+export interface Book extends BaseBook {
+  publicationDate: string;
+  language: string;
+  publisher: string;
+  isbn: string;
+  pdfUrl: string;
+}
 
 // Mock database
 const books: Book[] = [
@@ -27,6 +33,11 @@ const books: Book[] = [
     pages: 180,
     isAvailable: true,
     imageUrl: '',
+    publicationDate: "1925-04-10",
+    language: "English",
+    publisher: "Scribner",
+    isbn: "9780743273565",
+    pdfUrl: "https://example.com/the-great-gatsby.pdf"
   },
   {
     bookid: "to-kill-a-mockingbird",
@@ -37,6 +48,11 @@ const books: Book[] = [
     pages: 281,
     isAvailable: false,
     imageUrl: '',
+    publicationDate: "1960-07-11",
+    language: "English",
+    publisher: "J.B. Lippincott & Co.",
+    isbn: "9780061120084",
+    pdfUrl: "https://example.com/to-kill-a-mockingbird.pdf"
   },
   {
     bookid: "1984",
@@ -47,6 +63,11 @@ const books: Book[] = [
     pages: 328,
     isAvailable: true,
     imageUrl: '',
+    publicationDate: "1949-06-08",
+    language: "English",
+    publisher: "Secker & Warburg",
+    isbn: "9780451524935",
+    pdfUrl: "https://example.com/1984.pdf"
   },
   {
     bookid: "pride-and-prejudice",
@@ -57,6 +78,11 @@ const books: Book[] = [
     pages: 432,
     isAvailable: true,
     imageUrl: '',
+    publicationDate: "1813-01-28",
+    language: "English",
+    publisher: "T. Egerton",
+    isbn: "9780141439518",
+    pdfUrl: "https://example.com/pride-and-prejudice.pdf"
   },
   {
     bookid: "the-catcher-in-the-rye",
@@ -67,6 +93,11 @@ const books: Book[] = [
     pages: 277,
     isAvailable: false,
     imageUrl: '',
+    publicationDate: "1951-07-16",
+    language: "English",
+    publisher: "Little, Brown and Company",
+    isbn: "9780316769488",
+    pdfUrl: "https://example.com/the-catcher-in-the-rye.pdf"
   },
   {
     bookid: "moby-dick",
@@ -77,6 +108,11 @@ const books: Book[] = [
     pages: 635,
     isAvailable: true,
     imageUrl: '',
+    publicationDate: "1851-10-18",
+    language: "English",
+    publisher: "Harper & Brothers",
+    isbn: "9781503280786",
+    pdfUrl: "https://example.com/moby-dick.pdf"
   },
   {
     bookid: "war-and-peace",
@@ -87,6 +123,11 @@ const books: Book[] = [
     pages: 1225,
     isAvailable: true,
     imageUrl: '',
+    publicationDate: "1869-01-01",
+    language: "Russian",
+    publisher: "The Russian Messenger",
+    isbn: "9781400079988",
+    pdfUrl: "https://example.com/war-and-peace.pdf"
   },
   {
     bookid: "the-hobbit",
@@ -97,6 +138,11 @@ const books: Book[] = [
     pages: 310,
     isAvailable: true,
     imageUrl: '',
+    publicationDate: "1937-09-21",
+    language: "English",
+    publisher: "George Allen & Unwin",
+    isbn: "9780261103344",
+    pdfUrl: "https://example.com/the-hobbit.pdf"
   },
   {
     bookid: "the-lord-of-the-rings",
@@ -107,6 +153,11 @@ const books: Book[] = [
     pages: 1178,
     isAvailable: true,
     imageUrl: '',
+    publicationDate: "1954-07-29",
+    language: "English",
+    publisher: "George Allen & Unwin",
+    isbn: "9780544003415",
+    pdfUrl: "https://example.com/the-lord-of-the-rings.pdf"
   },
   {
     bookid: "the-alchemist",
@@ -117,6 +168,11 @@ const books: Book[] = [
     pages: 208,
     isAvailable: true,
     imageUrl: '',
+    publicationDate: "1988-05-01",
+    language: "Portuguese",
+    publisher: "Rocco",
+    isbn: "9780062315007",
+    pdfUrl: "https://example.com/the-alchemist.pdf"
   },
 ];
 

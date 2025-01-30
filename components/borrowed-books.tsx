@@ -1,18 +1,27 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import API from "@/lib/axios"; // Importing the custom API instance
 import BookCard from "@/components/ui/card";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
+import { BorrowedBook } from "@/types/_types"; // Importing the BorrowedBook type
 
-const RelatedBooks: React.FC = () => {
+const BorrowedBooks: React.FC = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [books, setBooks] = useState<BorrowedBook[]>([]); // Using BorrowedBook type for the books state
 
-  const books = [
-    { title: "The Art of Programming", dateBorrowed: "Jan 1, 2025", dueDate: "Jan 15, 2025", status: "Not Overdue", imageUrl: "/svg/display.svg" },
-    { title: "Data Structures Explained", dateBorrowed: "Dec 25, 2024", dueDate: "Jan 5, 2025", status: "Not Overdue", imageUrl: "/svg/display.svg" },
-    { title: "Web Development Mastery", dateBorrowed: "Dec 20, 2024", dueDate: "Jan 1, 2025", status: "Overdue", imageUrl: "/svg/display.svg" },
-    { title: "AI & Machine Learning", dateBorrowed: "Jan 10, 2025", dueDate: "Jan 20, 2025", status: "Not Overdue", imageUrl: "/svg/display.svg" },
-    // Add more books here
-  ];
+  // Fetch borrowed books data using Axios
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await API.get("api/user/borrowed"); // Using the custom API instance
+        setBooks(response.data); // Set the data from the API
+      } catch (error) {
+        console.error("Error fetching borrowed books:", error);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   const scroll = (direction: "left" | "right") => {
     const container = document.getElementById("book-container");
@@ -47,7 +56,7 @@ const RelatedBooks: React.FC = () => {
 
         <div
           id="book-container"
-          className="flex overflow-x-hidden scroll-smooth  py-8"
+          className="flex overflow-x-hidden scroll-smooth py-8"
           style={{ scrollSnapType: "x mandatory" }}
         >
           {books.map((book, index) => (
@@ -62,6 +71,7 @@ const RelatedBooks: React.FC = () => {
                 dateBorrowed={book.dateBorrowed}
                 dueDate={book.dueDate}
                 status={book.status}
+                description={book.description}
               />
             </div>
           ))}
@@ -79,4 +89,4 @@ const RelatedBooks: React.FC = () => {
   );
 };
 
-export default RelatedBooks;
+export default BorrowedBooks;

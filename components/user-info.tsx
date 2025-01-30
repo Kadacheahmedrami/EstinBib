@@ -1,24 +1,48 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CircleUserRound } from 'lucide-react';
+import API from '@/lib/axios'; // Make sure to import the API instance
 
 const UserInfo = () => {
-  const [formData, setFormData] = useState({
-    fullName: 'FELIACHI ayaahlam',
-    userId: '123456789',
-    email: 'a_filiachi@estin.dz'
+  // State to store fetched user data and loading state
+  const [userData, setUserData] = useState({
+    fullName: '',
+    userId: '',
+    email: ''
   });
+  const [loading, setLoading] = useState(true);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  // Fetch user data from the API
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await API.get('api/user/me');  // Assuming the endpoint is "/user/me"
+        const { user } = response.data;  // Extract user data from response
+        setUserData({
+          fullName: user.fullName,
+          userId: user.userId,
+          email: user.emailAddress
+        });
+        setLoading(false); // Set loading to false once data is fetched
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        setLoading(false); // Set loading to false even in case of error
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  // Loading animation with dots
+  const loadingDots = (
+    <span className="text-xl font-medium">
+        ***************
+    </span>
+  );
 
   return (
-    <div className="  p-4 sm:p-8 bg-white">
-      <div className="flex flex-col  lg:flex-row justify-center items-center gap-8 lg:gap-12 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-8 bg-white">
+      <div className="flex flex-col lg:flex-row justify-center items-center gap-8 lg:gap-12 max-w-7xl mx-auto">
         {/* Profile Section */}
         <div className="flex flex-col items-center text-center w-full lg:w-auto">
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">My Account</h1>
@@ -30,47 +54,34 @@ const UserInfo = () => {
           </div>
         </div>
 
-        {/* Form Section */}
+        {/* Info Section */}
         <div className="w-full max-w-2xl space-y-6 sm:space-y-8">
           <div className="space-y-6 sm:space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
               <label className="text-slate-900 text-xl sm:text-2xl font-bold w-full sm:w-48 shrink-0">
                 Full Name :
               </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                className="w-full bg-slate-100 p-3 rounded-md border border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all"
-              />
+              <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
+                {loading ? loadingDots : userData.fullName}
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
               <label className="text-slate-900 text-xl sm:text-2xl font-bold w-full sm:w-48 shrink-0">
                 User s ID :
               </label>
-              <input
-                type="text"
-                name="userId"
-                value={formData.userId}
-                onChange={handleChange}
-                className="w-full bg-slate-100 p-3 rounded-md border border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all"
-                readOnly
-              />
+              <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
+                {loading ? loadingDots : userData.userId}
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
               <label className="text-slate-900 text-xl sm:text-2xl font-bold w-full sm:w-48 shrink-0">
                 Email Address :
               </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full bg-slate-100 p-3 rounded-md border border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all"
-              />
+              <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
+                {loading ? loadingDots : userData.email}
+              </div>
             </div>
           </div>
 

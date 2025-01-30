@@ -22,12 +22,15 @@ export interface Book extends BaseBook {
 }
 
 export interface BorrowedBook {
+  description: any;
   title: string;
   dateBorrowed: string;
   dueDate: string;
-  status: string;
+  status: string; // Could be 'borrowed', 'returned', 'overdue'
   imageUrl: string;
+  fineAmount?: number; // Optional field to track fines for overdue books
 }
+
 
 // Component Props
 export interface BookDetailsProps {

@@ -4,17 +4,8 @@ import { useEffect, useState } from 'react';
 import Title from '@/components/Title';
 import ParentComponent from "@/components/FilterETSearch";
 import API from '@/lib/axios'; // Import the axios instance
+import {Book} from '@/types/_types'
 
-interface Book {
-  bookid: string;
-  title: string;
-  author: string;
-  category: string;
-  description: string;
-  pages: number;
-  isAvailable: boolean;
-  imageUrl: string;
-}
 
 
 export default function Catalog() {

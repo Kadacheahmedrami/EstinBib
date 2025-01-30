@@ -27,26 +27,14 @@ const BookCard: React.FC<BookPreviewProps> = ({ title, description, imageUrl }) 
 
 interface RelatedBooksProps {
   containerId: string;
+  books: { title: string; description: string; imageUrl: string }[]; // books prop
 }
 
-const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId }) => {
+const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showLeftButton, setShowLeftButton] = useState(false);
   const [showRightButton, setShowRightButton] = useState(true);
   const [cardsToShow, setCardsToShow] = useState(4);
-
-  const books = [
-    { title: "The Art of Programming", description: "A comprehensive guide to software development", imageUrl: "/svg/display.svg" },
-    { title: "Data Structures Explained", description: "Master the fundamentals of data organization", imageUrl: "/svg/display.svg" },
-    { title: "Web Development Mastery", description: "Modern techniques for building web applications", imageUrl: "/svg/display.svg" },
-    { title: "AI & Machine Learning", description: "Introduction to artificial intelligence", imageUrl: "/svg/display.svg" },
-    { title: "Cloud Computing Basics", description: "Understanding cloud infrastructure", imageUrl: "/svg/display.svg" },
-    { title: "Cybersecurity Essentials", description: "Protect your digital assets", imageUrl: "/svg/display.svg" },
-    { title: "Mobile App Development", description: "Build apps for iOS and Android", imageUrl: "/svg/display.svg" },
-    { title: "DevOps Handbook", description: "Streamline your development pipeline", imageUrl: "/svg/display.svg" },
-    { title: "Database Design", description: "Optimize your data architecture", imageUrl: "/svg/display.svg" },
-    { title: "Software Architecture", description: "Design scalable applications", imageUrl: "/svg/display.svg" }
-  ];
 
   useEffect(() => {
     const updateCardsToShow = () => {
@@ -120,7 +108,7 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId }) => {
               style={{ scrollSnapAlign: 'start' }}
             >
               <BookCard
-                imageUrl={book.imageUrl}
+                imageUrl={book.imageUrl == '' ? '/svg/display.svg'  : book.imageUrl}
                 title={book.title}
                 description={book.description}
               />

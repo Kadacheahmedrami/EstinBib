@@ -1,5 +1,4 @@
 /* eslint-disable */
-
 import BookDetails from '@/components/BookDetails';
 import RelatedBooks from '@/components/RelatedBooks';
 
@@ -21,16 +20,15 @@ interface Book {
   pdfUrl: string;
 }
 
-// interface BookPageProps {
-//   book: Book | null;
-// }
-
 export default async function BookPage({ params }: any) {
-  
   const { bookid } = await params;
 
   // Fetch book data
   const book = await getBookData(bookid);
+
+  // Fetch random books for the carousels
+  const randomBooks1 = await getRandomBooks();
+  const randomBooks2 = await getRandomBooks();
 
   if (!book) {
     return (
@@ -53,13 +51,13 @@ export default async function BookPage({ params }: any) {
           <h3 className="font-bold text-[30px]">In the same section:</h3>
           <div className="bg-black mt-2 h-[2px] w-[70%]" />
         </div>
-        <RelatedBooks containerId="book-container-1" /> {/* Unique ID for first carousel */}
+        <RelatedBooks books={randomBooks1} containerId="book-container-1" /> {/* Random books for first carousel */}
 
         <div className="w-full flex justify-center items-center gap-[70px] flex-row">
           <h3 className="font-bold text-[30px]">In the same section:</h3>
           <div className="bg-black mt-2 h-[2px] w-[70%]" />
         </div>
-        <RelatedBooks containerId="book-container-2" /> {/* Unique ID for second carousel */}
+        <RelatedBooks books={randomBooks2} containerId="book-container-2" /> {/* Random books for second carousel */}
       </div>
     </>
   );
@@ -81,6 +79,26 @@ async function getBookData(bookid: string): Promise<Book | null> {
   }
 }
 
+// Fetch random books (6 books in total)
+async function getRandomBooks(): Promise<{ title: string; description: string; imageUrl: string }[]> {
+  try {
+    const response = await API.get('/api/books');
+
+    const books = response.data.books || []; // Get all books
+    const randomBooks = getRandomItems(books, 6); // Select 6 random books
+
+    return randomBooks;
+  } catch (error) {
+    console.error('Error fetching random books:', error);
+    return []; // Return an empty array in case of an error
+  }
+}
+
+// Helper function to get random items from an array
+function getRandomItems(arr: any[], count: number): any[] { 
+  const shuffled = [...arr].sort(() => 0.5 - Math.random()); // Shuffle the array randomly
+  return shuffled.slice(0, count); // Return the first 'count' items from the shuffled array
+}
 
 export async function generateStaticParams() {
   try {
