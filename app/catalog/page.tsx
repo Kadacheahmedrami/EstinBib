@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Title from '@/components/Title';
 import ParentComponent from "@/components/FilterETSearch";
+import API from '@/lib/axios'; // Import the axios instance
 
 interface Book {
   bookid: string;
@@ -15,10 +16,6 @@ interface Book {
   imageUrl: string;
 }
 
-interface APIResponse {
-  books: Book[];
-  total: number;
-}
 
 export default function Catalog() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -28,12 +25,8 @@ export default function Catalog() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/books');
-        if (!response.ok) {
-          throw new Error('Failed to fetch books');
-        }
-        const data: APIResponse = await response.json();
-        setBooks(data.books); // Extract the books array from the response
+        const response = await API.get('/api/books'); // Use the axios instance for the request
+        setBooks(response.data.books); // Extract the books array from the response
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {

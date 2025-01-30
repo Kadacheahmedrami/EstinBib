@@ -2,18 +2,12 @@
 import React, { useState } from "react";
 import BookCard from "@/components/ui/card";
 
-interface BookProps {
-  title: string;
-  dateBorrowed: string;
-  dueDate: string;
-  status: string;
-  imageUrl: string;
-}
+import { BookProps1 } from '@/types/_types'
 
 const BorrowHistory: React.FC = () => {
   const [visibleBooks, setVisibleBooks] = useState(4); // Set the initial number of books to display
 
-  const books: BookProps[] = [
+  const books: BookProps1[] = [
     { title: "The Art of Programming", dateBorrowed: "Jan 1, 2025", dueDate: "Jan 15, 2025", status: "Not Overdue", imageUrl: "/svg/display.svg" },
     { title: "Data Structures Explained", dateBorrowed: "Dec 25, 2024", dueDate: "Jan 5, 2025", status: "Not Overdue", imageUrl: "/svg/display.svg" },
     { title: "Web Development Mastery", dateBorrowed: "Dec 20, 2024", dueDate: "Jan 1, 2025", status: "Overdue", imageUrl: "/svg/display.svg" },

@@ -5,29 +5,8 @@ import SearchBar from "@/components/searchBar";
 import BookFilter from "@/components/Filter";
 import BookCard from '@/components/BookCard';
 
-interface BookCardProps {
-  bookid: string;
-  title: string;
-  author: string;
-  category: string;
-  description: string;
-  pages: number;
-  isAvailable: boolean;
-  imageUrl: string;
-}
+import {  FilterState, ParentComponentProps }from '@/types/_types';
 
-interface FilterState {
-  schoolYear: string[];
-  size: string;
-  availability: string;
-  documentType: string[];
-  language: string[];
-  periodicType: string[];
-}
-
-interface ParentComponentProps {
-  books?: BookCardProps[]; // Make books optional
-}
 
 export default function ParentComponent({ books = [] }: ParentComponentProps) { // Provide default empty array
   const [searchInput, setSearchInput] = useState("");

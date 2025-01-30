@@ -2,19 +2,9 @@ import React from "react"
 import Image from "next/image"
 import { redirect } from 'next/navigation'
 import {  User, ListIcon as Category, FileText, Layers, Check, X, ArrowRight } from "lucide-react"
+import {BookCardProps1} from '@/types/_types'
 
-interface BookCardProps {
-  bookid: string
-  title: string
-  author: string
-  category: string
-  description: string
-  pages: number
-  isAvailable: boolean
-  imageUrl: string
-}
-
-const BookCard = ({ bookid, title, author, category, description, pages, isAvailable, imageUrl }: BookCardProps) => {
+const BookCard = ({ bookid, title, author, category, description, pages, isAvailable, imageUrl }: BookCardProps1) => {
  
 
   const handleClick = (e: React.MouseEvent) => {

@@ -1,11 +1,7 @@
 import React from 'react';
 import styles from './NeonCheckbox.module.css'; // Assuming you have a CSS module for styles
+import {NeonCheckboxProps} from '@/types/_types'
 
-interface NeonCheckboxProps {
-  id: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-}
 
 const NeonCheckbox: React.FC<NeonCheckboxProps> = ({ id, checked, onChange }) => {
   return (

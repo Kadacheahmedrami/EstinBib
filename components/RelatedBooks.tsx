@@ -2,12 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
-
-interface BookProps {
-  title: string;
-  description: string;
-  imageUrl: string;
-}
+import {BookProps} from "@/types/_types"
 
 const BookCard: React.FC<BookProps> = ({ title, description, imageUrl }) => {
   return (

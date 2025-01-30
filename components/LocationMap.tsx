@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-
+import {LocationMapProps} from '@/types/_types'
 // Fix for default marker icons in Leaflet
 const defaultIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -14,11 +14,7 @@ const defaultIcon = L.icon({
   shadowSize: [41, 41],
 });
 
-interface LocationMapProps {
-  latitude: number;
-  longitude: number;
-  locationName: string;
-}
+
 
 // Component to handle map click events
 const MapClickHandler: React.FC<{ onMapClick: () => void }> = ({ onMapClick }) => {

@@ -4,24 +4,7 @@ import { useState, useEffect } from "react"
 import NeonCheckbox from "@/components/checkBox/checkbox"
 import RadioButton from "@/components/radioInput/radiobutton"
 import { X } from "lucide-react"
-
-interface FilterState {
-  
-  schoolYear: string[]
-  size: string
-  availability: string
-  documentType: string[]
-  language: string[]
-  periodicType: string[]
-}
-
-interface BookFilterProps {
-  isMobileOpen?: boolean
-  onClose?: () => void
-  filterParams: FilterState
-  onFilterChange?: (filters: FilterState) => void
-}
-
+import {FilterState ,BookFilterProps } from "@/types/_types"
 export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilterChange }: BookFilterProps) {
   const [filters, setFilters] = useState<FilterState>({
     schoolYear: [],

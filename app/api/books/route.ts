@@ -120,41 +120,40 @@ const books: Book[] = [
   },
 ];
 
-// GET /api/books - Get all books
 export async function GET(request: Request) {
   try {
     // Optional: Add query parameter support for filtering
-    const { searchParams } = new URL(request.url)
-    const category = searchParams.get('category')
-    const available = searchParams.get('available')
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const available = searchParams.get('available');
 
-    let filteredBooks = [...books]
+    let filteredBooks = [...books];
 
     // Apply filters if they exist
     if (category) {
-      filteredBooks = filteredBooks.filter(book => 
+      filteredBooks = filteredBooks.filter(book =>
         book.category.toLowerCase() === category.toLowerCase()
-      )
+      );
     }
 
     if (available !== null) {
-      filteredBooks = filteredBooks.filter(book => 
+      filteredBooks = filteredBooks.filter(book =>
         book.isAvailable === (available === 'true')
-      )
+      );
     }
 
     return NextResponse.json(
-      { 
+      {
         books: filteredBooks,
-        total: filteredBooks.length 
+        total: filteredBooks.length
       },
       { status: 200 }
-    )
+    );
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return NextResponse.json(
       { error: 'Failed to fetch books' },
       { status: 500 }
-    )
+    );
   }
 }

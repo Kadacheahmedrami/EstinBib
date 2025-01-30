@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Image from 'next/image';
 import LandingPageSearch from '@/components/seach-bar';
@@ -11,7 +10,8 @@ const HeroLanding: React.FC = () => {
   ];
 
   return (
-    <div className="relative min-h-[90vh]  flex flex-col lg:flex-row items-start justify-between bg-[#06293A] px-6 md:px-16 lg:px-32   overflow-hidden">
+    <>
+    <div className="relative min-h-[90vh] flex flex-col lg:flex-row items-start justify-between bg-[#06293A] px-6 md:px-16 lg:px-32 overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/jpg/back.jpg')" }}>
       {/* Left Content */}
       <div className="relative z-10 max-w-2xl flex flex-col justify-center h-[90vh] w-full items-center text-left">
         <div className='flex flex-col items-start'>
@@ -38,10 +38,13 @@ const HeroLanding: React.FC = () => {
       </div>
 
       {/* Right Side Image */}
-
-        <Image src="/jpg/library.png" alt="Library Illustration" width={900} height={900} className="absolute right-0 top-0 hidden lg:block my-8 mx-12  h-auto" />
- 
+      <Image src="/jpg/library.png" alt="Library Illustration" width={900} height={900} className="absolute right-0 top-0 hidden lg:block my-8 mx-12 h-auto" />
     </div>
+
+    
+    
+    </>
+    
   );
 };
 

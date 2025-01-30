@@ -4,25 +4,7 @@ import Image from 'next/image';
 import { Book as BookIcon, User, Layers, Clock, Calendar, Globe, Link as LinkIcon } from 'lucide-react';
 import Link from 'next/link';
 
-interface Book {
-  bookid: string;
-  title: string;
-  author: string;
-  category: string;
-  description: string;
-  pages: number;
-  isAvailable: boolean;
-  imageUrl: string;
-  publicationDate: string;
-  language: string;
-  publisher: string;
-  isbn: string;
-  pdfUrl: string;
-}
-
-interface BookDetailsProps {
-  book: Book;
-}
+import {   BookDetailsProps} from '@/types/_types'
 
 export default function BookDetails({ book }: BookDetailsProps) {
   return (

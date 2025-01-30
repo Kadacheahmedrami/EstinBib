@@ -3,7 +3,7 @@
 import BookDetails from '@/components/BookDetails';
 import RelatedBooks from '@/components/RelatedBooks';
 
-
+import API from '@/lib/axios'; 
 
 interface Book {
   bookid: string;
@@ -68,32 +68,25 @@ export default async function BookPage({ params }: any) {
 // Fetch book data
 async function getBookData(bookid: string): Promise<Book | null> {
   try {
-    const response = await fetch(`http://localhost:3000/api/books/${bookid}`, {
-      next: { revalidate: 60 }, // Revalidate every 60 seconds
+    const response = await API.get(`/api/books/${bookid}`, {
+      params: {
+        revalidate: 60, // Revalidate every 60 seconds
+      },
     });
 
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = await response.json();
-    return data.book || null;
+    return response.data.book || null; // Return the book if available
   } catch (error) {
     console.error('Error fetching book:', error);
-    return null;
+    return null; // Return null in case of an error
   }
 }
 
 
 export async function generateStaticParams() {
   try {
-    // Fetch data from API
-    const response = await fetch('http://localhost:3000/api/books');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const response = await API.get('/api/books');
 
-    const { books } = await response.json(); // Destructure books directly
+    const { books } = response.data; // Destructure books directly from the response
 
     if (!Array.isArray(books)) {
       throw new Error('Expected an array but received something else');
@@ -105,6 +98,6 @@ export async function generateStaticParams() {
 
   } catch (error) {
     console.error('Error fetching static params:', error);
-    return [];
+    return []; // Return an empty array in case of an error
   }
 }
