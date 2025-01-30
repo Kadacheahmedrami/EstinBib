@@ -2,7 +2,7 @@ import "./globals.css";
 
 import Header from '@/components/header';
 import Footer from '@/components/Foter';
-
+import { getServerAuthSession } from "@/lib/auth";
 
 export const metadata = {
   title: "Estin Bib",
@@ -10,9 +10,11 @@ export const metadata = {
   keywords: "Estin Bib, ESTIN library, academic resources, books for ESTIN students, research papers, ESTIN Algeria, educational platform, find books, library ESTIN",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  
+
   return (
     <html lang="en">
       <head>
@@ -23,7 +25,7 @@ export default function RootLayout({
    
         
 
-            <Header />
+            <Header   />
             <div className='mt-[100px]'></div>
             <main className="relative flex flex-col ">
               {children}
