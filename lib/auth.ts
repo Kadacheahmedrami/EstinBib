@@ -58,7 +58,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-    // Ensure this is set
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
     GoogleProvider({
