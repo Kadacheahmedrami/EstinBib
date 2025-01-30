@@ -28,8 +28,8 @@ export default function RootLayout({
             <main className="relative flex flex-col ">
               {children}
             </main>
+        
             <Footer />
-   
       </body>
     </html>
   );

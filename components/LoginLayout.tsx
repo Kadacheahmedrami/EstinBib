@@ -1,6 +1,7 @@
 // components/LoginLayout.tsx
-import Image from 'next/image';
 
+import Image from 'next/image';
+// import { signIn } from "next-auth/react";
 const LoginLayout = ({
   children
 }: {
@@ -47,8 +48,8 @@ const LoginLayout = ({
               <span className="px-2 bg-white text-gray-500">Or continue with</span>
             </div>
           </div>
-
-          <button className="w-full flex items-center justify-center px-4 h-[48px]  border border-gray-300 rounded-[14px] hover:bg-gray-50 transition-colors">
+          {/* onClick={() => signIn("google")}  */}
+          <button  className="w-full flex items-center justify-center px-4 h-[48px]  border border-gray-300 rounded-[14px] hover:bg-gray-50 transition-colors">
             <Image
                   src={"/svg/google.svg"}
                   height={35}
