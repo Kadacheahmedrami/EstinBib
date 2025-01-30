@@ -1,19 +1,5 @@
-// BookProps used in @/components/RelatedBooks.tsx
-export interface BookProps {
-  title: string;
-  description: string;
-  imageUrl: string;
-}
-
-// LocationMapProps used in @/components/LocationMapClient.tsx
-export interface LocationMapProps {
-  latitude: number;
-  longitude: number;
-  locationName: string;
-}
-
-// BookCardProps used in @/components/FilterETSearch.tsx
-export interface BookCardProps {
+// Core Types
+export interface BaseBook {
   bookid: string;
   title: string;
   author: string;
@@ -24,12 +10,41 @@ export interface BookCardProps {
   imageUrl: string;
 }
 
-// ParentComponentProps used in @/components/FilterETSearch.tsx
-export interface ParentComponentProps {
-  books?: BookCardProps[]; // Make books optional
+// Extended Book Types
+export interface Book extends BaseBook {
+  publicationDate: string;
+  language: string;
+  publisher: string;
+  isbn: string;
+  pdfUrl: string;
 }
 
-// FilterState used in @/components/Filter.tsx
+export interface BorrowedBook {
+  title: string;
+  dateBorrowed: string;
+  dueDate: string;
+  status: string;
+  imageUrl: string;
+}
+
+// Component Props
+export interface BookDetailsProps {
+  book: Book;
+}
+
+// Add this to your _types.ts
+export interface BookPreviewProps {
+  title: string;
+  description: string;
+  imageUrl: string;
+}
+
+export interface LocationMapProps {
+  latitude: number;
+  longitude: number;
+  locationName: string;
+}
+
 export interface FilterState {
   schoolYear: string[];
   size: string;
@@ -39,67 +54,18 @@ export interface FilterState {
   periodicType: string[];
 }
 
-// BookFilterProps used in @/components/Filter.tsx
-export interface BookFilterProps {
+export interface FilterProps {
   isMobileOpen?: boolean;
   onClose?: () => void;
   filterParams: FilterState;
   onFilterChange?: (filters: FilterState) => void;
 }
 
-// BookProps1 used in @/components/borrow-history.tsx
-export interface BookProps1 {
-  title: string;
-  dateBorrowed: string;
-  dueDate: string;
-  status: string;
-  imageUrl: string;
+export interface ParentComponentProps {
+  books?: BaseBook[];
 }
 
-// Book used in @/components/BookDetails.tsx
-export interface Book {
-  bookid: string;
-  title: string;
-  author: string;
-  category: string;
-  description: string;
-  pages: number;
-  isAvailable: boolean;
-  imageUrl: string;
-  publicationDate: string;
-  language: string;
-  publisher: string;
-  isbn: string;
-  pdfUrl: string;
-}
-
-// BookDetailsProps used in @/components/BookDetails.tsx
-export interface BookDetailsProps {
-  book: Book;
-}
-
-// BookCardProps1 used in @/components/BookDetails.tsx
-export interface BookCardProps1 {
-  bookid: string;
-  title: string;
-  author: string;
-  category: string;
-  description: string;
-  pages: number;
-  isAvailable: boolean;
-  imageUrl: string;
-}
-
-// BookProps1 used in @/components/ui/card.tsx
-export interface BookProps1 {
-  title: string;
-  dateBorrowed: string;
-  dueDate: string;
-  status: string;
-  imageUrl: string;
-}
-
-// RadioButtonProps used in @/components/radioInput/radiobutton.tsx
+// Form Input Props
 export interface RadioButtonProps {
   id: string;
   name: string;
@@ -109,8 +75,7 @@ export interface RadioButtonProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-// NeonCheckboxProps used in @/components/radioInput/radiobutton.tsx
-export interface NeonCheckboxProps {
+export interface CheckboxProps {
   id: string;
   checked: boolean;
   onChange: (checked: boolean) => void;

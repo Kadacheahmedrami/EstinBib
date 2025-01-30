@@ -1,9 +1,9 @@
 import React from 'react';
 import styles from './NeonCheckbox.module.css'; // Assuming you have a CSS module for styles
-import {NeonCheckboxProps} from '@/types/_types'
+import {CheckboxProps} from '@/types/_types'
 
 
-const NeonCheckbox: React.FC<NeonCheckboxProps> = ({ id, checked, onChange }) => {
+const NeonCheckbox: React.FC<CheckboxProps> = ({ id, checked, onChange }) => {
   return (
     <label className={styles.neonCheckbox} htmlFor={id}>
       <input

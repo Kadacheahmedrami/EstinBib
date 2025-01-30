@@ -1,10 +1,10 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
-import {BookProps} from "@/types/_types"
+import { BookPreviewProps } from "@/types/_types";
 
-const BookCard: React.FC<BookProps> = ({ title, description, imageUrl }) => {
+const BookCard: React.FC<BookPreviewProps> = ({ title, description, imageUrl }) => {
   return (
     <div className="bg-white rounded-lg overflow-hidden w-72 mx-4 flex-shrink-0">
       <Image
@@ -12,10 +12,11 @@ const BookCard: React.FC<BookProps> = ({ title, description, imageUrl }) => {
         alt={title}
         width={310}
         height={200}
+        className="object-cover"
       />
       <div className="p-4">
         <h3 className="font-bold text-xl mb-2 truncate">{title}</h3>
-        <p className="text-gray-700 text-base truncate">{description}</p>
+        <p className="text-gray-700 text-base mb-4 truncate">{description}</p>
         <button className="mt-4 rounded-lg w-full text-[#F1413E] px-4 py-2 border-2 border-solid border-[#F1413E] hover:bg-[#F1413E] hover:text-white transition duration-300">
           Learn More
         </button>
@@ -29,8 +30,10 @@ interface RelatedBooksProps {
 }
 
 const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId }) => {
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const [, setVisibleBooks] = useState(4); // Default number of visible books
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showLeftButton, setShowLeftButton] = useState(false);
+  const [showRightButton, setShowRightButton] = useState(true);
+  const [cardsToShow, setCardsToShow] = useState(4);
 
   const books = [
     { title: "The Art of Programming", description: "A comprehensive guide to software development", imageUrl: "/svg/display.svg" },
@@ -45,69 +48,78 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId }) => {
     { title: "Software Architecture", description: "Design scalable applications", imageUrl: "/svg/display.svg" }
   ];
 
-  // Update the number of visible books based on screen width
   useEffect(() => {
-    const updateVisibleBooks = () => {
+    const updateCardsToShow = () => {
       if (window.innerWidth < 640) {
-        setVisibleBooks(1); // 1 book on small screens
+        setCardsToShow(1);
       } else if (window.innerWidth < 1024) {
-        setVisibleBooks(2); // 2 books on medium screens
+        setCardsToShow(2);
       } else {
-        setVisibleBooks(4); // 4 books on large screens
+        setCardsToShow(4);
       }
     };
 
-    updateVisibleBooks();
-    window.addEventListener('resize', updateVisibleBooks);
+    updateCardsToShow();
+    window.addEventListener('resize', updateCardsToShow);
+    return () => window.removeEventListener('resize', updateCardsToShow);
+  }, []);
 
-    return () => window.removeEventListener('resize', updateVisibleBooks);
+  const updateScrollButtons = () => {
+    if (containerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
+      setShowLeftButton(scrollLeft > 0);
+      setShowRightButton(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
 
-    
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('scroll', updateScrollButtons);
+      updateScrollButtons();
+
+      return () => container.removeEventListener('scroll', updateScrollButtons);
+    }
   }, []);
 
   const scroll = (direction: 'left' | 'right') => {
-    const container = document.getElementById(containerId);
+    const container = containerRef.current;
     if (container) {
-      const scrollAmount = direction === 'left' ? -container.clientWidth : container.clientWidth;
-      const newPosition = Math.max(
-        0,
-        Math.min(
-          container.scrollWidth - container.clientWidth,
-          scrollPosition + scrollAmount
-        )
-      );
-
-      container.scrollTo({
-        left: newPosition,
+      const cardWidth = 320; // Card width (w-72) + margin (mx-4)
+      const scrollAmount = cardWidth * cardsToShow;
+      container.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
       });
-      setScrollPosition(newPosition);
     }
   };
 
   return (
     <div className="relative w-screen overflow-hidden">
-      <div className="max-w-[2000px] mx-auto px-4 sm:px-8 lg:px-16">
-        <button 
-          onClick={() => scroll('left')}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
-          aria-label="Scroll left"
-        >
-          <ChevronLeftCircle size={48} color="#F1413E" strokeWidth={1.5} />
-        </button>
+      <div className="max-w-[2000px] overflow-hidden mx-auto px-4 sm:px-8 lg:px-16">
+        {showLeftButton && (
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
+            aria-label="Scroll left"
+          >
+            <ChevronLeftCircle size={48} color="#F1413E" strokeWidth={1.5} />
+          </button>
+        )}
 
-        <div 
-          id={containerId} 
-          className="flex overflow-x-hidden scroll-smooth gap-4 py-8"
+        <div
+          ref={containerRef}
+          id={containerId}
+          className="flex overflow-hidden scroll-smooth gap-4 py-8 scrollbar-hide"
           style={{ scrollSnapType: 'x mandatory' }}
         >
           {books.map((book, index) => (
-            <div 
+            <div
               key={index}
-              className="w-full sm:w-1/2 lg:w-1/4 flex-shrink-0"
+              className="flex-shrink-0 mx-4"
               style={{ scrollSnapAlign: 'start' }}
             >
-              <BookCard 
+              <BookCard
                 imageUrl={book.imageUrl}
                 title={book.title}
                 description={book.description}
@@ -116,13 +128,15 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId }) => {
           ))}
         </div>
 
-        <button 
-          onClick={() => scroll('right')}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
-          aria-label="Scroll right"
-        >
-          <ChevronRightCircle size={48} color="#F1413E" strokeWidth={1.5} />
-        </button>
+        {showRightButton && (
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
+            aria-label="Scroll right"
+          >
+            <ChevronRightCircle size={48} color="#F1413E" strokeWidth={1.5} />
+          </button>
+        )}
       </div>
     </div>
   );

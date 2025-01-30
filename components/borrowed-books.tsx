@@ -1,9 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import BookCard from "@/components/ui/card"
+import BookCard from "@/components/ui/card";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
-
-
 
 const RelatedBooks: React.FC = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -19,7 +17,7 @@ const RelatedBooks: React.FC = () => {
   const scroll = (direction: "left" | "right") => {
     const container = document.getElementById("book-container");
     if (container) {
-      const scrollAmount = direction === "left" ? -1200 : 1200;
+      const scrollAmount = direction === "left" ? -container.clientWidth / 3 : container.clientWidth / 3;
       const newPosition = Math.max(
         0,
         Math.min(
@@ -37,8 +35,8 @@ const RelatedBooks: React.FC = () => {
   };
 
   return (
-    <div className="relative w-screen overflow-hidden">
-      <div className="max-w-[2000px] mx-auto px-16">
+    <div className="relative w-screen ">
+      <div className="max-w-[2000px]">
         <button
           onClick={() => scroll("left")}
           className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
@@ -49,13 +47,13 @@ const RelatedBooks: React.FC = () => {
 
         <div
           id="book-container"
-          className="flex overflow-x-hidden scroll-smooth gap-4 py-8"
+          className="flex overflow-x-hidden scroll-smooth  py-8"
           style={{ scrollSnapType: "x mandatory" }}
         >
           {books.map((book, index) => (
             <div
               key={index}
-              className="w-1/4 flex-shrink-0"
+              className="w-1/3 flex-shrink-0" // Adjust width to 1/3 to show 3 books at a time
               style={{ scrollSnapAlign: "start" }}
             >
               <BookCard

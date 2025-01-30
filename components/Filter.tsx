@@ -4,8 +4,8 @@ import { useState, useEffect } from "react"
 import NeonCheckbox from "@/components/checkBox/checkbox"
 import RadioButton from "@/components/radioInput/radiobutton"
 import { X } from "lucide-react"
-import {FilterState ,BookFilterProps } from "@/types/_types"
-export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilterChange }: BookFilterProps) {
+import {FilterState ,FilterProps } from "@/types/_types"
+export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilterChange }: FilterProps) {
   const [filters, setFilters] = useState<FilterState>({
     schoolYear: [],
     size: "",
