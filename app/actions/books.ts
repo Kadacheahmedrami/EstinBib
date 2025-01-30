@@ -109,7 +109,7 @@ export const sameSectionBooks = async (bookId: string) => {
       categories: {
         some: {
           id: {
-            in: book.categories.map((category) => category.id),
+            in: book.categories.map((category ) => category.id),
           },
         },
       },

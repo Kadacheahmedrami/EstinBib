@@ -2,7 +2,7 @@ import "./globals.css";
 
 import Header from '@/components/header';
 import Footer from '@/components/Foter';
-import { getServerAuthSession } from "@/lib/auth";
+// import { getServerAuthSession } from "@/lib/auth";
 
 export const metadata = {
   title: "Estin Bib",
