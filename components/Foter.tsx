@@ -1,144 +1,66 @@
 import React from 'react';
 import Image from "next/image";
 import LocationMapClient from '@/components/LocationMapClient';
+import Link from 'next/link';
 
 const Footer: React.FC = () => {
-    const estinLatitude = 36.7518;
-    const estinLongitude = 5.0647;
+    const estinLatitude = 36.6636426;
+    const estinLongitude = 4.9125355;
+    
     const locationName = 'ESTIN, Béjaia, Algeria';
 
     return (
-        <footer  className="bg-gray-800 font- text-white py-12 px-4 lg:px-24 md:px-12 "    style={{ 
-            fontFamily: 'Poppins, sans-serif', 
-            backgroundImage: 'url(/jpg/Gradient.png)' 
-          }}>
+        <footer className="bg-gray-800 text-white pt-8 pb-4 px-6 lg:px-16 md:px-10" 
+            style={{ fontFamily: 'Poppins, sans-serif', backgroundImage: 'url(/jpg/Gradient.png)' }}>
 
-                <div className="flex flex-col md:flex-row justify-between items-start space-y-8 md:space-y-0">
-                    {/* Left Section: Logo and Address */}
-                    <div className="flex flex-col mx-auto justify-center items-center text-center md:text-start space-y-4">
-                        <Image 
-                            src="/svg/estin.svg" 
-                            alt="ESTIN Logo" 
-                            width={260} 
-                            height={260} 
-                            className="cursor-pointer"
-                        />
-                        <p className="text-[22px]">National road n° 75,</p>
-                        <p className="text-[22px]">Amizour 06300 Bejaia, Algeria</p>
-                        <p className="text-[22px]">+213-34-824-916</p>
-                        <p className="text-[22px]">contact@estin.dz</p>
-                    </div>
+            <div className="flex flex-col md:flex-row justify-between items-start gap-8 space-y-6 md:space-y-0">
+                {/* Left Section: Logo and Address */}
+                <div className="flex flex-col items-start md:items-start text-center md:text-left space-y-9 w-full md:w-1/3">
+                    <Image src="/svg/estin.svg" alt="ESTIN Logo" width={200} height={200} className="cursor-pointer"/>
+                    <p className="text-[24px] w-full">National road n° 75, Amizour 06300 Bejaia, Algeria</p>
+                    <p className="text-[24px]">
+                    <a href="tel:+21334824916" className="text-[24px] text-[#F1413E] hover:underline">+213-34-824-916</a>
+                    </p>
 
-                    {/* Middle Section: Social Media and Map */}
-                    <div className="flex w-full justify-center items-center md:min-w-[350px] flex-col ">
-                        <h3 className="text-[34px] font-bold">Follow Us</h3>
-                        <ul className="flex mt-4 space-x-6">
-                              <li>
-                                <Image 
-                                    src="/svg/Website.svg" 
-                                    alt="Website" 
-                                    width={65} 
-                                    height={65} 
-                                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                                />
-                            </li>
-                            <li>
-                                <Image 
-                                    src="/svg/Facebook.svg" 
-                                    alt="Facebook" 
-                                    width={65} 
-                                    height={65} 
-                                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                                />
-                            </li>
-                            <li>
-                                <Image 
-                                    src="/svg/LinkedIn.svg" 
-                                    alt="LinkedIn" 
-                                    width={65} 
-                                    height={65} 
-                                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                                />
-                            </li>
-                            <li>
-                                <Image 
-                                    src="/svg/Insta.svg" 
-                                    alt="Instagram" 
-                                    width={65} 
-                                    height={65} 
-                                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                                />
-                            </li>
-                            <li>
-                                <Image 
-                                    src="/svg/Youtube.svg" 
-                                    alt="YouTube" 
-                                    width={65} 
-                                    height={65} 
-                                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                                />
-                            </li>
-                        </ul>
-                      
-                            <LocationMapClient 
-                                latitude={estinLatitude} 
-                                longitude={estinLongitude} 
-                                locationName={locationName} 
-                            />
-                      
-                    </div>
+                    <Link href="mailto:contact@estin.dz" className="text-[24px] text-[#F1413E] hover:underline">contact@estin.dz</Link>
 
-                    {/* Right Section: Contact Form */}
-                    <div className="w-full  md:w-1/3">
-                        <h3 className="text-[34px] font-bold mb-6">Contact The Library</h3>
-                        <form className="flex flex-col space-y-6">
-                            <div>
-                           
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    className="w-full px-4 py-3 bg-white border border-gray-600 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Your name"
-                                />
-                            </div>
-
-                            <div>
-                            
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    className="w-full px-4 py-3 bg-white border border-gray-600 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Your email"
-                                />
-                            </div>
-
-                            <div>
-                            
-                                <textarea
-                                    id="message"
-                                    name="message"
-                                    rows={4}
-                                    className="w-full px-4 py-3 bg-white border border-gray-600 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Your message"
-                                />
-                            </div>
-                            <div className='ml-auto'>
-                            <button className="relative  h-12 w-40 overflow-hidden border border-[#F1413E] text-white hover:text-[#F1413E] rounded-[10px] shadow-2xl transition-all duration-200 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm bg-[#F1413E] before:bg-white before:duration-300 before:ease-out hover:shadow-[0_4px_20px_#F1413E] hover:before:h-40 hover:before:w-40 hover:before:opacity-100">
-            <span className="relative  z-1">Send</span>
-          </button>
-                            </div>
-                 
-                        </form>
+                    <div className="h-full  text-start text-base border-t border-gray-700 pt-4 w-full">
+                        <p>© Copyrights. All rights reserved ESTIN - Bejaia</p>
                     </div>
                 </div>
 
-                {/* Copyright Section */}
-                <div className="mt-12 text-center text-base border-t border-gray-700 pt-6">
-                    <p>© Copyrights. All rights reserved ESTIN - Bejaia</p>
+                {/* Middle Section: Social Media and Map */}
+                <div className="flex flex-col items-start w-full md:w-1/3 space-y-4">
+                    <h3 className="text-2xl font-bold">Follow Us</h3>
+              
+                    <LocationMapClient latitude={estinLatitude} longitude={estinLongitude} locationName={locationName} />
+
+                    <ul className="flex space-x-5">
+                        {["Website", "Facebook", "LinkedIn", "Insta", "Youtube"].map((icon) => (
+                            <li key={icon}>
+                                <Image 
+                                    src={`/svg/${icon}.svg`} 
+                                    alt={icon} 
+                                    width={60} 
+                                    height={60} 
+                                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                                />
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-          
+
+                {/* Right Section: Contact Form */}
+                <div className="w-full md:w-1/3 flex flex-col">
+                    <h3 className="text-2xl  font-bold mb-5">Contact The Library</h3>
+                    <form className="flex flex-col space-y-4">
+                        <input type="text" placeholder="Your name" className="w-full px-4 py-3 bg-white border rounded-lg text-black text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                        <input type="email" placeholder="Your email" className="w-full px-4 py-3 bg-white border rounded-lg text-black text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                        <textarea rows={4} placeholder="Your message" className="w-full px-4  bg-white border rounded-lg text-black text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                        <button className="h-12 w-36 bg-[#F1413E] text-white text-lg rounded-lg hover:shadow-lg transition-all">Send</button>
+                    </form>
+                </div>
+            </div>
         </footer>
     );
 };

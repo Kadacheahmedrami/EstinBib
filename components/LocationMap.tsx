@@ -44,9 +44,9 @@ const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude, location
   };
 
   return (
-    <div className="w-full md:max-w-[400px] z-0 max-w-2xl mt-8 mx-auto text-center">
+    <div className="w-full md:max-w-[800px] z-0 max-w-2xl mt-8 mx-auto text-center">
   
-      <div className="w-full h-[230px]  rounded-lg border-2 border-gray-200 shadow-md overflow-hidden">
+      <div className="w-full h-[260px]  rounded-lg border-2 border-gray-200 shadow-md overflow-hidden">
         <MapContainer
           center={[latitude, longitude]}
           zoom={15}
