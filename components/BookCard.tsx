@@ -1,23 +1,36 @@
-import React from "react"
-import Image from "next/image"
-import { redirect } from 'next/navigation'
-import {  User, ListIcon as Category, FileText, Layers, Check, X, ArrowRight } from "lucide-react"
-import {BaseBook} from '@/types/_types'
+import React from "react";
+import Image from "next/image";
+import { redirect } from "next/navigation";
+import {
+  User,
+  ListIcon as Category,
+  FileText,
+  Layers,
+  Check,
+  X,
+  ArrowRight,
+} from "lucide-react";
+import { BaseBook } from "@/types/_types";
 
-const BookCard = ({ bookid, title, author, category, description, pages, isAvailable, imageUrl }: BaseBook) => {
- 
-
+const BookCard = ({
+  bookid,
+  title,
+  author,
+  category,
+  description,
+  pages,
+  isAvailable,
+  imageUrl,
+}: BaseBook) => {
   const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Only navigate if router is ready
 
- 
-      redirect(`/catalog/${bookid}`) 
- 
-  }
+    redirect(`/catalog/${bookid}`);
+  };
 
   return (
-    <div 
+    <div
       className="lg:ml-auto lg:mr-[5%] border lg:w-[75%] lg:h-[480px] z-0 bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 cursor-pointer"
       onClick={handleClick}
     >
@@ -50,7 +63,9 @@ const BookCard = ({ bookid, title, author, category, description, pages, isAvail
         {/* Right side - Book Information */}
         <div className="flex-1 p-6 lg:p-8 flex flex-col justify-between">
           <div className="space-y-4">
-            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 line-clamp-2">{title}</h2>
+            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 line-clamp-2">
+              {title}
+            </h2>
 
             <div className="flex flex-wrap items-center gap-4 text-sm lg:text-base">
               <div className="flex items-center text-gray-600">
@@ -67,7 +82,9 @@ const BookCard = ({ bookid, title, author, category, description, pages, isAvail
               <h3 className="text-lg font-semibold text-gray-800 flex items-center">
                 <FileText size={20} className="mr-2" /> Description
               </h3>
-              <p className="text-gray-600 text-sm lg:text-base line-clamp-3">{description}</p>
+              <p className="text-gray-600 text-sm lg:text-base line-clamp-3">
+                {description}
+              </p>
             </div>
 
             <div className="flex items-center text-gray-600">
@@ -77,9 +94,9 @@ const BookCard = ({ bookid, title, author, category, description, pages, isAvail
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
-            <button 
+            <button
               onClick={(e) => {
-                e.stopPropagation()
+                e.stopPropagation();
                 // Add your reserve logic here
               }}
               className="w-full sm:w-auto px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-300 flex items-center justify-center font-semibold"
@@ -87,13 +104,11 @@ const BookCard = ({ bookid, title, author, category, description, pages, isAvail
               Reserve Now
             </button>
 
-            <button 
+            <button
               onClick={(e) => {
-                e.stopPropagation()
-      
-              
-                  redirect(`/catalog/${bookid}`) 
-                
+                e.stopPropagation();
+
+                redirect(`/catalog/${bookid}`);
               }}
               className="w-full sm:w-auto flex items-center justify-center text-red-500 hover:text-red-600 transition-colors duration-300 font-semibold"
             >
@@ -104,7 +119,7 @@ const BookCard = ({ bookid, title, author, category, description, pages, isAvail
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BookCard
+export default BookCard;
