@@ -38,12 +38,12 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
+    session: ({ session, token }) => ({
       ...session,
       user: {
         ...session.user,
-        id: user.id,
-        role: user.role,
+        id: token.id,
+        role: token.role,
       },
     }),
     jwt: ({ token, user }) => {
@@ -54,6 +54,7 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
   },
+  secret: process.env.NEXTAUTH_SECRET!,
   session: {
     strategy: "jwt",
   },
