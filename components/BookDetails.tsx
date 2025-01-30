@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import {   BookDetailsProps} from '@/types/_types'
 
+
 export default function BookDetails({ book }: BookDetailsProps) {
   return (
     <div className="bg-white rounded-2xl mx-auto overflow-hidden flex justify-center my-6 md:mx-8 md:my-10">
