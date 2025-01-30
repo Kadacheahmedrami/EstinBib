@@ -5,18 +5,19 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const url = request.nextUrl.clone();
 
-  if (pathname.startsWith('/') ) {
+  if (pathname.startsWith('/home') ) {
    
  
-    url.pathname = '/home';
+    url.pathname = '/';
     return NextResponse.redirect(url);
-  }else {
+  }
+
     if (pathname.startsWith('/login') ) {
   
       url.pathname = '/auth/login';
       return NextResponse.redirect(url);
     }
-  }
+  
 
 
 
