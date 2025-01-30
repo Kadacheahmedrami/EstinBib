@@ -16,6 +16,11 @@ export const getRecentBooks = unstable_cache(
   ["recentBooks"] // Cache tag for revalidation
 );
 
+export async function getBooks() {
+  return await db.book.findMany({
+    orderBy: { title: "asc" },
+  });
+}
 export async function addNewBook(bookData: AddBook) {
   const session = await getServerAuthSession();
   if (!session) {
