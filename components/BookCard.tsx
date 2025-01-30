@@ -1,18 +1,34 @@
-import React from "react"
-import Image from "next/image"
-import { Book, User, ListIcon as Category, FileText, Layers, Check, X, ArrowRight } from "lucide-react"
+import React from "react";
+import Image from "next/image";
+import {
+  User,
+  ListIcon as Category,
+  FileText,
+  Layers,
+  Check,
+  X,
+  ArrowRight,
+} from "lucide-react";
 
 interface BookCardProps {
-  title: string
-  author: string
-  category: string
-  description: string
-  pages: number
-  isAvailable: boolean
-  imageUrl: string
+  title: string;
+  author: string;
+  category: string;
+  description: string;
+  pages: number;
+  isAvailable: boolean;
+  imageUrl: string;
 }
 
-const BookCard = ({ title, author, category, description, pages, isAvailable, imageUrl }: BookCardProps) => {
+const BookCard = ({
+  title,
+  author,
+  category,
+  description,
+  pages,
+  isAvailable,
+  imageUrl,
+}: BookCardProps) => {
   return (
     <div className="w-full z-0 bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
       <div className="flex flex-col lg:flex-row">
@@ -43,7 +59,9 @@ const BookCard = ({ title, author, category, description, pages, isAvailable, im
         {/* Right side - Book Information */}
         <div className="flex-1 p-6 lg:p-8 flex flex-col justify-between">
           <div className="space-y-4">
-            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 line-clamp-2">{title}</h2>
+            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 line-clamp-2">
+              {title}
+            </h2>
 
             <div className="flex flex-wrap items-center gap-4 text-sm lg:text-base">
               <div className="flex items-center text-gray-600">
@@ -60,7 +78,9 @@ const BookCard = ({ title, author, category, description, pages, isAvailable, im
               <h3 className="text-lg font-semibold text-gray-800 flex items-center">
                 <FileText size={20} className="mr-2" /> Description
               </h3>
-              <p className="text-gray-600 text-sm lg:text-base line-clamp-3">{description}</p>
+              <p className="text-gray-600 text-sm lg:text-base line-clamp-3">
+                {description}
+              </p>
             </div>
 
             <div className="flex items-center text-gray-600">
@@ -82,8 +102,7 @@ const BookCard = ({ title, author, category, description, pages, isAvailable, im
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BookCard
-
+export default BookCard;
