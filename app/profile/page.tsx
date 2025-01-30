@@ -12,7 +12,7 @@ export default async function Profile() {
   }
 
   return (
-    <main className="container mx-auto px-4">
+ 
       <div className="flex w-full flex-col">
         <UserInfo />
         <div className="md:col-span-2 space-y-8">
@@ -29,6 +29,6 @@ export default async function Profile() {
           <BorrowHistory key={2} />
         </div>
       </div>
-    </main>
+ 
   )
 }
