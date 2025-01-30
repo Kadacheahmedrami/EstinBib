@@ -13,7 +13,7 @@ const LoginLayout = ({
         {/* Left side - Image */}
         <div className="w-full md:w-2/5 lg:w-2/6 relative bg-blue-600 min-h-[200px] md:min-h-full">
           <div
-            className="absolute inset-0 bg-gradient-to-br from-blue-600/90 to-blue-800/90"
+            className="absolute inset-0 bg-gradient-to-br from-blue-[] to-blue-800/90"
             style={{
               backgroundImage: "url(/jpg/1.png)",
               backgroundSize: "cover",
