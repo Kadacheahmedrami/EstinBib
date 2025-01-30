@@ -35,7 +35,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "app/pages/dashPat/appointemente/page.jsx"
-, "app/api/books/[bookid]/route.js", "app/api/books/[bookid]/route.js", "app/catalog/[bookid]/page.jsx", "app/api/books/[bookid]/route.js", "app/api/books/[bookid]/route.js", "app/api/auth/[...nextauth].js"  ],
+, "app/api/books/[bookid]/route.js", "app/api/books/[bookid]/route.js", "app/pages/catalog/[bookid]/page.jsx", "app/api/books/[bookid]/route.js", "app/api/books/[bookid]/route.js", "app/api/auth/[...nextauth].js"  ],
   "exclude": [
     "node_modules"
   ]

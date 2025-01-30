@@ -39,7 +39,7 @@ const BookCard = ({
         <div className="w-full z-0  lg:w-2/5 relative">
           <div className="aspect-w-3 aspect-h-4 lg:aspect-none lg:h-full">
             <Image
-              src={imageUrl || "svg/display.svg"}
+              src={imageUrl || "/svg/display.svg"}
               alt={title}
               height={200}
               width={320}

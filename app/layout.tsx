@@ -1,6 +1,6 @@
 import "./globals.css";
 import Header from '@/components/header';
-import Footer from '@/components/Foter';
+
 import { getServerAuthSession } from "@/lib/auth";
 
 
@@ -21,11 +21,11 @@ export default async function RootLayout({
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
         <Header session={session} />
-        <div className='mt-[100px]'></div>
+        <div className='mt-[75px]'></div>
         <main className="relative flex flex-col ">
           {children}
         </main>
-        <Footer />
+        
       </body>
     </html>
   );

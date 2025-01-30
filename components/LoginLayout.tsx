@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const LoginLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="min-h-screen flex items-center  justify-center bg-gray-50 p-4">
+    <div className="md:my-12 flex items-center  justify-center p-4">
       <div className="w-full max-w-[1100px] flex flex-col md:flex-row bg-white rounded-[30px] shadow-2xl overflow-hidden">
         {/* Left side - Image */}
         <div className="w-full md:w-2/5 lg:w-2/6 relative bg-blue-600 min-h-[200px] md:min-h-full">

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { CircleUserRound } from 'lucide-react';
 import API from '@/lib/axios'; // Make sure to import the API instance
+import { signOut } from "next-auth/react";
 
 const UserInfo = () => {
   // State to store fetched user data and loading state
@@ -10,6 +11,13 @@ const UserInfo = () => {
     userId: '',
     email: ''
   });
+  const handleSignOut = async () => {
+    try {
+      await signOut({ callbackUrl: "/" });
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
   const [loading, setLoading] = useState(true);
 
   // Fetch user data from the API
@@ -86,7 +94,7 @@ const UserInfo = () => {
           </div>
 
           <div className="flex justify-end pt-4">
-            <button className="text-red-500 border-2 border-red-500 px-6 py-2 rounded-md hover:bg-red-50 transition-all flex items-center gap-2 font-medium">
+            <button onClick={handleSignOut} className="text-red-500 border-2 border-red-500 px-6 py-2 rounded-md hover:bg-red-50 transition-all flex items-center gap-2 font-medium">
               <span>→</span>
               Log Out
             </button>
