@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef } from "react";
 import BookCard from "@/components/ui/card";
-import { BookProps1 } from '@/types/_types';
+import { BorrowedBook } from '@/types/_types';
 import { motion } from "framer-motion";  // Importing Framer Motion for animation
 
 const BorrowHistory: React.FC = () => {
@@ -11,7 +11,7 @@ const BorrowHistory: React.FC = () => {
   // Reference for the "Show More" button to scroll to it
   const showMoreButtonRef = useRef<HTMLButtonElement | null>(null);
 
-const books: BookProps1[] = [
+const books: BorrowedBook[] = [
   {
     title: "The Art of Programming",
     dateBorrowed: "Jan 1, 2025",

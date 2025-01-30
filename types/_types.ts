@@ -10,6 +10,8 @@ export interface BaseBook {
   imageUrl: string;
 }
 
+
+
 // Extended Book Types
 export interface Book extends BaseBook {
   publicationDate: string;
@@ -55,6 +57,12 @@ export interface FilterState {
 }
 
 export interface FilterProps {
+  isMobileOpen?: boolean;
+  onClose?: () => void;
+  filterParams: FilterState;
+  onFilterChange?: (filters: FilterState) => void;
+}
+export interface BookFilterProps {
   isMobileOpen?: boolean;
   onClose?: () => void;
   filterParams: FilterState;
