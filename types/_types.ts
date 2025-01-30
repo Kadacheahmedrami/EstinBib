@@ -37,6 +37,7 @@ export interface BookDetailsProps {
   book: Book;
 }
 
+
 // Add this to your _types.ts
 export interface BookPreviewProps {
   title: string;
@@ -74,7 +75,9 @@ export interface BookFilterProps {
 
 export interface ParentComponentProps {
   books?: BaseBook[];
+  loading?: boolean; // New loading parameter
 }
+
 
 // Form Input Props
 export interface RadioButtonProps {

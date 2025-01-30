@@ -1,14 +1,12 @@
-"use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import SearchBar from "@/components/searchBar";
 import BookFilter from "@/components/Filter";
 import BookCard from '@/components/BookCard';
 
-import {  FilterState, ParentComponentProps }from '@/types/_types';
+import { FilterState, ParentComponentProps } from '@/types/_types';
 
-
-export default function ParentComponent({ books = [] }: ParentComponentProps) { // Provide default empty array
+export default function ParentComponent({ books = [], loading = false }: ParentComponentProps) {
   const [searchInput, setSearchInput] = useState("");
   const [filterParams, setFilterParams] = useState<FilterState>({
     schoolYear: [],
@@ -20,6 +18,15 @@ export default function ParentComponent({ books = [] }: ParentComponentProps) { 
   });
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // Log state values whenever searchInput or filterParams change
+  useEffect(() => {
+    console.log("Search Input changed:", searchInput);
+  }, [searchInput]); // This effect runs every time searchInput changes
+
+  useEffect(() => {
+    console.log("Filter Params changed:", filterParams);
+  }, [filterParams]); // This effect runs every time filterParams changes
 
   const handleSearch = (input: string) => {
     setSearchInput(input);
@@ -58,19 +65,23 @@ export default function ParentComponent({ books = [] }: ParentComponentProps) { 
 
         <div className="w-full lg:w-3/4">
           <div className="m-8 relative flex flex-col gap-[80px]">
-            {books.map((book, index) => (
-              <BookCard
-                key={book.bookid || index} // Prefer bookid over index for key
-                bookid={book.bookid} 
-                title={book.title}
-                author={book.author}
-                category={book.category}
-                description={book.description}
-                pages={book.pages}
-                isAvailable={book.isAvailable}
-                imageUrl={book.imageUrl}
-              />
-            ))}
+            {loading ? (
+              <div className="text-center h-screen">Loading...</div> // Show loading text or spinner
+            ) : (
+              books.map((book, index) => (
+                <BookCard
+                  key={book.bookid || index} // Prefer bookid over index for key
+                  bookid={book.bookid} 
+                  title={book.title}
+                  author={book.author}
+                  category={book.category}
+                  description={book.description}
+                  pages={book.pages}
+                  isAvailable={book.isAvailable}
+                  imageUrl={book.imageUrl}
+                />
+              ))
+            )}
           </div>
         </div>
       </div>

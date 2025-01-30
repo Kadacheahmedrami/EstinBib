@@ -28,9 +28,7 @@ export default function Catalog() {
     fetchBooks();
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -51,7 +49,9 @@ export default function Catalog() {
           backgroundRepeat: 'no-repeat',
         }}
       ></div>
-      <ParentComponent books={books} />
+        <ParentComponent  loading={loading}  books={books} />
+   
+   
     </>
   );
 }
