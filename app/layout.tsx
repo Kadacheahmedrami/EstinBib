@@ -1,8 +1,8 @@
 import "./globals.css";
-
 import Header from '@/components/header';
 import Footer from '@/components/Foter';
-// import { getServerAuthSession } from "@/lib/auth";
+import { getServerAuthSession } from "@/lib/auth";
+
 
 export const metadata = {
   title: "Estin Bib",
@@ -13,25 +13,19 @@ export const metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  
-
+  const session = await getServerAuthSession();
+ 
   return (
     <html lang="en">
       <head>
-        
       </head>
-      
       <body className="min-h-screen bg-background font-sans antialiased">
-   
-        
-
-            <Header   />
-            <div className='mt-[100px]'></div>
-            <main className="relative flex flex-col ">
-              {children}
-            </main>
-        
-            <Footer />
+        <Header session={session} />
+        <div className='mt-[100px]'></div>
+        <main className="relative flex flex-col ">
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   );
