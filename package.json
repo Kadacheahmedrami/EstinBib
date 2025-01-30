@@ -21,6 +21,7 @@
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "lucide-react": "^0.469.0",
     "next": "^15.1.4",
+    "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.7",
     "react-dom": "^19.0.0",
