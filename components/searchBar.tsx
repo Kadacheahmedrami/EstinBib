@@ -1,6 +1,7 @@
 "use client";
 import { Search, Filter } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+// import { useRouter } from "next/router";
 
 export default function SearchBar({ searchInput, onSearch, isFilterOpen, setIsFilterOpen }: {
   searchInput: string;
@@ -15,6 +16,16 @@ export default function SearchBar({ searchInput, onSearch, isFilterOpen, setIsFi
   const [isSticky, setIsSticky] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchBarRef = useRef<HTMLDivElement>(null);
+
+  // const router = useRouter();
+  // const { q } = router.query; //
+
+  // useEffect(() => {
+  //   if (typeof q === "string") {
+  //     setInput(q); // Set input value when 'q' exists in the URL
+  //   }
+  // }, [q]); // Runs when 'q' changes
+
 
   useEffect(() => {
     const storedKeywords = localStorage.getItem("searchKeywords");

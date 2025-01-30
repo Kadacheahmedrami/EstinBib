@@ -9,7 +9,7 @@ const LandingPageSearch: React.FC = () => {
 
   const handleSearch = () => {
     if (searchQuery.trim() !== "") {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/catalog?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
