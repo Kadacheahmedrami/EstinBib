@@ -26,7 +26,7 @@ const BookCard = ({
     e.preventDefault();
     // Only navigate if router is ready
 
-    redirect(`/catalog/${bookid}`);
+    redirect(`/pages/catalog/${bookid}`);
   };
 
   return (
@@ -108,7 +108,7 @@ const BookCard = ({
               onClick={(e) => {
                 e.stopPropagation();
 
-                redirect(`/catalog/${bookid}`);
+                redirect(`/pages/catalog/${bookid}`);
               }}
               className="w-full sm:w-auto flex items-center justify-center text-red-500 hover:text-red-600 transition-colors duration-300 font-semibold"
             >
