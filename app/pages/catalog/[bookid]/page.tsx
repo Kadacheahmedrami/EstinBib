@@ -5,6 +5,9 @@ import RelatedBooks from "@/components/RelatedBooks";
 
 import API from "@/lib/axios";
 
+export const dynamic = 'force-dynamic';
+
+
 interface Book {
   bookid: string;
   title: string;

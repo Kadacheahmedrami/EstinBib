@@ -19,7 +19,6 @@ model User {
   role          Role       @default(STUDENT)
 
   borrowedBooks Borrow[]
-  addedBooks    Book[]
   bookRequests  BookRequest[]
   accounts      Account[]
   createdAt DateTime @default(now())
@@ -37,8 +36,6 @@ model Book {
   available    Boolean    @default(true)
   publishedAt  DateTime 
   categories   Category[]
-  addedById    String
-  addedBy      User       @relation(fields: [addedById], references: [id])
   borrows      Borrow[]
   addedAt      DateTime @default(now())
   language     String 
