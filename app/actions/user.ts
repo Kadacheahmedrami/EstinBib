@@ -1,50 +1,50 @@
-"user server";
-import { db } from "@/lib/db";
+"use server";
+import { db } from "@/db";
+import { eq, desc, isNull, and } from "drizzle-orm";
+import { users, borrows, books } from "@/db/schema"; // You'll need to create these schema definitions
 import { getServerAuthSession } from "@/lib/auth";
+
 export async function getUserInfo() {
   const session = await getServerAuthSession();
   if (!session || !session.user.email) {
     return null;
   }
-  const result = await db.user.findUnique({
-    where: { email: session.user.email },
-  });
+  const [result] = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      image: users.image,
+    })
+    .from(users)
+    .where(eq(users.email, session.user.email));
+
   if (!result) {
     return null;
   }
-  return {
-    id: result.id,
-    name: result.name,
-    email: result.email,
-    image: result.image,
-  };
+  return result;
 }
+
 export async function getActiveBorrows() {
   const session = await getServerAuthSession();
   if (!session) {
     throw new Error("User not authenticated");
   }
-  const activeBorrows = await db.borrow.findMany({
-    where: {
-      userId: session.user.id,
-      returnedAt: null,
-    },
-    select: {
-      id: true,
-      borrowedAt: true,
-      dueDate: true,
+
+  return await db
+    .select({
+      id: borrows.id,
+      borrowedAt: borrows.borrowedAt,
+      dueDate: borrows.dueDate,
       book: {
-        select: {
-          title: true,
-          coverImage: true,
-        },
+        title: books.title,
+        coverImage: books.coverImage,
       },
-    },
-    orderBy: {
-      borrowedAt: "desc",
-    },
-  });
-  return activeBorrows;
+    })
+    .from(borrows)
+    .innerJoin(books, eq(borrows.bookId, books.id))
+    .where(and(eq(borrows.userId, session.user.id), isNull(borrows.returnedAt)))
+    .orderBy(desc(borrows.borrowedAt));
 }
 
 export async function borrowsHistory() {
@@ -52,25 +52,20 @@ export async function borrowsHistory() {
   if (!session) {
     throw new Error("User not authenticated");
   }
-  const borrowsHistory = await db.borrow.findMany({
-    where: {
-      userId: session.user.id,
-    },
-    select: {
-      id: true,
+
+  return await db
+    .select({
+      id: borrows.id,
+      borrowedAt: borrows.borrowedAt,
+      dueDate: borrows.dueDate,
+      returnedAt: borrows.returnedAt,
       book: {
-        select: {
-          title: true,
-          coverImage: true,
-        },
+        title: books.title,
+        coverImage: books.coverImage,
       },
-      borrowedAt: true,
-      dueDate: true,
-      returnedAt: true,
-    },
-    orderBy: {
-      borrowedAt: "desc",
-    },
-  });
-  return borrowsHistory;
+    })
+    .from(borrows)
+    .innerJoin(books, eq(borrows.bookId, books.id))
+    .where(eq(borrows.userId, session.user.id))
+    .orderBy(desc(borrows.borrowedAt));
 }
