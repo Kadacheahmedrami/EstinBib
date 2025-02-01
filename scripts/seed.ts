@@ -1,31 +1,34 @@
-import { db } from "@/lib/db";
+import { db } from "@/db";
+import { books, categories, bookCategories } from "@/db/schema"; // adjust the import path to your schema definitions
 
 const seed = async () => {
   try {
-    // Clear existing data
-    await db.book.deleteMany();
-    await db.category.deleteMany();
+    // Clear existing data in the proper order to avoid foreign key issues.
+    await db.delete(bookCategories).execute();
+    await db.delete(books).execute();
+    await db.delete(categories).execute();
 
-    // First, create categories
-    const categories = [
+    // Define categories to seed.
+    const categoryData = [
       { name: "Non-Fiction" },
       { name: "Fiction" },
       { name: "Business" },
-      {
-        name: "Finance",
-      },
+      { name: "Finance" },
     ];
 
+    // Insert categories and retrieve the created rows.
     const createdCategories = await Promise.all(
-      categories.map((category) =>
-        db.category.create({
-          data: category,
-        })
-      )
+      categoryData.map(async (cat) => {
+        const [insertedCat] = await db
+          .insert(categories)
+          .values(cat)
+          .returning();
+        return insertedCat;
+      })
     );
 
-    // Seed books with category connections
-    const books = [
+    // Define book data with a reference to the category id.
+    const bookData = [
       {
         title: "how innovation works",
         author: "Matt Ridley",
@@ -36,7 +39,6 @@ const seed = async () => {
           "https://res.cloudinary.com/df9y24wp0/image/upload/v1738171061/mdcbs2zoddjahu80sqsw.png",
         size: 406,
         publishedAt: new Date("2020-05-19"),
-        addedById: "cm6jg580j0000q9tkk49l2qc3",
         addedAt: new Date(),
         language: "English",
         categoryId: createdCategories[0].id, // Non-Fiction
@@ -51,7 +53,6 @@ const seed = async () => {
           "https://res.cloudinary.com/df9y24wp0/image/upload/v1738171061/qh4i1levrqzi0yi6y9kp.png",
         size: 288,
         publishedAt: new Date("1890-04-01"),
-        addedById: "cm6jg580j0000q9tkk49l2qc3",
         addedAt: new Date(),
         language: "English",
         categoryId: createdCategories[1].id, // Fiction
@@ -66,7 +67,6 @@ const seed = async () => {
           "https://res.cloudinary.com/df9y24wp0/image/upload/v1738171061/gajybnbwljkrztt1c56m.png",
         size: 256,
         publishedAt: new Date("2019-01-15"),
-        addedById: "cm6jg580j0000q9tkk49l2qc3",
         addedAt: new Date(),
         language: "English",
         categoryId: createdCategories[2].id, // Business
@@ -81,17 +81,18 @@ const seed = async () => {
           "https://res.cloudinary.com/df9y24wp0/image/upload/v1738171060/y6cwvdhm1eygkp4rubq6.png",
         size: 256,
         publishedAt: new Date("2020-09-08"),
-        addedById: "cm6jg580j0000q9tkk49l2qc3",
         addedAt: new Date(),
         language: "English",
         categoryId: createdCategories[3].id, // Finance
       },
     ];
 
-    // Insert books into the database
-    for (const book of books) {
-      await db.book.create({
-        data: {
+    // Insert each book and create its relation with the corresponding category.
+    for (const book of bookData) {
+      // Insert the book record.
+      const [insertedBook] = await db
+        .insert(books)
+        .values({
           title: book.title,
           author: book.author,
           isbn: book.isbn,
@@ -99,23 +100,25 @@ const seed = async () => {
           coverImage: book.coverImage,
           size: book.size,
           publishedAt: book.publishedAt,
-          addedById: book.addedById,
-          categories: {
-            connect: {
-              id: book.categoryId,
-            },
-          },
           addedAt: book.addedAt,
           language: book.language,
-        },
-      });
+          available: true,
+        })
+        .returning();
+
+      // Create the join record in bookCategories to link the book with its category.
+      await db
+        .insert(bookCategories)
+        .values({
+          bookId: insertedBook.id,
+          categoryId: book.categoryId,
+        })
+        .execute();
     }
 
     console.log("Seeding completed successfully.");
   } catch (error) {
     console.error("Error seeding data:", error);
-  } finally {
-    await db.$disconnect();
   }
 };
 
