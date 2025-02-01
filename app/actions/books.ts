@@ -1,126 +1,130 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
-import { unstable_cache } from "next/cache";
-
-import { db } from "@/lib/db";
+import { revalidateTag, unstable_cache } from "next/cache";
+import { db } from "@/db";
 import { getServerAuthSession } from "@/lib/auth";
 import { AddBook } from "@/types/actions-inputs";
+import { books, borrows, bookCategories, categories } from "@/db/schema";
+import { eq, desc, count, inArray, and, sql } from "drizzle-orm";
+
+/**
+ * Get the 5 most recently added books
+ */
 export const getRecentBooks = unstable_cache(
   async () => {
-    return await db.book.findMany({
-      orderBy: { addedAt: "desc" },
-      take: 5,
-    });
+    return await db.select().from(books).orderBy(desc(books.addedAt)).limit(5);
   },
   ["recentBooks"] // Cache tag for revalidation
 );
 
+/**
+ * Get all books sorted by title (ascending)
+ */
 export async function getBooks() {
-  return await db.book.findMany({
-    orderBy: { title: "asc" },
-  });
+  return await db.select().from(books).orderBy(books.title);
 }
+
+/**
+ * Add a new book to the database
+ */
 export async function addNewBook(bookData: AddBook) {
   const session = await getServerAuthSession();
   if (!session) {
     throw new Error("User not authenticated");
   }
-  await db.book.create({
-    data: {
-      title: bookData.title,
-      addedById: session.user.id,
-      author: bookData.author,
-      isbn: bookData.isbn,
-      description: bookData.description,
-      coverImage: bookData.coverImage,
-      publishedAt: new Date(bookData.publishedAt),
-      size: bookData.size,
-      language: bookData.language,
-    },
+
+  await db.insert(books).values({
+    title: bookData.title,
+    author: bookData.author,
+    isbn: bookData.isbn,
+    description: bookData.description,
+    coverImage: bookData.coverImage,
+    publishedAt: new Date(bookData.publishedAt),
+    size: bookData.size,
+    language: bookData.language,
   });
 
-  // Revalidate the cache tagged with 'recentBooks'
+  // Revalidate cache for recent books
   revalidateTag("recentBooks");
 }
 
+/**
+ * Get the 5 most borrowed books
+ */
 export async function getMostBorrowedBooks() {
-  const mostBorrowedBooks = await db.book.findMany({
-    select: {
-      id: true,
-      title: true,
-      author: true,
-      _count: {
-        select: { borrows: true },
-      },
-    },
-    orderBy: {
-      borrows: {
-        _count: "desc",
-      },
-    },
-    take: 5, // Adjust the number to retrieve more or fewer books
-  });
+  const mostBorrowedBooks = await db
+    .select({
+      id: books.id,
+      title: books.title,
+      author: books.author,
+      borrowCount: count(borrows.bookId).as("borrowCount"),
+    })
+    .from(books)
+    .leftJoin(borrows, eq(books.id, borrows.bookId))
+    .groupBy(books.id)
+    .orderBy(desc(sql`COUNT(${borrows.bookId})`))
+    .limit(5);
 
   return mostBorrowedBooks;
 }
 
+/**
+ * Get details of a specific book by ID
+ */
 export const bookdetails = async (id: string) => {
-  return await db.book.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      title: true,
-      author: true,
-      coverImage: true,
-      description: true,
-      size: true,
-      language: true,
-      available: true,
-      publishedAt: true,
-      categories: {
-        select: {
-          name: true,
-          id: true,
-        },
-      },
-    },
-  });
+  return await db
+    .select({
+      id: books.id,
+      title: books.title,
+      author: books.author,
+      coverImage: books.coverImage,
+      description: books.description,
+      size: books.size,
+      language: books.language,
+      available: books.available,
+      publishedAt: books.publishedAt,
+      categories:
+        sql`json_agg(json_build_object('id', ${categories.id}, 'name', ${categories.name}))`.as(
+          "categories"
+        ),
+    })
+    .from(books)
+    .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
+    .leftJoin(categories, eq(bookCategories.categoryId, categories.id))
+    .where(eq(books.id, id))
+    .groupBy(books.id)
+    .execute()
+    .then((res) => res[0] || null);
 };
 
+/**
+ * Get books from the same categories as the given book ID
+ */
 export const sameSectionBooks = async (bookId: string) => {
-  const book = await db.book.findUnique({
-    where: { id: bookId },
-    select: {
-      categories: {
-        select: {
-          id: true,
-        },
-      },
-    },
-  });
+  const bookCategoriesResult = await db
+    .select({ categoryId: bookCategories.categoryId })
+    .from(bookCategories)
+    .where(eq(bookCategories.bookId, bookId));
 
-  if (!book) {
-    return [];
-  }
+  if (!bookCategoriesResult.length) return [];
 
-  const books = await db.book.findMany({
-    where: {
-      categories: {
-        some: {
-          id: {
-            in: book.categories.map((category ) => category.id),
-          },
-        },
-      },
-      NOT: {
-        id: bookId,
-      },
-    },
-    take: 5,
-  });
+  const categoryIds = bookCategoriesResult
+    .map((c) => c.categoryId)
+    .filter((id): id is string => id !== null);
 
-  return books;
+  const similarBooks = await db
+    .select()
+    .from(books)
+    .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
+    .where(
+      and(
+        inArray(bookCategories.categoryId, categoryIds),
+        sql`${books.id} != ${bookId}` // Exclude the original book
+      )
+    )
+    .limit(5);
+
+  return similarBooks;
 };
 
-// TODO : add you might like books
+// TODO: Add "You Might Like" books recommendation
