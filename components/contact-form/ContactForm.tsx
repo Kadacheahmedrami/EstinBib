@@ -1,80 +1,82 @@
-"use client"
+"use client";
 
-import { useState, type FormEvent, type ChangeEvent } from "react"
-import Image from "next/image"
+import { useState, type FormEvent, type ChangeEvent } from "react";
+import Image from "next/image";
+
 interface FormData {
-  isbn: string
-  title: string
-  author: string
-  publisher: string
-  releaseYear: string
+  isbn: string;
+  title: string;
+  author: string;
+  publisher: string;
+  releaseYear: string;
 }
 
 interface FormErrors {
-  isbn?: string
-  title?: string
+  isbn?: string;
+  title?: string;
 }
 
-export default function BookSuggestionForm() {
+export function ContactForm() {
   const [formData, setFormData] = useState<FormData>({
     isbn: "",
     title: "",
     author: "",
     publisher: "",
     releaseYear: "2004/22/22",
-  })
+  });
 
-  const [errors, setErrors] = useState<FormErrors>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrors = {}
+    const newErrors: FormErrors = {};
 
     if (!formData.isbn.trim()) {
-      newErrors.isbn = "ISBN is required"
+      newErrors.isbn = "ISBN is required";
     }
 
     if (!formData.title.trim()) {
-      newErrors.title = "Book title is required"
+      newErrors.title = "Book title is required";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
+    }));
+
     if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({
         ...prev,
         [name]: undefined,
-      }))
+      }));
     }
-  }
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      console.log("Form submitted:", formData)
-      setIsSubmitted(true)
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      console.log("Form submitted:", formData);
+      setIsSubmitted(true);
     } catch (error) {
-      console.error("Submission error:", error)
+      console.error("Submission error:", error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleReset = () => {
     setFormData({
@@ -83,19 +85,23 @@ export default function BookSuggestionForm() {
       author: "",
       publisher: "",
       releaseYear: "2004/22/22",
-    })
-    setIsSubmitted(false)
-  }
+    });
+    setIsSubmitted(false);
+  };
 
   return (
     <>
       {/* Custom Modal */}
       {isSubmitted && (
-        <div className="fixed  inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white max-w-2xl rounded-[15px] mx-4 animate-fade-in">
-           
-          <Image className="mb-[-120px]  relative bottom-[120px]" height={200} width={140} alt="suggetion" src={"/svg/pretty.svg"}/>
+            <Image
+              className="mb-[-120px] relative bottom-[120px]"
+              height={200}
+              width={140}
+              alt="suggestion"
+              src="/svg/pretty.svg"
+            />
             <div className="w-full bg-white m-auto p-6 rounded-[15px]">
               <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                 <div className="space-y-6 max-w-xl">
@@ -105,19 +111,19 @@ export default function BookSuggestionForm() {
                     Sent!
                   </h1>
                   <p className="text-gray-600 text-lg sm:text-xl">
-                    Our team will review your suggestion and consider adding it to our collection. A responsible team member
-                    will get back to you soon. Please check your email for updates.
+                    Our team will review your suggestion and consider adding it to our collection. A responsible team
+                    member will get back to you soon. Please check your email for updates.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <button
                       onClick={() => (window.location.href = "/")}
-                      className="px-6  md:w-1/2 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-all duration-200 flex items-center justify-center gap-2"
+                      className="px-6 md:w-1/2 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-all duration-200 flex items-center justify-center gap-2"
                     >
                       ← Return to Home
                     </button>
                     <button
                       onClick={handleReset}
-                      className="px-6  md:w-1/2 py-3 bg-red-500 hover:bg-red-600 text-white rounded-md transition-all duration-200"
+                      className="px-6 md:w-1/2 py-3 bg-red-500 hover:bg-red-600 text-white rounded-md transition-all duration-200"
                     >
                       Suggest Another
                     </button>
@@ -129,7 +135,7 @@ export default function BookSuggestionForm() {
         </div>
       )}
 
-      <div className=" bg-white py-8 px-4">
+      <div className="bg-white py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-[#0A2942] text-4xl font-bold mb-6">
@@ -146,8 +152,8 @@ export default function BookSuggestionForm() {
               </span>
             </h1>
             <p className="text-gray-700 text-lg">
-              If there is a book that you think would be a great addition to our shelves but you don&apos;t see it listed
-              in our catalog, please fill out this Book Suggestion Form
+              If there is a book that you think would be a great addition to our shelves but you don&apos;t see it
+              listed in our catalog, please fill out this Book Suggestion Form.
             </p>
           </div>
 
@@ -221,9 +227,9 @@ export default function BookSuggestionForm() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`px-8 py-3 bg-[#EF4444] hover:bg-[#DC2626] text-white rounded-md transition-colors
-                  ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}
-                `}
+                className={`px-8 py-3 bg-[#EF4444] hover:bg-[#DC2626] text-white rounded-md transition-colors ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
                 {isSubmitting ? "Sending..." : "Send →"}
               </button>
@@ -236,5 +242,5 @@ export default function BookSuggestionForm() {
         </div>
       </div>
     </>
-  )
+  );
 }

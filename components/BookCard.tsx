@@ -26,7 +26,7 @@ const BookCard = ({
     e.preventDefault();
     // Only navigate if router is ready
 
-    redirect(`/catalog/${bookid}`);
+    redirect(`/pages/catalog/${bookid}`);
   };
 
   return (
@@ -39,7 +39,7 @@ const BookCard = ({
         <div className="w-full z-0  lg:w-2/5 relative">
           <div className="aspect-w-3 aspect-h-4 lg:aspect-none lg:h-full">
             <Image
-              src={imageUrl || "svg/display.svg"}
+              src={imageUrl || "/svg/display.svg"}
               alt={title}
               height={200}
               width={320}
@@ -108,7 +108,7 @@ const BookCard = ({
               onClick={(e) => {
                 e.stopPropagation();
 
-                redirect(`/catalog/${bookid}`);
+                redirect(`/pages/catalog/${bookid}`);
               }}
               className="w-full sm:w-auto flex items-center justify-center text-red-500 hover:text-red-600 transition-colors duration-300 font-semibold"
             >

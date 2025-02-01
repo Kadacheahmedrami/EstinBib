@@ -1,9 +1,5 @@
-// app/login/page.tsx
+
 import LoginLayout from '@/components/LoginLayout';
-
-
-
-
 
 interface MainLayoutProps {
   children: React.ReactNode;

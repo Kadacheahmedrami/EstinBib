@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-// import { getServerSession } from "next-auth";
-// import { authOptions } from "@/lib/auth"; 
+
+
+
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const url = request.nextUrl.clone();
+
+
+
 
   if (pathname.startsWith('/home') ) {
    
@@ -14,9 +18,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-    if (pathname.startsWith('/login') ) {
-  
-      url.pathname = '/auth/login';
+    if (pathname.startsWith('/login') || pathname.startsWith('/home') || pathname.startsWith('/catalog') ||  pathname.startsWith('/contact-us') ||pathname.startsWith('/profile')   ) {
+      if(pathname.startsWith('/login'))
+      {      url.pathname = '/auth/login';}
+      else{
+        url.pathname = `/pages/${url.pathname}`;
+      }
+
       return NextResponse.redirect(url);
     }
 
@@ -46,9 +54,12 @@ export const config = {
   matcher: [
     '/login',
     '/home',
+    '/catalog',
     '/contact-us',
     '/profile',
     '/auth/login',  // You can add more auth routes if necessary
     '/auth/register', // Add other auth routes if necessary
   ],
 };
+
+
