@@ -11,22 +11,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 
-// ===========================
-// Enums
-// ===========================
-
 export const roleEnum = pgEnum("Role", ["STUDENT", "LIBRARIAN"]);
 
-// ===========================
-// Tables
-// ===========================
-
-/**
- * User table
- *
- * Maps to the Prisma model:
- *   model User { id, name, email, emailVerified, image, role, createdAt, updatedAt, ... }
- */
 export const users = pgTable("user", {
   id: varchar("id")
     .primaryKey()
@@ -42,15 +28,6 @@ export const users = pgTable("user", {
     .$onUpdateFn(() => new Date()),
 });
 
-/**
- * Book table
- *
- * Maps to the Prisma model:
- *   model Book { id, title, author, isbn, description, coverImage, size, available, publishedAt,
- *                search_vector (unsupported), addedAt, language, categories, borrows }
- *
- * Note: The unsupported search_vector field is omitted.
- */
 export const books = pgTable(
   "book",
   {
@@ -65,7 +42,6 @@ export const books = pgTable(
     size: integer("size"),
     available: boolean("available").default(true),
     publishedAt: timestamp("publishedAt").notNull(),
-    // Note: Prisma's unsupported search_vector field is not included here.
     addedAt: timestamp("addedAt").defaultNow(),
     language: varchar("language"),
   },
@@ -77,22 +53,11 @@ export const books = pgTable(
   ]
 );
 
-/**
- * Book-Category join table
- *
- * Implements the many-to-many relation between Book and Category.
- */
 export const bookCategories = pgTable("book_category", {
   bookId: varchar("book_id").references(() => books.id),
   categoryId: varchar("category_id").references(() => categories.id),
 });
 
-/**
- * Category table
- *
- * Maps to the Prisma model:
- *   model Category { id, name, books }
- */
 export const categories = pgTable(
   "category",
   {
@@ -104,12 +69,6 @@ export const categories = pgTable(
   (table) => [index("category_name_idx").on(table.name)]
 );
 
-/**
- * Borrow table
- *
- * Maps to the Prisma model:
- *   model Borrow { id, bookId, userId, borrowedAt, dueDate, returnedAt, ... }
- */
 export const borrows = pgTable(
   "borrow",
   {
@@ -129,12 +88,6 @@ export const borrows = pgTable(
   ]
 );
 
-/**
- * Book Request table
- *
- * Maps to the Prisma model:
- *   model BookRequest { id, userId, requestedAt, title, author, isbn, releasedAt }
- */
 export const bookRequests = pgTable(
   "book_request",
   {
@@ -154,14 +107,6 @@ export const bookRequests = pgTable(
   ]
 );
 
-/**
- * Contact table
- *
- * Maps to the Prisma model:
- *   model contact { id, name, email, message, createdAt }
- *
- * Note: The table is named "contact" (singular) to match the Prisma model.
- */
 export const contacts = pgTable("contact", {
   id: varchar("id")
     .primaryKey()
@@ -172,13 +117,6 @@ export const contacts = pgTable("contact", {
   createdAt: timestamp("createdAt").defaultNow(),
 });
 
-/**
- * Account table
- *
- * Maps to the Prisma model:
- *   model Account { userId, type, provider, providerAccountId, refresh_token, access_token,
- *                   expires_at, token_type, scope, id_token, session_state, createdAt, updatedAt }
- */
 export const accounts = pgTable(
   "account",
   {
@@ -205,12 +143,6 @@ export const accounts = pgTable(
   ]
 );
 
-/**
- * Verification Token table
- *
- * Maps to the Prisma model:
- *   model VerificationToken { identifier, token, expires }
- */
 export const verificationTokens = pgTable(
   "verification_token",
   {
