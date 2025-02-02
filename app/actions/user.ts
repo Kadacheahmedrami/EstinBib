@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/db";
 import { eq, desc, isNull, and } from "drizzle-orm";
-import { users, borrows, books } from "@/db/schema"; // You'll need to create these schema definitions
+import { users, borrows, books } from "@/db/schema";
 import { getServerAuthSession } from "@/lib/auth";
 
 export async function getUserInfo() {
@@ -33,13 +33,11 @@ export async function getActiveBorrows() {
 
   return await db
     .select({
-      id: borrows.id,
+      title: books.title,
       borrowedAt: borrows.borrowedAt,
       dueDate: borrows.dueDate,
-      book: {
-        title: books.title,
-        coverImage: books.coverImage,
-      },
+      coverImage: books.coverImage,
+      description: books.description,
     })
     .from(borrows)
     .innerJoin(books, eq(borrows.bookId, books.id))
@@ -55,14 +53,12 @@ export async function borrowsHistory() {
 
   return await db
     .select({
-      id: borrows.id,
+      title: books.title,
       borrowedAt: borrows.borrowedAt,
       dueDate: borrows.dueDate,
       returnedAt: borrows.returnedAt,
-      book: {
-        title: books.title,
-        coverImage: books.coverImage,
-      },
+      coverImage: books.coverImage,
+      description: books.description,
     })
     .from(borrows)
     .innerJoin(books, eq(borrows.bookId, books.id))
