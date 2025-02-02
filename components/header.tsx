@@ -75,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
 
       {/* Mobile Navigation */}
       <div className="lg:hidden flex ml-auto">
-        <DropdownImageMenu links={links} />
+        <DropdownImageMenu  links={links} />
       </div>
 
       {/* Desktop Profile */}
