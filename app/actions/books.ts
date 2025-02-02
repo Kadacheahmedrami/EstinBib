@@ -73,8 +73,8 @@ export async function getMostBorrowedBooks() {
 /**
  * Get details of a specific book by ID
  */
-export const bookdetails = async (id: string) => {
-  return await db
+export const bookDetails = async (id: string) => {
+  const [result] = await db
     .select({
       id: books.id,
       title: books.title,
@@ -85,20 +85,21 @@ export const bookdetails = async (id: string) => {
       language: books.language,
       available: books.available,
       publishedAt: books.publishedAt,
-      categories:
-        sql`json_agg(json_build_object('id', ${categories.id}, 'name', ${categories.name}))`.as(
-          "categories"
-        ),
+      categories: sql`
+        json_agg(
+          json_build_object('id', ${categories.id}, 'name', ${categories.name})
+        )
+      `.as("categories"),
     })
     .from(books)
     .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
     .leftJoin(categories, eq(bookCategories.categoryId, categories.id))
     .where(eq(books.id, id))
     .groupBy(books.id)
-    .execute()
-    .then((res) => res[0] || null);
-};
+    .execute();
 
+  return result ?? null; // Explicitly returning `null` if no result is found
+};
 /**
  * Get books from the same categories as the given book ID
  */
