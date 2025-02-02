@@ -103,7 +103,7 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
 
   return (
     <div className="relative w-screen overflow-hidden">
-      <div className="max-w-[2000px] overflow-hidden mx-auto px-4 sm:px-8 lg:px-16">
+     
         {showLeftButton && (
           <button
             onClick={() => scroll("left")}
@@ -140,7 +140,7 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
             <ChevronRightCircle size={48} color="#F1413E" strokeWidth={1.5} />
           </button>
         )}
-      </div>
+
     </div>
   );
 };

@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
           <ProfileDropdown session={session}  />
           :
           <Link href="/auth/login">
-          <button className="h-12 w-40 border-2 border-[#F1413E] text-[#F1413E] rounded-md bg-white">
+          <button className="h-12 w-40 border-2 border-[#F1413E] text-[#F1413E] rounded-md bg-white transition-all  hover:font-bold ease-in-out duration-100 hover:text-white hover:bg-[#F1413E] ">
             Log In
           </button>
         </Link>

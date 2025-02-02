@@ -18,26 +18,24 @@ const BookCard = ({
   description,
   size,
   available,
-  coverImage
- 
+  coverImage,
 }: BaseBook) => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Navigate to the book details page
     redirect(`/catalog/${id}`);
   };
 
   return (
     <div
-      className="lg:ml-auto lg:mr-[5%] border lg:w-[75%] lg:h-[480px] z-0 bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 cursor-pointer"
+      className="md:ml-auto md:mr-[5%] border  md:w-[70%] sm:w-full z-0 bg-white rounded-3xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 cursor-pointer"
       onClick={handleClick}
     >
-      <div className="flex flex-col h-full lg:flex-row">
+      <div className="flex flex-col h-full md:flex-row">
         {/* Left side - Book Image */}
-        <div className="w-full lg:w-2/5 relative">
-          <div className="aspect-w-3 aspect-h-4 lg:aspect-none lg:h-full">
+        <div className="w-full md:w-2/5 relative">
+          <div className="aspect-w-3 aspect-h-4 md:aspect-none md:h-full">
             <Image
-              src={coverImage ? coverImage : "/default-book.jpg"} 
+              src={coverImage ? coverImage : "/default-book.jpg"}
               alt={title || "cover"}
               height={200}
               width={280}
@@ -47,7 +45,7 @@ const BookCard = ({
           </div>
 
           {/* Availability Badge */}
-          <div className="absolute top-10 left-20 shadow border rounded-full bg-white text-sm font-semibold">
+          <div className="absolute top-3 left-4 md:left-8 md:top-6 shadow border rounded-full bg-white text-sm font-semibold">
             {available ? (
               <span className="text-white rounded-full px-3 py-1 bg-green-500 flex items-center">
                 <Check size={16} className="mr-1" /> Available
@@ -61,13 +59,13 @@ const BookCard = ({
         </div>
 
         {/* Right side - Book Information */}
-        <div className="flex-1 p-6 lg:p-8 flex flex-col justify-between">
+        <div className="flex-1 px-6 md:px-8  flex flex-col justify-between py-4">
           <div className="space-y-4">
-            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 line-clamp-2">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 line-clamp-2">
               {title}
             </h2>
 
-            <div className="flex flex-wrap items-center gap-4 text-sm lg:text-base">
+            <div className="flex flex-wrap items-center gap-4 text-sm md:text-base">
               <div className="flex items-center text-gray-600">
                 <User size={18} className="mr-2" />
                 <span className="font-medium text-gray-900">{author}</span>
@@ -75,10 +73,10 @@ const BookCard = ({
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+              <h3 className="text-md font-semibold text-gray-800 flex items-center">
                 <FileText size={20} className="mr-2" /> Description
               </h3>
-              <p className="text-gray-600 text-sm lg:text-base line-clamp-3">
+              <p className="text-gray-600 text-sm md:text-base line-clamp-3">
                 {description}
               </p>
             </div>
@@ -89,17 +87,9 @@ const BookCard = ({
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+          <div className="flex flex-col sm:flex-row items-end justify-between mt-6 gap-4">
             {/* Reserve Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                // Add your reserve logic here
-              }}
-              className="w-full sm:w-auto px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-300 flex items-center justify-center font-semibold"
-            >
-              Reserve Now
-            </button>
+            {/* Add Reserve Button here if needed */}
 
             {/* More Details Button */}
             <button
@@ -107,10 +97,10 @@ const BookCard = ({
                 e.stopPropagation();
                 redirect(`/catalog/${id}`);
               }}
-              className="w-full sm:w-auto flex items-center justify-center text-red-500 hover:text-red-600 transition-colors duration-300 font-semibold"
+              className="w-full ml-auto sm:w-auto text-[24px] border-solid border-[#F1413E] border-[2px] rounded-[10px] my-4 py-1 px-8 flex items-center justify-center text-red-500 hover:text-red-600 transition-colors duration-300 font-semibold"
             >
               More Details
-              <ArrowRight size={20} className="ml-2" />
+              <ArrowRight size={30} className="ml-2" />
             </button>
           </div>
         </div>
