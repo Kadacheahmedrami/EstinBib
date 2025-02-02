@@ -11,7 +11,7 @@ const HeroLanding: React.FC = () => {
 
   return (
     <>
-    <div className="relative min-h-[90vh] flex flex-col lg:flex-row items-start justify-between bg-[#06293A] px-6 md:px-16 lg:px-32 overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/jpg/back.jpg')" }}>
+    <div className="relative min-h-[92vh] flex flex-col lg:flex-row items-start justify-between bg-[#06293A] px-6 md:px-16 lg:px-32 overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/jpg/back.jpg')" }}>
       {/* Left Content */}
       <div className="relative z-10 max-w-2xl flex flex-col justify-center h-[90vh] w-full items-center text-left">
         <div className='flex flex-col items-start'>
