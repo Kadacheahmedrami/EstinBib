@@ -1,21 +1,13 @@
 import React from "react";
 import Image from "next/image";
+import { BorrowedBook } from "@/types/_types";
 
-// Define the type for BookCard props
-interface BookCardProps {
-  title: string;
-  imageUrl: string | null;
-  dateBorrowed: Date | null;
-  dueDate: Date;
-  status: string;
-}
-
-const BookCard: React.FC<BookCardProps> = ({
+const BookCard: React.FC<BorrowedBook> = ({
   title,
   dateBorrowed,
   dueDate,
   status,
-  imageUrl,
+  coverImage,
 }) => {
   const isOverdue = status.toLowerCase() === "overdue";
 
@@ -26,33 +18,25 @@ const BookCard: React.FC<BookCardProps> = ({
       </h2>
       <div className="flex flex-row justify-between items-center mb-8">
         <div className="relative group">
-          {imageUrl ? (
-            <Image
-              src={imageUrl || '/default-book.jpg'}
-              alt={title}
-              width={250}
-              height={350}
-              className="rounded-lg object-cover transform scale-110 group-hover:scale-[1.1] transition duration-300"
-            />
-          ) : (
-            <div className="bg-gray-300 w-[250px] h-[350px] rounded-lg flex items-center justify-center">
-              <span className="text-gray-600">No Image</span>
-            </div>
-          )}
+          <Image
+            src={coverImage}
+            alt={title}
+            width={250}
+            height={350}
+            className="rounded-lg object-cover transform scale-110  group-hover:scale-[1.1] transition duration-300"
+          />
         </div>
         <div className="flex flex-col justify-between mx-auto space-y-6">
           <div className="text-[22px] text-gray-800 space-y-4">
             <p className="flex flex-col items-start">
               <span className="font-semibold">Date Borrowed:</span>
               <span className="text-gray-600">
-                {dateBorrowed ? dateBorrowed.toLocaleDateString() : "N/A"}
+                {dateBorrowed ? dateBorrowed : "N/A"}
               </span>
             </p>
             <p className="flex flex-col items-start">
               <span className="font-semibold">Due Date:</span>
-              <span className="text-gray-600">
-                {dueDate.toLocaleDateString()}
-              </span>
+              <span className="text-gray-600">{dueDate}</span>
             </p>
             <p className="flex flex-col items-start">
               <span className="font-semibold">Status:</span>

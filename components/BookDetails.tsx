@@ -1,26 +1,30 @@
-import Image from 'next/image';
-import { Book as BookIcon, User, Layers, Clock, Globe, Link as LinkIcon } from 'lucide-react';
-
-
+import Image from "next/image";
+import {
+  Book as BookIcon,
+  User,
+  Layers,
+  Clock,
+  Globe,
+  Link as LinkIcon,
+} from "lucide-react";
 
 interface Book {
   id: string;
   title: string;
   author: string;
-  isbn: string;
+  isbn: string | null;
   description: string;
   coverImage: string;
   size: number;
   available: boolean;
-  publishedAt: string;
-  addedAt: string;
+  publishedAt: Date | null;
+  addedAt: Date;
   language: string;
 }
 
-
 export default function BookDetails({ book }: { book: Book }) {
   // Format the publication date
-  
+
   // console.log("book details =========",book)
 
   return (
@@ -29,7 +33,7 @@ export default function BookDetails({ book }: { book: Book }) {
         {/* Book Image Section */}
         <div className="md:w-1/3 relative h-64 md:h-auto">
           <Image
-            src={  '/default-book.jpg'} // Use coverImage from the data  book.coverImage
+            src={"/default-book.jpg"} // Use coverImage from the data  book.coverImage
             alt={"cover"}
             height={400}
             width={480}
@@ -49,7 +53,9 @@ export default function BookDetails({ book }: { book: Book }) {
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">{book.title}</h1>
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">
+              {book.title}
+            </h1>
 
             {/* Book Details in Column Layout */}
             <div className="space-y-3 md:space-y-4 text-base md:text-xl text-gray-700">
@@ -63,7 +69,10 @@ export default function BookDetails({ book }: { book: Book }) {
               </div>
               <div className="flex items-center">
                 <Clock className="h-5 w-5 md:h-6 md:w-6 mr-2 md:mr-3" />
-                <span>Published on: {book.publishedAt}</span> {/* Use formatted publication date */}
+                <span>
+                  Published on: {book.publishedAt?.toDateString()}
+                </span>{" "}
+                {/* Use formatted publication date */}
               </div>
               <div className="flex items-center">
                 <Globe className="h-5 w-5 md:h-6 md:w-6 mr-2 md:mr-3" />
@@ -85,7 +94,9 @@ export default function BookDetails({ book }: { book: Book }) {
 
           {/* Description Section */}
           <div className="prose prose-base md:prose-lg max-w-none mb-6 md:mb-8">
-            <h2 className="text-xl md:text-2xl font-semibold mb-3 md:mb-4">Description</h2>
+            <h2 className="text-xl md:text-2xl font-semibold mb-3 md:mb-4">
+              Description
+            </h2>
             <p className="text-gray-600 leading-relaxed">{book.description}</p>
           </div>
 

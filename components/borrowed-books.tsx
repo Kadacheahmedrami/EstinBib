@@ -1,31 +1,21 @@
-"use client"
+"use client";
 import React, { useState } from "react";
+import BookCard from "@/components/ui/card";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
-import BookCard from "@/components/ui/card"; // Adjust if necessary
-
-interface BorrowedBookHistory {
-  id: string;
-  borrowedAt: Date | null;
-  dueDate: Date;
-  returnedAt?: Date | null; // Make returnedAt optional
-  book: {
-    title: string;
-    coverImage: string | null;
-  };
-}
-
-// Define the component props to accept `history`
+import { ActiveBorrows } from "@/types/_types"; // Importing the BorrowedBook type
 interface BorrowedBooksProps {
-  history: BorrowedBookHistory[];
+  books: ActiveBorrows[];
 }
-
-const BorrowedBooks: React.FC<BorrowedBooksProps> = ({ history }) => {
+const BorrowedBooks = ({ books }: BorrowedBooksProps) => {
   const [scrollPosition, setScrollPosition] = useState(0);
 
   const scroll = (direction: "left" | "right") => {
     const container = document.getElementById("book-container");
     if (container) {
-      const scrollAmount = direction === "left" ? -container.clientWidth / 3 : container.clientWidth / 3;
+      const scrollAmount =
+        direction === "left"
+          ? -container.clientWidth / 3
+          : container.clientWidth / 3;
       const newPosition = Math.max(
         0,
         Math.min(
@@ -58,19 +48,19 @@ const BorrowedBooks: React.FC<BorrowedBooksProps> = ({ history }) => {
           className="flex overflow-x-hidden scroll-smooth py-8"
           style={{ scrollSnapType: "x mandatory" }}
         >
-          {history.map((item, index) => (
+          {books.map((book, index) => (
             <div
               key={index}
               className="w-1/3 flex-shrink-0"
               style={{ scrollSnapAlign: "start" }}
             >
               <BookCard
-                imageUrl={item.book.coverImage || ""}
-                title={item.book.title}
-                dateBorrowed={item.borrowedAt}
-                dueDate={item.dueDate}
-                status={item.returnedAt ? "Returned" : "Borrowed"}
-                // description={`Due: ${item.dueDate.toLocaleDateString()}`}
+                coverImage={book.coverImage}
+                title={book.title}
+                dateBorrowed={book.borrowedAt.toDateString()}
+                dueDate={book.dueDate.toDateString()}
+                status={book.dueDate < new Date() ? " true " : " false "}
+                description={book.description}
               />
             </div>
           ))}

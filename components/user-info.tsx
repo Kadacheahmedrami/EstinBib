@@ -1,6 +1,6 @@
 import { getUserInfo } from "@/app/actions/user";
 import { CircleUserRound } from "lucide-react";
-import Signout from "@/components/signout";
+import Signout from "./signout";
 
 const UserInfo = async () => {
   const info = await getUserInfo();
@@ -10,6 +10,9 @@ const UserInfo = async () => {
       <div className="flex flex-col lg:flex-row justify-center items-center gap-8 lg:gap-12 max-w-7xl mx-auto">
         {/* Profile Section */}
         <div className="flex flex-col items-center text-center w-full lg:w-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">
+            My Account
+          </h1>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">
             My Account
           </h1>
@@ -30,6 +33,7 @@ const UserInfo = async () => {
               </label>
               <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
                 {info?.name}
+                {info?.name}
               </div>
             </div>
 
@@ -38,6 +42,7 @@ const UserInfo = async () => {
                 User s ID :
               </label>
               <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
+                {info?.id}
                 {info?.id}
               </div>
             </div>
@@ -48,11 +53,13 @@ const UserInfo = async () => {
               </label>
               <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
                 {info?.email}
+                {info?.email}
               </div>
             </div>
           </div>
 
           <div className="flex justify-end pt-4">
+            <Signout />
             <Signout />
           </div>
         </div>

@@ -14,26 +14,24 @@ export interface BaseBook {
   language: string | null;
 }
 
-
+// Extended Book Types
 export interface Book extends BaseBook {
-  id: string;              // Book ID as string (matching the format in the data)
+  id: string; // Book ID as string (matching the format in the data)
 }
 
 export interface BorrowedBook {
-  id: number;
+  description: string;
   title: string;
-  description?: string; // Optional because API might not provide it
-  imageUrl?: string; // Optional with default fallback
-  borrowCount?: number; // Added because API returns it
+  dateBorrowed: string;
+  dueDate: string;
+  status: string; // Could be 'borrowed', 'returned', 'overdue'
+  coverImage: string;
 }
-
-
 
 // Component Props
 export interface BookDetailsProps {
   book: Book;
 }
-
 
 // Add this to your _types.ts
 export interface BookPreviewProps {
@@ -75,7 +73,6 @@ export interface ParentComponentProps {
   loading?: boolean; // New loading parameter
 }
 
-
 // Form Input Props
 export interface RadioButtonProps {
   id: string;
@@ -90,4 +87,21 @@ export interface CheckboxProps {
   id: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+}
+
+export interface ActiveBorrows {
+  title: string;
+  borrowedAt: Date;
+  dueDate: Date;
+  coverImage: string;
+  description: string;
+}
+
+export interface BooksHistory {
+  title: string;
+  borrowedAt: Date;
+  dueDate: Date;
+  returnedAt: Date | null;
+  coverImage: string;
+  description: string;
 }
