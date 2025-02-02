@@ -5,6 +5,7 @@ import { Session } from "next-auth"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
 import { LogOut, User, ChevronDown } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface ProfileDropdownProps {
   session: Session
@@ -16,15 +17,16 @@ export default function ProfileDropdown({ session }: ProfileDropdownProps) {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    function handleClickOutside() {
+      if (dropdownRef.current) {
         setIsOpen(false)
       }
     }
-
+  
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+  
 
   const userInitial = session.user?.email?.[0].toUpperCase() || '?'
 
@@ -49,27 +51,35 @@ export default function ProfileDropdown({ session }: ProfileDropdownProps) {
         />
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
-          <Link 
-            href="/profile"
-            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -5 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -5 }}
+            transition={{ duration: 0.2 }}
+            className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1"
           >
-            <User className="w-4 h-4" />
-            <span>Profile</span>
-          </Link>
+            <Link 
+              href="/profile"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <User className="w-4 h-4" />
+              <span>Profile</span>
+            </Link>
 
-          <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
+            <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
 
-          <button
-            onClick={() => signOut()}
-            className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out</span>
-          </button>
-        </div>
-      )}
+            <button
+              onClick={() => signOut()}
+              className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

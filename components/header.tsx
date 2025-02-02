@@ -11,8 +11,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ session }) => {
-  const mobilelinks = session ? ["home", "catalog", "contact-us", "login"] : ["home", "catalog", "contact-us", "profile"];
-  const links = ["home", "catalog", "contact-us"] ;
+  const mobilelinks = !session ? ["", "catalog", "contact-us", "login"] : ["", "catalog", "contact-us", "profile"];
+  const links = ["", "catalog", "contact-us"] ;
   return (
     <div className="h-[70px] fixed z-20  py-8 px-[7%] flex justify-center items-center w-full bg-white">
     
@@ -32,7 +32,13 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
         {links.map((menuItem, index) => (
           <li key={index} className="menu-item">
             <Link href={`/${menuItem}`} className="menu-link">
-              {menuItem}
+              {
+              menuItem == '' ? 
+              "Home"
+              :
+              menuItem
+              }
+           
             </Link>
           </li>
         ))}

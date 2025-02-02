@@ -7,7 +7,7 @@ export default async function BookSuggestionForm() {
 
   // If no session, redirect to the login page
   if (!session) {
-    redirect('/login') // You can replace this with your desired redirect path
+    redirect('/auth/login') // You can replace this with your desired redirect path
   }
 
   return (

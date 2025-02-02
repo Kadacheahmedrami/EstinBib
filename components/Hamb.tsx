@@ -42,7 +42,7 @@ const DropdownImageMenu: React.FC<DropdownImageMenuProps> = ({ links }) => {
       {/* Dropdown Menu */}
       <div
         className={`fixed top-0 z-50 left-0 w-full h-full bg-opacity-95 bg-white flex flex-col transition-all duration-500 ${
-          menuOpen ? "translate-y-[88px] opacity-100" : "-translate-y-full opacity-0"
+          menuOpen ? "translate-y-[70px] opacity-100" : "-translate-y-full opacity-0"
         }`}
       >
         <ul className="list-none w-full p-0 m-0">
@@ -53,7 +53,12 @@ const DropdownImageMenu: React.FC<DropdownImageMenuProps> = ({ links }) => {
             >
               <Link onClick={toggleMenu} href={`/${linkName}`}>
                 <div className="text-start py-4">
-                  {linkName}
+                  {linkName == '' 
+                  ?
+                    "home"
+                  :
+                  linkName
+                  }
                 </div>
               </Link>
             </li>

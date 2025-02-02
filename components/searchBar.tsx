@@ -103,7 +103,7 @@ export default function SearchBar({ searchInput, onSearch, isFilterOpen, setIsFi
         ref={searchBarRef}
         className={`w-full transition-all ${
           isSticky 
-            ? 'fixed top-[88px] left-0  z-20 py-4' 
+            ? 'fixed top-[70px] left-0  z-10 py-4' 
             : 'relative'
         }`}
       >
@@ -193,13 +193,13 @@ export default function SearchBar({ searchInput, onSearch, isFilterOpen, setIsFi
           </div>
           <div className="block md:hidden">
             <button
-              className={`flex bg-[#F1413E] p-4 rounded-full mr-4 transition-all duration-300 ${
+              className={`flex border-solid bg-white border-[#F1413E] border-[2px] p-3 rounded-full mr-4 transition-all duration-300 ${
                 isFilterOpen ? 'bg-opacity-80' : ''
               }`}
               aria-label="Filter"
               onClick={toggleFilter}
             >
-              <Filter className="w-6 h-6 text-white" />
+              <Filter className="w-7 h-7 text-[#F1413E]" />
             </button>
           </div>
         </div>
