@@ -57,6 +57,8 @@ export async function getMostBorrowedBooks() {
       id: books.id,
       title: books.title,
       author: books.author,
+      coverImage: books.coverImage,
+      description: books.description,
       borrowCount: count(borrows.bookId).as("borrowCount"),
     })
     .from(books)
