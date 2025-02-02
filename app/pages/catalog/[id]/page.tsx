@@ -1,10 +1,9 @@
-
-
 import React from "react";
 import API from "@/lib/axios";
 import BookDetails from "@/components/BookDetails"; // Component for detailed view
 import RelatedBooks from "@/components/RelatedBooks";
 import { BorrowedBook } from "@/types/_types"; // Shared type
+import { AxiosError } from "axios";
 
 export const dynamic = "force-dynamic";
 
@@ -94,16 +93,20 @@ export default async function BookPage({ params }: PageProps) {
 // Fetch book data by ID
 async function getBookData(id: string): Promise<Book | null> {
   try {
-    const response = await API.get(`/api/books/${id}`,{
-      params: {
-        revalidate: 60, // Revalidate every 60 seconds
-      }, 
-  });
+    const response = await API.get(`/api/books/${id}`, {
+      params: { revalidate: 60 },
+    });
     return response.data.book[0] || null;
   } catch (error) {
-    console.error("Error fetching book:", error);
+    // Type the error as AxiosError
+    if (error instanceof AxiosError) {
+      console.error("Error fetching book:", error.response?.data || error.message);
+    } else {
+      console.error("Unexpected error:", error);
+    }
     return null;
   }
+  
 }
 
 // Fetch random books (for the RelatedBooks carousel)
