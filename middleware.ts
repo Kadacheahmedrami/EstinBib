@@ -18,13 +18,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-    if (pathname.startsWith('/login') || pathname.startsWith('/home') || pathname.startsWith('/catalog') ||  pathname.startsWith('/contact-us') ||pathname.startsWith('/profile')   ) {
-      if(pathname.startsWith('/login'))
-      {      url.pathname = '/auth/login';}
-      else{
-        url.pathname = `/pages/${url.pathname}`;
-      }
-
+    if (pathname.startsWith('/login')  ) {
+     
+          url.pathname = '/auth/login';
+  
       return NextResponse.redirect(url);
     }
 

@@ -33,7 +33,7 @@ export default function BookDetails({ book }: { book: Book }) {
         {/* Book Image Section */}
         <div className="md:w-1/3 relative h-64 md:h-auto">
           <Image
-            src={"/default-book.jpg"} // Use coverImage from the data  book.coverImage
+            src={book.coverImage ? book.coverImage : "/default-book.jpg"} // Use coverImage from the data  
             alt={"cover"}
             height={400}
             width={480}

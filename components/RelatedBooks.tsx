@@ -4,9 +4,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
+import Link from "next/link";
 
 // --- BookCard Component ---
 const BookCard: React.FC<RecentBooks> = ({
+  id,
   title,
   description,
   coverImage,
@@ -25,9 +27,12 @@ const BookCard: React.FC<RecentBooks> = ({
         <p className="text-gray-700 text-base mb-4 truncate">
           {description || "No description available."}
         </p>
+        <Link href={`/catalog/${id}`}>
         <button className="mt-4 rounded-lg w-full text-[#F1413E] px-4 py-2 border-2 border-solid border-[#F1413E] hover:bg-[#F1413E] hover:text-white transition duration-300">
           Learn More
         </button>
+        </Link>
+
       </div>
     </div>
   );

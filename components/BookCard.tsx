@@ -24,7 +24,7 @@ const BookCard = ({
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     // Navigate to the book details page
-    redirect(`/pages/catalog/${id}`);
+    redirect(`/catalog/${id}`);
   };
 
   return (
@@ -105,7 +105,7 @@ const BookCard = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                redirect(`/pages/catalog/${id}`);
+                redirect(`/catalog/${id}`);
               }}
               className="w-full sm:w-auto flex items-center justify-center text-red-500 hover:text-red-600 transition-colors duration-300 font-semibold"
             >
