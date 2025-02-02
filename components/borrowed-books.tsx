@@ -51,7 +51,7 @@ const BorrowedBooks = ({ books }: BorrowedBooksProps) => {
           {books.map((book, index) => (
             <div
               key={index}
-              className="w-1/3 flex-shrink-0" // Adjust width to 1/3 to show 3 books at a time
+              className="w-1/3 flex-shrink-0"
               style={{ scrollSnapAlign: "start" }}
             >
               <BookCard

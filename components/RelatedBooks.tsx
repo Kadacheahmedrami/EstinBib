@@ -4,14 +4,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
-import { BorrowedBook } from "@/types/_types"; // Your shared type
 
 // --- BookCard Component ---
-const BookCard: React.FC<BorrowedBook> = ({ title, description, imageUrl }) => {
+const BookCard: React.FC<RecentBooks> = ({
+  title,
+  description,
+  coverImage,
+}) => {
   return (
     <div className="bg-white rounded-lg overflow-hidden w-72 mx-4 flex-shrink-0">
       <Image
-        src={imageUrl && imageUrl !== "" ? imageUrl : "/svg/display.svg"}
+        src={coverImage && coverImage !== "" ? coverImage : "/svg/display.svg"}
         alt={title}
         width={310}
         height={200}
@@ -30,10 +33,15 @@ const BookCard: React.FC<BorrowedBook> = ({ title, description, imageUrl }) => {
   );
 };
 
-// --- RelatedBooks Component ---
+interface RecentBooks {
+  id: string;
+  title: string;
+  description: string;
+  coverImage: string;
+}
 interface RelatedBooksProps {
   containerId: string;
-  books: BorrowedBook[];
+  books: RecentBooks[];
 }
 
 const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {

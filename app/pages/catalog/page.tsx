@@ -1,12 +1,9 @@
 import Title from '@/components/Title';
 import ParentComponent from '@/components/FilterETSearch';
-import { Book } from '@/types/_types';
+
 import { getBooks } from '@/app/actions/books';
 
 // Catalog component expects the books prop to be an array of Book objects
-interface CatalogProps {
-  books: Book[]; // Expect an array of books
-}
 
 export default async function Catalog() {
   const books = await getBooks();

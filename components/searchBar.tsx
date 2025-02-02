@@ -108,7 +108,7 @@ export default function SearchBar({ searchInput, onSearch, isFilterOpen, setIsFi
         }`}
       >
         <div className="flex  w-[100%] px-4 justify-center items-start gap-4 flex-row">
-          <div className="flex  flex-col mx-auto w-full md:max-w-[600px]">
+          <div className="flex  flex-col mx-auto w-[80%] md:max-w-[800px]">
             {/* Search Bar */}
             <div className={`flex  shadow items-center h-[57px] w-full bg-[#F8F7F7] rounded-[22px]  p-3 transition-all duration-300 ${
               isSticky ? 'shadow-lg' : ''
@@ -193,7 +193,7 @@ export default function SearchBar({ searchInput, onSearch, isFilterOpen, setIsFi
           </div>
           <div className="block md:hidden">
             <button
-              className={`flex bg-[#F1413E] p-4 rounded-full transition-all duration-300 ${
+              className={`flex bg-[#F1413E] p-4 rounded-full mr-4 transition-all duration-300 ${
                 isFilterOpen ? 'bg-opacity-80' : ''
               }`}
               aria-label="Filter"

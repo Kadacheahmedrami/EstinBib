@@ -3,7 +3,6 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import {
   User,
-  ListIcon as Category,
   FileText,
   Layers,
   Check,
@@ -19,6 +18,7 @@ const BookCard = ({
   description,
   size,
   available,
+  coverImage
  
 }: BaseBook) => {
   const handleClick = (e: React.MouseEvent) => {
@@ -37,7 +37,7 @@ const BookCard = ({
         <div className="w-full lg:w-2/5 relative">
           <div className="aspect-w-3 aspect-h-4 lg:aspect-none lg:h-full">
             <Image
-              src={ "/default-book.jpg"} // {coverImage}
+              src={coverImage ? coverImage : "/default-book.jpg"} 
               alt={title || "cover"}
               height={200}
               width={280}

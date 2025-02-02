@@ -5,14 +5,23 @@ import { db } from "@/db";
 import { getServerAuthSession } from "@/lib/auth";
 import { AddBook } from "@/types/actions-inputs";
 import { books, borrows, bookCategories, categories } from "@/db/schema";
-import { eq, desc, count, inArray, and, sql } from "drizzle-orm";
+import { eq, desc, inArray, and, sql } from "drizzle-orm";
 
 /**
  * Get the 5 most recently added books
  */
 export const getRecentBooks = unstable_cache(
   async () => {
-    return await db.select().from(books).orderBy(desc(books.addedAt)).limit(5);
+    return await db
+      .select({
+        id: books.id,
+        title: books.title,
+        coverImage: books.coverImage,
+        description: books.description,
+      })
+      .from(books)
+      .orderBy(desc(books.addedAt))
+      .limit(5);
   },
   ["recentBooks"] // Cache tag for revalidation
 );
@@ -56,10 +65,8 @@ export async function getMostBorrowedBooks() {
     .select({
       id: books.id,
       title: books.title,
-      author: books.author,
       coverImage: books.coverImage,
       description: books.description,
-      borrowCount: count(borrows.bookId).as("borrowCount"),
     })
     .from(books)
     .leftJoin(borrows, eq(books.id, borrows.bookId))
@@ -81,6 +88,8 @@ export const bookDetails = async (id: string) => {
       author: books.author,
       coverImage: books.coverImage,
       description: books.description,
+      isbn: books.isbn,
+      addedAt: books.addedAt,
       size: books.size,
       language: books.language,
       available: books.available,

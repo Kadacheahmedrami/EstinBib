@@ -13,6 +13,9 @@ const UserInfo = async () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">
             My Account
           </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">
+            My Account
+          </h1>
           <div className="relative group">
             <CircleUserRound className="w-48 h-48 sm:w-80 sm:h-80 text-slate-600 transition-colors group-hover:text-slate-700" />
             <button className="mt-4 text-slate-600 underline text-sm hover:text-slate-800 transition-colors">
@@ -30,6 +33,7 @@ const UserInfo = async () => {
               </label>
               <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
                 {info?.name}
+                {info?.name}
               </div>
             </div>
 
@@ -38,6 +42,7 @@ const UserInfo = async () => {
                 User s ID :
               </label>
               <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
+                {info?.id}
                 {info?.id}
               </div>
             </div>
@@ -48,11 +53,13 @@ const UserInfo = async () => {
               </label>
               <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
                 {info?.email}
+                {info?.email}
               </div>
             </div>
           </div>
 
           <div className="flex justify-end pt-4">
+            <Signout />
             <Signout />
           </div>
         </div>
