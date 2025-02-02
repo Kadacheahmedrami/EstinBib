@@ -14,7 +14,7 @@ const BorrowHistory = ({ books }: BorrowHistoryProps) => {
   const showMoreButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const showMoreBooks = () => {
-    setVisibleBooks((prev) => Math.min(prev + 3, books.length)); // Show 3 more books at a time
+    setVisibleBooks((prev) => Math.min(prev + 3, history.length)); // Show 3 more books at a time
     setIsOpen(!isOpen); // Toggle the dropdown state
 
     // Scroll to the "Show More" button after it is clicked
@@ -50,7 +50,7 @@ const BorrowHistory = ({ books }: BorrowHistoryProps) => {
         ))}
       </div>
 
-      {visibleBooks < books.length && (
+      {visibleBooks < history.length && (
         <div className="flex justify-center mt-6">
           <button
             ref={showMoreButtonRef}

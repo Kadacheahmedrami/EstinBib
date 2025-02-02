@@ -30,7 +30,9 @@ const BookCard: React.FC<BorrowedBook> = ({
           <div className="text-[22px] text-gray-800 space-y-4">
             <p className="flex flex-col items-start">
               <span className="font-semibold">Date Borrowed:</span>
-              <span className="text-gray-600">{dateBorrowed}</span>
+              <span className="text-gray-600">
+                {dateBorrowed ? dateBorrowed : "N/A"}
+              </span>
             </p>
             <p className="flex flex-col items-start">
               <span className="font-semibold">Due Date:</span>
