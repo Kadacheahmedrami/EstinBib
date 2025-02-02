@@ -1,13 +1,13 @@
 import React from "react";
 import Image from "next/image";
-import { BorrowedBook } from '@/types/_types';
+import { BorrowedBook } from "@/types/_types";
 
 const BookCard: React.FC<BorrowedBook> = ({
   title,
   dateBorrowed,
   dueDate,
   status,
-  imageUrl,
+  coverImage,
 }) => {
   const isOverdue = status.toLowerCase() === "overdue";
 
@@ -19,7 +19,7 @@ const BookCard: React.FC<BorrowedBook> = ({
       <div className="flex flex-row justify-between items-center mb-8">
         <div className="relative group">
           <Image
-            src={imageUrl}
+            src={coverImage}
             alt={title}
             width={250}
             height={350}
@@ -39,7 +39,9 @@ const BookCard: React.FC<BorrowedBook> = ({
             <p className="flex flex-col items-start">
               <span className="font-semibold">Status:</span>
               <span
-                className={`font-semibold text-xl ${isOverdue ? "text-red-600" : "text-green-600"}`}
+                className={`font-semibold text-xl ${
+                  isOverdue ? "text-red-600" : "text-green-600"
+                }`}
               >
                 {status}
               </span>

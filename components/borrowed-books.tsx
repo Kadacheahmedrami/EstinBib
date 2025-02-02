@@ -1,32 +1,21 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import API from "@/lib/axios"; // Importing the custom API instance
+import React, { useState } from "react";
 import BookCard from "@/components/ui/card";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
-import { BorrowedBook } from "@/types/_types"; // Importing the BorrowedBook type
-
-const BorrowedBooks: React.FC = () => {
+import { ActiveBorrows } from "@/types/_types"; // Importing the BorrowedBook type
+interface BorrowedBooksProps {
+  books: ActiveBorrows[];
+}
+const BorrowedBooks = ({ books }: BorrowedBooksProps) => {
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [books, setBooks] = useState<BorrowedBook[]>([]); // Using BorrowedBook type for the books state
-
-  // Fetch borrowed books data using Axios
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await API.get("api/user/borrowed"); // Using the custom API instance
-        setBooks(response.data); // Set the data from the API
-      } catch (error) {
-        console.error("Error fetching borrowed books:", error);
-      }
-    };
-
-    fetchBooks();
-  }, []);
 
   const scroll = (direction: "left" | "right") => {
     const container = document.getElementById("book-container");
     if (container) {
-      const scrollAmount = direction === "left" ? -container.clientWidth / 3 : container.clientWidth / 3;
+      const scrollAmount =
+        direction === "left"
+          ? -container.clientWidth / 3
+          : container.clientWidth / 3;
       const newPosition = Math.max(
         0,
         Math.min(
@@ -66,11 +55,11 @@ const BorrowedBooks: React.FC = () => {
               style={{ scrollSnapAlign: "start" }}
             >
               <BookCard
-                imageUrl={book.imageUrl}
+                coverImage={book.coverImage}
                 title={book.title}
-                dateBorrowed={book.dateBorrowed}
-                dueDate={book.dueDate}
-                status={book.status}
+                dateBorrowed={book.borrowedAt.toDateString()}
+                dueDate={book.dueDate.toDateString()}
+                status={book.dueDate < new Date() ? " true " : " false "}
                 description={book.description}
               />
             </div>

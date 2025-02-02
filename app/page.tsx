@@ -1,50 +1,19 @@
-// /app/page.tsx
-"use client";
-
-import React, { useEffect, useState } from "react";
-import API from "@/lib/axios";
-import HeroLanding from "@/components/HeroLanding"; // Your hero component
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import HeroLanding from "@/components/HeroLanding";
 import RelatedBooks from "@/components/RelatedBooks";
-import { BorrowedBook } from "@/types/_types"; // Shared type
+import { getMostBorrowedBooks, getRecentBooks } from "@/app/actions/books";
+// Map BorrowedBook to BookPreviewProps
+const mapBooksToPreviewProps = (books: any[]) => {
+  return books.map((book) => ({
+    title: book.title,
+    description: book.description,
+    imageUrl: book.coverImage,
+  }));
+};
 
-export default function Home() {
-  const [newBooks, setNewBooks] = useState<BorrowedBook[]>([]);
-  const [mostBorrowedBooks, setMostBorrowedBooks] = useState<BorrowedBook[]>([]);
-
-  useEffect(() => {
-    // Fetch "What's New" books
-    API.get("/api/books/whats-new")
-      .then((response) => {
-        setNewBooks(
-          response.data.books.map((book: any) => ({
-            id: book.id,
-            title: book.title,
-            description: book.description || "No description available.",
-            imageUrl: book.imageUrl || "/default-book.jpg",
-          }))
-        );
-      })
-      .catch((error) => {
-        console.error("Error fetching new books:", error);
-      });
-
-    // Fetch "Most Borrowed" books
-    API.get("/api/books/most-borrowed")
-      .then((response) => {
-        setMostBorrowedBooks(
-          response.data.mostBorrowedBooks.map((book: any) => ({
-            id: book.id,
-            title: book.title,
-            description: book.description || "No description available.",
-            imageUrl: book.imageUrl || "/default-book.jpg",
-            // Optionally include other fields like borrowCount if needed
-          }))
-        );
-      })
-      .catch((error) => {
-        console.error("Error fetching most borrowed books:", error);
-      });
-  }, []);
+export default async function Home() {
+  const newBooks = await getRecentBooks();
+  const mostBorrowedBooks = await getMostBorrowedBooks();
 
   return (
     <main>
@@ -52,12 +21,18 @@ export default function Home() {
       <h2 className="ml-[4%] my-4 text-[50px] font-bold text-[#F1413E]">
         What s New?
       </h2>
-      <RelatedBooks containerId="book-container-1" books={newBooks} />
+      <RelatedBooks
+        containerId="book-container-1"
+        books={mapBooksToPreviewProps(newBooks)}
+      />
 
       <h2 className="ml-[4%] my-4 text-[50px] font-bold text-[#F1413E]">
         Most Borrowed
       </h2>
-      <RelatedBooks containerId="book-container-2" books={mostBorrowedBooks} />
+      <RelatedBooks
+        containerId="book-container-2"
+        books={mapBooksToPreviewProps(mostBorrowedBooks)}
+      />
     </main>
   );
 }
