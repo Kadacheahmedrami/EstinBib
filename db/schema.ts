@@ -17,13 +17,14 @@ export const users = pgTable("user", {
   id: varchar("id")
     .primaryKey()
     .$defaultFn(() => createId()),
-  name: varchar("name"),
+  name: varchar("name").notNull(),
   email: varchar("email").notNull().unique(),
   emailVerified: timestamp("emailVerified"),
   image: varchar("image"),
   role: roleEnum("role").notNull().default("STUDENT"),
-  createdAt: timestamp("createdAt").defaultNow(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt")
+    .notNull()
     .defaultNow()
     .$onUpdateFn(() => new Date()),
 });
@@ -37,13 +38,13 @@ export const books = pgTable(
     title: varchar("title").notNull(),
     author: varchar("author").notNull(),
     isbn: varchar("isbn").unique(),
-    description: text("description"),
-    coverImage: varchar("coverImage"),
-    size: integer("size"),
-    available: boolean("available").default(true),
+    description: text("description").notNull(),
+    coverImage: varchar("coverImage").notNull(),
+    size: integer("size").notNull(),
+    available: boolean("available").notNull().default(true),
     publishedAt: timestamp("publishedAt").notNull(),
-    addedAt: timestamp("addedAt").defaultNow(),
-    language: varchar("language"),
+    addedAt: timestamp("addedAt").notNull().defaultNow(),
+    language: varchar("language").notNull(),
   },
   (table) => [
     index("title_author_idx").on(table.title, table.author),
@@ -54,8 +55,12 @@ export const books = pgTable(
 );
 
 export const bookCategories = pgTable("book_category", {
-  bookId: varchar("book_id").references(() => books.id),
-  categoryId: varchar("category_id").references(() => categories.id),
+  bookId: varchar("book_id")
+    .notNull()
+    .references(() => books.id),
+  categoryId: varchar("category_id")
+    .notNull()
+    .references(() => categories.id),
 });
 
 export const categories = pgTable(
@@ -75,9 +80,13 @@ export const borrows = pgTable(
     id: varchar("id")
       .primaryKey()
       .$defaultFn(() => createId()),
-    bookId: varchar("book_id").references(() => books.id),
-    userId: varchar("user_id").references(() => users.id),
-    borrowedAt: timestamp("borrowedAt").defaultNow(),
+    bookId: varchar("book_id")
+      .notNull()
+      .references(() => books.id),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    borrowedAt: timestamp("borrowedAt").notNull().defaultNow(),
     dueDate: timestamp("dueDate").notNull(),
     returnedAt: timestamp("returnedAt"),
   },
@@ -94,8 +103,10 @@ export const bookRequests = pgTable(
     id: varchar("id")
       .primaryKey()
       .$defaultFn(() => createId()),
-    userId: varchar("user_id").references(() => users.id),
-    requestedAt: timestamp("requestedAt").defaultNow(),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    requestedAt: timestamp("requestedAt").notNull().defaultNow(),
     title: varchar("title").notNull(),
     author: varchar("author").notNull(),
     isbn: varchar("isbn"),
@@ -114,13 +125,15 @@ export const contacts = pgTable("contact", {
   name: varchar("name").notNull(),
   email: varchar("email").notNull(),
   message: text("message").notNull(),
-  createdAt: timestamp("createdAt").defaultNow(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
 
 export const accounts = pgTable(
   "account",
   {
-    userId: varchar("user_id").references(() => users.id),
+    userId: varchar("userId")
+      .notNull()
+      .references(() => users.id),
     type: varchar("type").notNull(),
     provider: varchar("provider").notNull(),
     providerAccountId: varchar("providerAccountId").notNull(),
@@ -131,8 +144,9 @@ export const accounts = pgTable(
     scope: varchar("scope"),
     id_token: text("id_token"),
     session_state: varchar("session_state"),
-    createdAt: timestamp("createdAt").defaultNow(),
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
     updatedAt: timestamp("updatedAt")
+      .notNull()
       .defaultNow()
       .$onUpdateFn(() => new Date()),
   },

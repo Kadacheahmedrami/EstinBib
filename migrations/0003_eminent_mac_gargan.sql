@@ -1,0 +1,20 @@
+ALTER TABLE "account" ALTER COLUMN "userId" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "account" ALTER COLUMN "createdAt" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "account" ALTER COLUMN "updatedAt" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "book_category" ALTER COLUMN "book_id" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "book_category" ALTER COLUMN "category_id" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "book_request" ALTER COLUMN "user_id" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "book_request" ALTER COLUMN "requestedAt" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "book" ALTER COLUMN "description" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "book" ALTER COLUMN "coverImage" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "book" ALTER COLUMN "size" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "book" ALTER COLUMN "available" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "book" ALTER COLUMN "addedAt" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "book" ALTER COLUMN "language" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "borrow" ALTER COLUMN "book_id" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "borrow" ALTER COLUMN "user_id" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "borrow" ALTER COLUMN "borrowedAt" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "contact" ALTER COLUMN "createdAt" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "user" ALTER COLUMN "name" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "user" ALTER COLUMN "createdAt" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "user" ALTER COLUMN "updatedAt" SET NOT NULL;
