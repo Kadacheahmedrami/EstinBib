@@ -1,12 +1,15 @@
+"use client"
 import { useState, useEffect } from "react";
-
 import SearchBar from "@/components/searchBar";
 import BookFilter from "@/components/Filter";
 import BookCard from '@/components/BookCard';
+import { FilterState, Book } from '@/types/_types';
 
-import { FilterState, ParentComponentProps } from '@/types/_types';
+interface ParentComponentProps {
+  books: Book[]; // Ensure that books is an array of Book objects
+}
 
-export default function ParentComponent({ books = [], loading = false }: ParentComponentProps) {
+export default function ParentComponent({ books }: ParentComponentProps) {
   const [searchInput, setSearchInput] = useState("");
   const [filterParams, setFilterParams] = useState<FilterState>({
     schoolYear: [],
@@ -21,12 +24,12 @@ export default function ParentComponent({ books = [], loading = false }: ParentC
 
   // Log state values whenever searchInput or filterParams change
   useEffect(() => {
-    console.log("Search Input changed:", searchInput);
-  }, [searchInput]); // This effect runs every time searchInput changes
+    // console.log("Search Input changed:", searchInput);
+  }, [searchInput]); 
 
   useEffect(() => {
-    console.log("Filter Params changed:", filterParams);
-  }, [filterParams]); // This effect runs every time filterParams changes
+    // console.log("Filter Params changed:", filterParams);
+  }, [filterParams]); 
 
   const handleSearch = (input: string) => {
     setSearchInput(input);
@@ -65,23 +68,24 @@ export default function ParentComponent({ books = [], loading = false }: ParentC
 
         <div className="w-full lg:w-3/4">
           <div className="m-8 relative flex flex-col gap-[80px]">
-            {loading ? (
-              <div className="text-center h-screen">Loading...</div> // Show loading text or spinner
-            ) : (
+            {
               books.map((book, index) => (
                 <BookCard
-                  key={book.bookid || index} // Prefer bookid over index for key
-                  bookid={book.bookid} 
+                  key={book.id || index}
+                  id={book.id}
                   title={book.title}
                   author={book.author}
-                  category={book.category}
                   description={book.description}
-                  pages={book.pages}
-                  isAvailable={book.isAvailable}
-                  imageUrl={book.imageUrl}
-                />
+                  size={book.size}
+                  available={book.available}
+                  coverImage={book.coverImage}
+                  publishedAt={book.publishedAt || new Date()} // Use a valid date or a fallback date
+                  addedAt={book.addedAt || null} // Use null or a valid date
+                  language={book.language || ""} // Use a valid string or fallback to empty string
+                  isbn={book.isbn}              />
+              
               ))
-            )}
+            }
           </div>
         </div>
       </div>

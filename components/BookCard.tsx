@@ -13,20 +13,18 @@ import {
 import { BaseBook } from "@/types/_types";
 
 const BookCard = ({
-  bookid,
+  id,
   title,
   author,
-  category,
   description,
-  pages,
-  isAvailable,
-  imageUrl,
+  size,
+  available,
+ 
 }: BaseBook) => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Only navigate if router is ready
-
-    redirect(`/pages/catalog/${bookid}`);
+    // Navigate to the book details page
+    redirect(`/pages/catalog/${id}`);
   };
 
   return (
@@ -36,24 +34,26 @@ const BookCard = ({
     >
       <div className="flex flex-col h-full lg:flex-row">
         {/* Left side - Book Image */}
-        <div className="w-full z-0  lg:w-2/5 relative">
+        <div className="w-full lg:w-2/5 relative">
           <div className="aspect-w-3 aspect-h-4 lg:aspect-none lg:h-full">
             <Image
-              src={imageUrl || "/svg/display.svg"}
-              alt={title}
+              src={ "/default-book.jpg"} // {coverImage}
+              alt={title || "cover"}
               height={200}
-              width={320}
-              className=" m-auto transition-opacity mt-4 duration-300 hover:opacity-90"
+              width={280}
+              className="m-auto transition-opacity my-2 duration-300 hover:opacity-90"
               priority
             />
           </div>
-          <div className="absolute top-10 shadow border  rounded-full left-20 bg-white   text-sm font-semibold ">
-            {isAvailable ? (
+
+          {/* Availability Badge */}
+          <div className="absolute top-10 left-20 shadow border rounded-full bg-white text-sm font-semibold">
+            {available ? (
               <span className="text-white rounded-full px-3 py-1 bg-green-500 flex items-center">
                 <Check size={16} className="mr-1" /> Available
               </span>
             ) : (
-              <span className="text-white bg-red-500  rounded-full px-3 py-1 flex items-center">
+              <span className="text-white bg-red-500 rounded-full px-3 py-1 flex items-center">
                 <X size={16} className="mr-1" /> Not Available
               </span>
             )}
@@ -72,10 +72,6 @@ const BookCard = ({
                 <User size={18} className="mr-2" />
                 <span className="font-medium text-gray-900">{author}</span>
               </div>
-              <div className="flex items-center text-gray-600">
-                <Category size={18} className="mr-2" />
-                <span className="font-medium text-gray-900">{category}</span>
-              </div>
             </div>
 
             <div className="space-y-2">
@@ -89,11 +85,12 @@ const BookCard = ({
 
             <div className="flex items-center text-gray-600">
               <Layers size={18} className="mr-2" />
-              <span className="font-medium text-gray-900">{pages} Pages</span>
+              <span className="font-medium text-gray-900">{size} Pages</span>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+            {/* Reserve Button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -104,11 +101,11 @@ const BookCard = ({
               Reserve Now
             </button>
 
+            {/* More Details Button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
-
-                redirect(`/pages/catalog/${bookid}`);
+                redirect(`/pages/catalog/${id}`);
               }}
               className="w-full sm:w-auto flex items-center justify-center text-red-500 hover:text-red-600 transition-colors duration-300 font-semibold"
             >

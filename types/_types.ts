@@ -1,35 +1,32 @@
 // Core Types
+// File: @/types/_types.ts
 export interface BaseBook {
-  bookid: string;
+  id: string;
   title: string;
   author: string;
-  category: string;
-  description: string;
-  pages: number;
-  isAvailable: boolean;
-  imageUrl: string;
+  isbn: string | null;
+  description: string | null;
+  coverImage: string | null;
+  size: number | null;
+  available: boolean | null;
+  publishedAt: Date;
+  addedAt: Date | null;
+  language: string | null;
 }
 
 
-
-// Extended Book Types
 export interface Book extends BaseBook {
-  publicationDate: string;
-  language: string;
-  publisher: string;
-  isbn: string;
-  pdfUrl: string;
+  id: string;              // Book ID as string (matching the format in the data)
 }
 
 export interface BorrowedBook {
-  description: any;
+  id: number;
   title: string;
-  dateBorrowed: string;
-  dueDate: string;
-  status: string; // Could be 'borrowed', 'returned', 'overdue'
-  imageUrl: string;
-  fineAmount?: number; // Optional field to track fines for overdue books
+  description?: string; // Optional because API might not provide it
+  imageUrl?: string; // Optional with default fallback
+  borrowCount?: number; // Added because API returns it
 }
+
 
 
 // Component Props

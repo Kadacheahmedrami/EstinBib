@@ -1,8 +1,9 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { CircleUserRound } from 'lucide-react';
-import API from '@/lib/axios'; // Make sure to import the API instance
+
 import { signOut } from "next-auth/react";
+import { getUserInfo } from '@/app/actions/user';
 
 const UserInfo = () => {
   // State to store fetched user data and loading state
@@ -24,14 +25,14 @@ const UserInfo = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await API.get('api/user/me');  // Assuming the endpoint is "/user/me"
-        const { user } = response.data;  // Extract user data from response
+        const user = await getUserInfo()  // Assuming the endpoint is "/user/me"
+         if(user && user.name ) {
         setUserData({
-          fullName: user.fullName,
-          userId: user.userId,
-          email: user.emailAddress
+          fullName: user.name,
+          userId: user.id,
+          email: user.email
         });
-        setLoading(false); // Set loading to false once data is fetched
+        setLoading(false) }; // Set loading to false once data is fetched
       } catch (error) {
         console.error('Error fetching user profile:', error);
         setLoading(false); // Set loading to false even in case of error

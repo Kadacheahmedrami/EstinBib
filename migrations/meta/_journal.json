@@ -15,6 +15,20 @@
       "when": 1738427157745,
       "tag": "0001_equal_dreadnoughts",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1738451499567,
+      "tag": "0002_large_mentor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1738451560216,
+      "tag": "0003_striped_revanche",
+      "breakpoints": true
     }
   ]
 }

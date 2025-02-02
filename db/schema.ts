@@ -182,7 +182,7 @@ export const contacts = pgTable("contact", {
 export const accounts = pgTable(
   "account",
   {
-    userId: varchar("user_id").references(() => users.id),
+    userId: varchar("userId").references(() => users.id),
     type: varchar("type").notNull(),
     provider: varchar("provider").notNull(),
     providerAccountId: varchar("providerAccountId").notNull(),
