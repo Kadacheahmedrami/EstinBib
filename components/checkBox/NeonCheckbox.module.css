@@ -199,7 +199,7 @@
     }
   }
   
-  @keyframes borderFlow3 {
+  /* @keyframes borderFlow3 {
     0% {
       transform: translateX(0);
     }
@@ -255,7 +255,7 @@
       transform: rotate(var(--r, 0deg)) translateX(30px) scale(0);
       opacity: 0;
     }
-  }
+  } */
   
   /* Particle Positions */
   .neonCheckboxParticles span:nth-child(1) {
