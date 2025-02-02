@@ -1,4 +1,5 @@
-// /app/books/[id]/page.tsx
+
+
 import React from "react";
 import API from "@/lib/axios";
 import BookDetails from "@/components/BookDetails"; // Component for detailed view
@@ -22,17 +23,19 @@ interface Book {
 }
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }> ;
 }
 
 export default async function BookPage({ params }: PageProps) {
-  const { id } = params;
+  // Await the params before destructuring its properties.
+  const { id } = await params;
 
   // Fetch the main book data
   const book = await getBookData(id);
 
   // Fetch random books for the carousel
-  const randomBooks = await getRandomBooks();
+  const randomBooks1 = await getRandomBooks();
+  const randomBooks2 = await getRandomBooks();
 
   // If no book found, show an error message
   if (!book) {
@@ -49,19 +52,18 @@ export default async function BookPage({ params }: PageProps) {
   }
 
   // Transform the random books to match the BorrowedBook interface
-  const relatedBooks1: BorrowedBook[] = randomBooks.map((b) => ({
+  const relatedBooks1: BorrowedBook[] = randomBooks1.map((b) => ({
     id: Number(b.id), // Convert the string id to a number
     title: b.title,
     description: b.description,
-    imageUrl:  "/default-book.jpg",
+    imageUrl: "/default-book.jpg",
   }));
-  const relatedBooks2: BorrowedBook[] = randomBooks.map((b) => ({
+  const relatedBooks2: BorrowedBook[] = randomBooks2.map((b) => ({
     id: Number(b.id), // Convert the string id to a number
     title: b.title,
     description: b.description,
-    imageUrl:  "/default-book.jpg",
+    imageUrl: "/default-book.jpg",
   }));
-  
 
   return (
     <>
@@ -83,9 +85,6 @@ export default async function BookPage({ params }: PageProps) {
         </div>
         <RelatedBooks containerId="book-container-detail" books={relatedBooks2} />
       </div>
-
-
-      
     </>
   );
 }
@@ -95,7 +94,11 @@ export default async function BookPage({ params }: PageProps) {
 // Fetch book data by ID
 async function getBookData(id: string): Promise<Book | null> {
   try {
-    const response = await API.get(`/api/books/${id}`);
+    const response = await API.get(`/api/books/${id}`,{
+      params: {
+        revalidate: 60, // Revalidate every 60 seconds
+      }, 
+  });
     return response.data.book[0] || null;
   } catch (error) {
     console.error("Error fetching book:", error);
@@ -119,8 +122,8 @@ async function getRandomBooks(): Promise<Book[]> {
   }
 }
 
-// Helper function to select random items from an array
-function getRandomItems(arr: any[], count: number): any[] {
+// Helper function to select random items from an array.
+function getRandomItems(arr: Book[], count: number): Book[] {
   if (!Array.isArray(arr) || arr.length === 0) {
     console.warn("getRandomItems received invalid array:", arr);
     return [];

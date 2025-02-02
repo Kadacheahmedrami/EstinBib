@@ -1,27 +1,26 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import API from "@/lib/axios"; // Importing the custom API instance
-import BookCard from "@/components/ui/card";
+"use client"
+import React, { useState } from "react";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
-import { BorrowedBook } from "@/types/_types"; // Importing the BorrowedBook type
+import BookCard from "@/components/ui/card"; // Adjust if necessary
 
-const BorrowedBooks: React.FC = () => {
+interface BorrowedBookHistory {
+  id: string;
+  borrowedAt: Date | null;
+  dueDate: Date;
+  returnedAt?: Date | null; // Make returnedAt optional
+  book: {
+    title: string;
+    coverImage: string | null;
+  };
+}
+
+// Define the component props to accept `history`
+interface BorrowedBooksProps {
+  history: BorrowedBookHistory[];
+}
+
+const BorrowedBooks: React.FC<BorrowedBooksProps> = ({ history }) => {
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [books, setBooks] = useState<BorrowedBook[]>([]); // Using BorrowedBook type for the books state
-
-  // Fetch borrowed books data using Axios
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await API.get("api/user/borrowed"); // Using the custom API instance
-        setBooks(response.data); // Set the data from the API
-      } catch (error) {
-        console.error("Error fetching borrowed books:", error);
-      }
-    };
-
-    fetchBooks();
-  }, []);
 
   const scroll = (direction: "left" | "right") => {
     const container = document.getElementById("book-container");
@@ -59,19 +58,19 @@ const BorrowedBooks: React.FC = () => {
           className="flex overflow-x-hidden scroll-smooth py-8"
           style={{ scrollSnapType: "x mandatory" }}
         >
-          {books.map((book, index) => (
+          {history.map((item, index) => (
             <div
               key={index}
-              className="w-1/3 flex-shrink-0" // Adjust width to 1/3 to show 3 books at a time
+              className="w-1/3 flex-shrink-0"
               style={{ scrollSnapAlign: "start" }}
             >
               <BookCard
-                imageUrl={book.imageUrl}
-                title={book.title}
-                dateBorrowed={book.dateBorrowed}
-                dueDate={book.dueDate}
-                status={book.status}
-                description={book.description}
+                imageUrl={item.book.coverImage || ""}
+                title={item.book.title}
+                dateBorrowed={item.borrowedAt}
+                dueDate={item.dueDate}
+                status={item.returnedAt ? "Returned" : "Borrowed"}
+                // description={`Due: ${item.dueDate.toLocaleDateString()}`}
               />
             </div>
           ))}

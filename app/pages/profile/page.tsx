@@ -3,13 +3,17 @@ import UserInfo from "@/components/user-info"
 import BorrowedBooks from "@/components/borrowed-books"
 import BorrowHistory from "@/components/borrow-history"
 import { getServerAuthSession } from "@/lib/auth"
+import { borrowsHistory, getActiveBorrows } from "@/app/actions/user"
 
 export default async function Profile() {
   const session = await getServerAuthSession()
-
+  const borrowed = await getActiveBorrows()
+  const history = await borrowsHistory()
   if (!session) {
     redirect("/auth/login")
   }
+
+
 
   return (
  
@@ -20,13 +24,13 @@ export default async function Profile() {
             <h3 className="font-bold text-[30px]">My Borrowed Books :</h3>
             <div className="bg-black mt-2 h-[2px] w-[70%]"></div>
           </div>
-          <BorrowedBooks key={1} />
+          <BorrowedBooks key={1} history={borrowed} />
 
           <div className="w-full flex justify-center items-center gap-[70px] flex-row">
             <h3 className="font-bold text-[30px]">My Borrow History</h3>
             <div className="bg-black mt-2 h-[2px] w-[70%]"></div>
           </div>
-          <BorrowHistory key={2} />
+          <BorrowHistory key={2} history={history} />
         </div>
       </div>
  

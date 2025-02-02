@@ -1,60 +1,18 @@
-"use client"
-import React, { useEffect, useState } from 'react';
-import { CircleUserRound } from 'lucide-react';
+import { getUserInfo } from "@/app/actions/user";
+import { CircleUserRound } from "lucide-react";
+import Signout from "@/components/signout";
 
-import { signOut } from "next-auth/react";
-import { getUserInfo } from '@/app/actions/user';
-
-const UserInfo = () => {
-  // State to store fetched user data and loading state
-  const [userData, setUserData] = useState({
-    fullName: '',
-    userId: '',
-    email: ''
-  });
-  const handleSignOut = async () => {
-    try {
-      await signOut({ callbackUrl: "/" });
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
-  const [loading, setLoading] = useState(true);
-
-  // Fetch user data from the API
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const user = await getUserInfo()  // Assuming the endpoint is "/user/me"
-         if(user && user.name ) {
-        setUserData({
-          fullName: user.name,
-          userId: user.id,
-          email: user.email
-        });
-        setLoading(false) }; // Set loading to false once data is fetched
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-        setLoading(false); // Set loading to false even in case of error
-      }
-    };
-
-    fetchUserProfile();
-  }, []);
-
-  // Loading animation with dots
-  const loadingDots = (
-    <span className="text-xl font-medium">
-        ***************
-    </span>
-  );
+const UserInfo = async () => {
+  const info = await getUserInfo();
 
   return (
     <div className="p-4 sm:p-8 bg-white">
       <div className="flex flex-col lg:flex-row justify-center items-center gap-8 lg:gap-12 max-w-7xl mx-auto">
         {/* Profile Section */}
         <div className="flex flex-col items-center text-center w-full lg:w-auto">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">My Account</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">
+            My Account
+          </h1>
           <div className="relative group">
             <CircleUserRound className="w-48 h-48 sm:w-80 sm:h-80 text-slate-600 transition-colors group-hover:text-slate-700" />
             <button className="mt-4 text-slate-600 underline text-sm hover:text-slate-800 transition-colors">
@@ -71,7 +29,7 @@ const UserInfo = () => {
                 Full Name :
               </label>
               <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
-                {loading ? loadingDots : userData.fullName}
+                {info?.name}
               </div>
             </div>
 
@@ -80,7 +38,7 @@ const UserInfo = () => {
                 User s ID :
               </label>
               <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
-                {loading ? loadingDots : userData.userId}
+                {info?.id}
               </div>
             </div>
 
@@ -89,16 +47,13 @@ const UserInfo = () => {
                 Email Address :
               </label>
               <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
-                {loading ? loadingDots : userData.email}
+                {info?.email}
               </div>
             </div>
           </div>
 
           <div className="flex justify-end pt-4">
-            <button onClick={handleSignOut} className="text-red-500 border-2 border-red-500 px-6 py-2 rounded-md hover:bg-red-50 transition-all flex items-center gap-2 font-medium">
-              <span>→</span>
-              Log Out
-            </button>
+            <Signout />
           </div>
         </div>
       </div>

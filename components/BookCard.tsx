@@ -3,7 +3,6 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import {
   User,
-  ListIcon as Category,
   FileText,
   Layers,
   Check,

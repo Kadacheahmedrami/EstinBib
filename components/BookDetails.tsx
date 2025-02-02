@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { Book as BookIcon, User, Layers, Clock, Globe, Link as LinkIcon } from 'lucide-react';
-import Link from 'next/link';
+
 
 
 interface Book {

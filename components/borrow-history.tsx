@@ -1,46 +1,34 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import BookCard from "@/components/ui/card";
-import { BorrowedBook } from "@/types/_types";
 import { motion } from "framer-motion";  // Importing Framer Motion for animation
 
-const BorrowHistory: React.FC = () => {
+// Define types for the history prop
+type HistoryItem = {
+  id: string;
+  borrowedAt: Date | null;
+  dueDate: Date;
+  returnedAt: Date | null;
+  book: {
+    title: string;
+    coverImage: string | null;
+  };
+};
+
+type BorrowHistoryProps = {
+  history: HistoryItem[];
+};
+
+const BorrowHistory: React.FC<BorrowHistoryProps> = ({ history }) => {
   const [visibleBooks, setVisibleBooks] = useState(3); // Set the initial number of books to display
   const [isOpen, setIsOpen] = useState(false); // For toggling the dropdown
-  const [books, setBooks] = useState<BorrowedBook[]>([]); // State to store fetched books
-  const [loading, setLoading] = useState(true); // State for loading indicator
-  const [error, setError] = useState<string | null>(null); // State to handle errors
 
   // Reference for the "Show More" button to scroll to it
   const showMoreButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  // Fetch books from the API
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await fetch("/api/user/borrow-history");
-        if (!response.ok) {
-          throw new Error("Failed to fetch borrow history");
-        }
-        const data: BorrowedBook[] = await response.json(); // Ensure the response data type is BorrowedBook[]
-        setBooks(data); // Assuming the response is an array of borrowed books
-      } catch (err: unknown) {
-        // Narrow down the error type for ESLint compatibility
-        if (err instanceof Error) {
-          setError(err.message); // Handle the error properly
-        } else {
-          setError("An unexpected error occurred");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBooks();
-  }, []);
-
+  // Show more books logic
   const showMoreBooks = () => {
-    setVisibleBooks((prev) => Math.min(prev + 3, books.length)); // Show 3 more books at a time
+    setVisibleBooks((prev) => Math.min(prev + 3, history.length)); // Show 3 more books at a time
     setIsOpen(!isOpen); // Toggle the dropdown state
 
     // Scroll to the "Show More" button after it is clicked
@@ -48,10 +36,6 @@ const BorrowHistory: React.FC = () => {
       showMoreButtonRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
-
-  // Show loading message or error if present
-  if (loading) return <div>Loading borrow history...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   // Placeholder content for the cards during loading
   const loadingCards = Array.from({ length: visibleBooks }).map((_, index) => (
@@ -62,7 +46,7 @@ const BorrowHistory: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Placeholder content, it can also have a glowing effect */}
+      {/* Placeholder content */}
       <div className="w-full h-full flex justify-center items-center text-gray-500">Loading...</div>
     </motion.div>
   ));
@@ -70,28 +54,28 @@ const BorrowHistory: React.FC = () => {
   return (
     <div className="w-full p-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {loading
+        {history.length === 0
           ? loadingCards
-          : books.slice(0, visibleBooks).map((book, index) => (
+          : history.slice(0, visibleBooks).map((item) => (
               <motion.div
-                key={index}
+                key={item.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }} // Animation for each book
               >
                 <BookCard
-                  imageUrl={book.imageUrl}
-                  title={book.title}
-                  dateBorrowed={book.dateBorrowed}
-                  dueDate={book.dueDate}
-                  status={book.status}
-                  description={book.description} // Pass description here
+                  imageUrl={item.book.coverImage}
+                  title={item.book.title}
+                  dateBorrowed={item.borrowedAt}
+                  dueDate={item.dueDate}
+                  status={item.returnedAt ? "Returned" : "Borrowed"}
+                  // description={`Borrowed on: ${item.borrowedAt ? item.borrowedAt.toLocaleDateString() : "N/A"}`} // Pass description here
                 />
               </motion.div>
             ))}
       </div>
 
-      {visibleBooks < books.length && (
+      {visibleBooks < history.length && (
         <div className="flex justify-center mt-6">
           <button
             ref={showMoreButtonRef}
