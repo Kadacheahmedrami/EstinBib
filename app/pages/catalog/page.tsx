@@ -1,39 +1,15 @@
-"use client";
-
-import { useEffect, useState } from 'react';
 import Title from '@/components/Title';
-import ParentComponent from "@/components/FilterETSearch";
-import API from '@/lib/axios'; // Import the axios instance
-import {Book} from '@/types/_types'
+import ParentComponent from '@/components/FilterETSearch';
+import { Book } from '@/types/_types';
+import { getBooks } from '@/app/actions/books';
 
+// Catalog component expects the books prop to be an array of Book objects
+interface CatalogProps {
+  books: Book[]; // Expect an array of books
+}
 
-
-export default function Catalog() {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await API.get('/api/books'); // Use the axios instance for the request
-        setBooks(response.data.books); // Extract the books array from the response
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBooks();
-  }, []);
-
-
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
+export default async function Catalog() {
+  const books = await getBooks();
   return (
     <>
       <Title
@@ -49,9 +25,7 @@ export default function Catalog() {
           backgroundRepeat: 'no-repeat',
         }}
       ></div>
-        <ParentComponent  loading={loading}  books={books} />
-   
-   
+      <ParentComponent books={books} />
     </>
   );
 }

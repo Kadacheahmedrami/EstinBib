@@ -1,22 +1,22 @@
 // Core Types
+// File: @/types/_types.ts
 export interface BaseBook {
-  bookid: string;
+  id: string;
   title: string;
   author: string;
-  category: string;
-  description: string;
-  pages: number;
-  isAvailable: boolean;
-  imageUrl: string;
+  isbn: string | null;
+  description: string | null;
+  coverImage: string | null;
+  size: number | null;
+  available: boolean | null;
+  publishedAt: Date;
+  addedAt: Date | null;
+  language: string | null;
 }
 
 // Extended Book Types
 export interface Book extends BaseBook {
-  publicationDate: string;
-  language: string;
-  publisher: string;
-  isbn: string;
-  pdfUrl: string;
+  id: string; // Book ID as string (matching the format in the data)
 }
 
 export interface BorrowedBook {

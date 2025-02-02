@@ -1,14 +1,17 @@
-"use client"
-import React, { useState, useEffect, useRef } from 'react';
+// /components/RelatedBooks.tsx
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
-import { BookPreviewProps } from "@/types/_types";
+import { BorrowedBook } from "@/types/_types"; // Your shared type
 
-const BookCard: React.FC<BookPreviewProps> = ({ title, description, imageUrl }) => {
+// --- BookCard Component ---
+const BookCard: React.FC<BorrowedBook> = ({ title, description, imageUrl }) => {
   return (
     <div className="bg-white rounded-lg overflow-hidden w-72 mx-4 flex-shrink-0">
       <Image
-        src={imageUrl}
+        src={imageUrl && imageUrl !== "" ? imageUrl : "/svg/display.svg"}
         alt={title}
         width={310}
         height={200}
@@ -16,7 +19,9 @@ const BookCard: React.FC<BookPreviewProps> = ({ title, description, imageUrl }) 
       />
       <div className="p-4">
         <h3 className="font-bold text-xl mb-2 truncate">{title}</h3>
-        <p className="text-gray-700 text-base mb-4 truncate">{description}</p>
+        <p className="text-gray-700 text-base mb-4 truncate">
+          {description || "No description available."}
+        </p>
         <button className="mt-4 rounded-lg w-full text-[#F1413E] px-4 py-2 border-2 border-solid border-[#F1413E] hover:bg-[#F1413E] hover:text-white transition duration-300">
           Learn More
         </button>
@@ -25,9 +30,10 @@ const BookCard: React.FC<BookPreviewProps> = ({ title, description, imageUrl }) 
   );
 };
 
+// --- RelatedBooks Component ---
 interface RelatedBooksProps {
   containerId: string;
-  books: { title: string; description: string; imageUrl: string }[]; // books prop
+  books: BorrowedBook[];
 }
 
 const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
@@ -48,8 +54,8 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
     };
 
     updateCardsToShow();
-    window.addEventListener('resize', updateCardsToShow);
-    return () => window.removeEventListener('resize', updateCardsToShow);
+    window.addEventListener("resize", updateCardsToShow);
+    return () => window.removeEventListener("resize", updateCardsToShow);
   }, []);
 
   const updateScrollButtons = () => {
@@ -63,21 +69,21 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
   useEffect(() => {
     const container = containerRef.current;
     if (container) {
-      container.addEventListener('scroll', updateScrollButtons);
+      container.addEventListener("scroll", updateScrollButtons);
       updateScrollButtons();
 
-      return () => container.removeEventListener('scroll', updateScrollButtons);
+      return () => container.removeEventListener("scroll", updateScrollButtons);
     }
   }, []);
 
-  const scroll = (direction: 'left' | 'right') => {
+  const scroll = (direction: "left" | "right") => {
     const container = containerRef.current;
     if (container) {
-      const cardWidth = 320; // Card width (w-72) + margin (mx-4)
+      const cardWidth = 320; // width (w-72) + margin (mx-4)
       const scrollAmount = cardWidth * cardsToShow;
       container.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
       });
     }
   };
@@ -87,7 +93,7 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
       <div className="max-w-[2000px] overflow-hidden mx-auto px-4 sm:px-8 lg:px-16">
         {showLeftButton && (
           <button
-            onClick={() => scroll('left')}
+            onClick={() => scroll("left")}
             className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
             aria-label="Scroll left"
           >
@@ -99,26 +105,22 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
           ref={containerRef}
           id={containerId}
           className="flex overflow-hidden scroll-smooth gap-4 py-8 scrollbar-hide"
-          style={{ scrollSnapType: 'x mandatory' }}
+          style={{ scrollSnapType: "x mandatory" }}
         >
           {books.map((book, index) => (
             <div
               key={index}
               className="flex-shrink-0 mx-4"
-              style={{ scrollSnapAlign: 'start' }}
+              style={{ scrollSnapAlign: "start" }}
             >
-              <BookCard
-                imageUrl={book.imageUrl == '' ? '/svg/display.svg'  : book.imageUrl}
-                title={book.title}
-                description={book.description}
-              />
+              <BookCard {...book} />
             </div>
           ))}
         </div>
 
         {showRightButton && (
           <button
-            onClick={() => scroll('right')}
+            onClick={() => scroll("right")}
             className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
             aria-label="Scroll right"
           >
