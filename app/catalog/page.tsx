@@ -2,7 +2,7 @@ import Title from '@/components/Title';
 import ParentComponent from '@/components/FilterETSearch';
 
 import { getBooks } from '@/app/actions/books';
-
+import Footer from '@/components/Foter'
 // Catalog component expects the books prop to be an array of Book objects
 
 export default async function Catalog() {
@@ -23,6 +23,7 @@ export default async function Catalog() {
         }}
       ></div>
       <ParentComponent books={books} />
+      <Footer />
     </>
   );
 }

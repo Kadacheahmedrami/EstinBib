@@ -1,7 +1,7 @@
 import { getServerAuthSession } from "@/lib/auth"
 import { ContactForm } from '@/components/contact-form/ContactForm'
 import { redirect } from 'next/navigation'
-
+import Footer from '@/components/Foter'
 export default async function BookSuggestionForm() {
   const session = await getServerAuthSession()
 
@@ -12,7 +12,10 @@ export default async function BookSuggestionForm() {
 
   return (
     <>
-      <ContactForm />
+    <main>
+    <ContactForm />
+    </main>
+      <Footer />
     </>
   )
 }

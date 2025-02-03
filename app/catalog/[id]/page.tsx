@@ -3,7 +3,7 @@ import BookDetails from "@/components/BookDetails"; // Component for detailed vi
 import RelatedBooks from "@/components/RelatedBooks";
 import { getRandomBooks } from "@/app/actions/helper";
 import { bookDetails } from "@/app/actions/books";
-
+import Footer from '@/components/Foter'
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -36,7 +36,8 @@ export default async function BookPage({ params }: PageProps) {
 
   return (
     <>
-      <div>
+    <main>
+    <div>
         <BookDetails book={book} />
       </div>
       <div>
@@ -60,6 +61,9 @@ export default async function BookPage({ params }: PageProps) {
           books={randomBooks2}
         />
       </div>
+    </main>
+      
+      <Footer />
     </>
   );
 }

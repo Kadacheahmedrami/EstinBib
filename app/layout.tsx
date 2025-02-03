@@ -10,6 +10,8 @@ export const metadata = {
   keywords: "Estin Bib, ESTIN library, academic resources, books for ESTIN students, research papers, ESTIN Algeria, educational platform, find books, library ESTIN",
 };
 
+
+
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -22,10 +24,10 @@ export default async function RootLayout({
       <body className="min-h-screen bg-background font-sans antialiased">
         <Header session={session} />
         <div className='mt-[75px]'></div>
-        <main className="relative flex flex-col ">
+    
           {children}
-        </main>
-        
+      
+          
       </body>
     </html>
   );

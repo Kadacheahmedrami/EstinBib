@@ -14,7 +14,7 @@ export default async function Profile() {
   const borrowHistory = await borrowsHistory();
   const activeBorrows = await getActiveBorrows();
   return (
-    <div className="flex w-full flex-col">
+    <main className="flex w-full flex-col">
       <UserInfo />
       <div className="md:col-span-2 space-y-8">
         <div className="w-full flex justify-center items-center gap-[70px] flex-row">
@@ -29,6 +29,6 @@ export default async function Profile() {
         </div>
         <BorrowHistory key={2} books={borrowHistory} />
       </div>
-    </div>
+    </main>
   );
 }

@@ -3,8 +3,10 @@ import PasswordRecoveryForm from '@/components/RecoverForm';
 const PasswordRecoveryPage = () => {
   return (
   
-        <PasswordRecoveryForm />
-   
+     
+        <main>
+      <PasswordRecoveryForm />
+      </main>
   
   );
 };
