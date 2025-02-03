@@ -5,9 +5,12 @@ import { books, bookCategories, categories } from "@/db/schema";
 import { db } from "@/db";
 
 export async function GET(request: NextRequest) {
-  // Get search query from searchParams
+  // Get search query parameters from searchParams
   const searchParams = request.nextUrl.searchParams;
   const q = searchParams.get("q");
+  const sizeParam = searchParams.get("size"); // e.g., "100-200"
+  const categoryParam = searchParams.get("categories"); // e.g., "business+commerce"
+  const availableParam = searchParams.get("available"); // e.g., "true" or "false"
 
   if (!q) {
     return NextResponse.json(
@@ -37,7 +40,34 @@ export async function GET(request: NextRequest) {
       )
     `;
 
-    // Execute the query to fetch books with their rank.
+    // Start building the query with all conditions
+    let conditions = sql`${weightedVector} @@ ${tsQuery}`;
+
+    // Add size condition if provided
+    if (sizeParam) {
+      const [minStr, maxStr] = sizeParam.split("-");
+      const minSize = Number(minStr);
+      const maxSize = Number(maxStr);
+      if (!isNaN(minSize) && !isNaN(maxSize)) {
+        conditions = sql`${conditions} AND ${books.size} BETWEEN ${minSize} AND ${maxSize}`;
+      }
+    }
+
+    // Add categories condition if provided
+    if (categoryParam) {
+      const categoryList = categoryParam.split("+").map((cat) => cat.trim());
+      conditions = sql`${conditions} AND ${
+        categories.name
+      } = ANY(ARRAY[${sql.join(categoryList)}])`;
+    }
+
+    // Add available condition if provided
+    if (availableParam !== null) {
+      const available = availableParam.toLowerCase() === "true";
+      conditions = sql`${conditions} AND ${books.available} = ${available}`;
+    }
+
+    // Execute the final query with all conditions
     const results = await db
       .select({
         id: books.id,
@@ -50,12 +80,13 @@ export async function GET(request: NextRequest) {
         publishedAt: books.publishedAt,
         addedAt: books.addedAt,
         size: books.size,
+        available: books.available,
         rank: sql`ts_rank(${weightedVector}, ${tsQuery})`,
       })
       .from(books)
       .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
       .leftJoin(categories, eq(bookCategories.categoryId, categories.id))
-      .where(sql`${weightedVector} @@ ${tsQuery}`)
+      .where(conditions)
       .orderBy(sql`ts_rank(${weightedVector}, ${tsQuery}) DESC`)
       .execute();
 
