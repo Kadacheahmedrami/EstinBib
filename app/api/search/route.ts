@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
         publishedAt: books.publishedAt,
         addedAt: books.addedAt,
         size: books.size,
+        available: books.available,
         rank: sql`ts_rank(${weightedVector}, ${tsQuery})`,
       })
       .from(books)

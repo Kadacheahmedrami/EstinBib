@@ -30,6 +30,90 @@ const seed = async () => {
     // Define book data with a reference to the category id.
     const bookData = [
       {
+        title: "Sapiens: A Brief History of Humankind",
+        author: "Yuval Noah Harari",
+        isbn: "9780062316097",
+        description:
+          "A deep dive into the history of human evolution, from early hunter-gatherers to modern societies.",
+        coverImage:
+          "https://res.cloudinary.com/df9y24wp0/image/upload/v1738540946/ppc7j0ygoawpckpaavvr.jpg",
+        size: 498,
+        publishedAt: new Date("2011-06-04"),
+        addedAt: new Date(),
+        language: "English",
+        categoryId: createdCategories[0].id, // Non-Fiction
+      },
+      {
+        title: "1984",
+        author: "George Orwell",
+        isbn: "9780451524935",
+        description:
+          "A dystopian novel that explores themes of totalitarianism, surveillance, and control.",
+        coverImage:
+          "https://res.cloudinary.com/df9y24wp0/image/upload/v1738540946/uhshmygvha6zywpbvagd.jpg",
+        size: 328,
+        publishedAt: new Date("1949-06-08"),
+        addedAt: new Date(),
+        language: "English",
+        categoryId: createdCategories[1].id, // Fiction
+      },
+      {
+        title: "The Lean Startup",
+        author: "Eric Ries",
+        isbn: "9780307887894",
+        description:
+          "A guide to startup success through lean methodologies, rapid prototyping, and continuous improvement.",
+        coverImage:
+          "https://res.cloudinary.com/df9y24wp0/image/upload/v1738540946/bjwvnuo2wvt9ofeiqvqh.jpg",
+        size: 336,
+        publishedAt: new Date("2011-09-13"),
+        addedAt: new Date(),
+        language: "English",
+        categoryId: createdCategories[2].id, // Business
+      },
+      {
+        title: "Rich Dad Poor Dad",
+        author: "Robert T. Kiyosaki",
+        isbn: "9781612680170",
+        description:
+          "Explores financial education, investment strategies, and the mindset shift required for wealth-building.",
+        coverImage:
+          "https://res.cloudinary.com/df9y24wp0/image/upload/v1738540947/vyszrgivbqyhiivmqonz.jpg",
+        size: 336,
+        publishedAt: new Date("1997-04-01"),
+        addedAt: new Date(),
+        language: "English",
+        categoryId: createdCategories[3].id, // Finance
+      },
+      {
+        title: "Atomic Habits",
+        author: "James Clear",
+        isbn: "9780735211292",
+        description:
+          "A practical guide to building good habits, breaking bad ones, and mastering tiny behaviors for remarkable results.",
+        coverImage:
+          "https://res.cloudinary.com/df9y24wp0/image/upload/v1738540947/rynz3h87f8rbjphmqyjb.jpg",
+        size: 320,
+        publishedAt: new Date("2018-10-16"),
+        addedAt: new Date(),
+        language: "English",
+        categoryId: createdCategories[0].id, // Non-Fiction
+      },
+      {
+        title: "To Kill a Mockingbird",
+        author: "Harper Lee",
+        isbn: "9780061120084",
+        description:
+          "A novel that explores themes of racial injustice, morality, and compassion in the American South.",
+        coverImage:
+          "https://res.cloudinary.com/df9y24wp0/image/upload/v1738540947/dsozyrfsxeytd3t7310i.png",
+        size: 324,
+        publishedAt: new Date("1960-07-11"),
+        addedAt: new Date(),
+        language: "English",
+        categoryId: createdCategories[1].id, // Fiction
+      },
+      {
         title: "how innovation works",
         author: "Matt Ridley",
         isbn: "9780062916617",
