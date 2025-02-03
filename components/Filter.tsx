@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import NeonCheckbox from "@/components/checkBox/checkbox"
 import RadioButton from "@/components/radioInput/radiobutton"
 import { X } from "lucide-react"
-import {FilterState ,FilterProps } from "@/types/_types"
+import { FilterState, FilterProps } from "@/types/_types"
+
 export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilterChange }: FilterProps) {
   const [filters, setFilters] = useState<FilterState>({
     schoolYear: [],
@@ -13,6 +14,8 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
     documentType: [],
     language: [],
     periodicType: [],
+    categories: [], // New: added categories
+    q: "", // New: added search query
   })
 
   const [isMobile, setIsMobile] = useState(false)
@@ -32,46 +35,88 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
 
   useEffect(() => {
     if (filterParams) {
-      setFilters(filterParams)
+      setFilters(prevFilters => ({
+        ...prevFilters,
+        ...filterParams
+      }))
     }
   }, [filterParams])
 
+  // Helper: update filters state and immediately apply the changes.
+  const updateFilters = (updater: (prev: FilterState) => FilterState) => {
+    setFilters(prev => {
+      const newFilters = updater(prev)
+      // Immediately apply the new filters
+      if (onFilterChange) {
+        onFilterChange(newFilters)
+      }
+      // If on mobile, close the filter sidebar
+      if (isMobile && onClose) {
+        onClose()
+      }
+      return newFilters
+    })
+  }
+
+  // Each handler now uses updateFilters to update the state and apply the filter
+
   const handleYearChange = (subject: string, checked: boolean) => {
-    setFilters((prev) => ({
+    updateFilters(prev => ({
       ...prev,
-      schoolYear: checked ? [...prev.schoolYear, subject] : prev.schoolYear.filter((item) => item !== subject),
+      schoolYear: checked 
+        ? [...prev.schoolYear, subject] 
+        : prev.schoolYear.filter(item => item !== subject)
     }))
   }
 
   const handleSizeChange = (size: string) => {
-    setFilters((prev) => ({ ...prev, size }))
+    updateFilters(prev => ({ ...prev, size }))
   }
 
   const handleAvailabilityChange = (availability: string) => {
-    setFilters((prev) => ({ ...prev, availability }))
+    updateFilters(prev => ({ ...prev, availability }))
   }
 
   const handleDocumentTypeChange = (type: string, checked: boolean) => {
-    setFilters((prev) => ({
+    updateFilters(prev => ({
       ...prev,
-      documentType: checked ? [...prev.documentType, type] : prev.documentType.filter((item) => item !== type),
+      documentType: checked 
+        ? [...prev.documentType, type] 
+        : prev.documentType.filter(item => item !== type)
     }))
   }
 
   const handleLanguageChange = (lang: string, checked: boolean) => {
-    setFilters((prev) => ({
+    updateFilters(prev => ({
       ...prev,
-      language: checked ? [...prev.language, lang] : prev.language.filter((item) => item !== lang),
+      language: checked 
+        ? [...prev.language, lang] 
+        : prev.language.filter(item => item !== lang)
     }))
   }
 
   const handlePeriodicTypeChange = (type: string, checked: boolean) => {
-    setFilters((prev) => ({
+    updateFilters(prev => ({
       ...prev,
-      periodicType: checked ? [...prev.periodicType, type] : prev.periodicType.filter((item) => item !== type),
+      periodicType: checked 
+        ? [...prev.periodicType, type] 
+        : prev.periodicType.filter(item => item !== type)
     }))
   }
 
+  // New: Handle categories change
+  const handleCategoriesChange = (category: string, checked: boolean) => {
+    updateFilters(prev => ({
+      ...prev,
+      categories: checked 
+        ? [...prev.categories, category] 
+        : prev.categories.filter(item => item !== category)
+    }))
+  }
+
+
+
+  // The manual apply button remains as an option
   const handleApplyFilter = () => {
     console.log("Applied filters:", filters)
     if (onFilterChange) {
@@ -85,7 +130,12 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
   return (
     <>
       {/* Overlay for Mobile */}
-      {isMobile && isMobileOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose} />}
+      {isMobile && isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={onClose}
+        />
+      )}
 
       {/* Sidebar */}
       <div
@@ -109,7 +159,12 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
         )}
 
         <div className="flex items-center mb-8 pb-4 border-b border-gray-100">
-          <svg className="w-6 h-6 mr-3 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-6 h-6 mr-3 text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -122,6 +177,19 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
 
         {/* Filter sections */}
         <div className="space-y-8">
+          {/* New: Categories Section */}
+          <FilterSection title="Categories">
+            {["Business", "Commerce", "Science", "Technology", "Arts", "Literature"].map((category, index) => (
+              <CheckboxItem
+                key={index}
+                id={`category-${index}`}
+                checked={filters.categories.includes(category)}
+                onChange={(checked) => handleCategoriesChange(category, checked)}
+                label={category}
+              />
+            ))}
+          </FilterSection>
+
           {/* Document Type Section */}
           <FilterSection title="Document Type">
             {["Document", "Periodic", "Article"].map((type, index) => (
@@ -215,7 +283,7 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
   )
 }
 
-// Helper components for better organization
+// Helper components remain the same as in the previous implementation
 const FilterSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div>
     <h3 className="text-lg font-semibold mb-4 text-gray-700 uppercase tracking-wide">{title}:</h3>
@@ -257,4 +325,3 @@ const RadioItem: React.FC<{ id: string; checked: boolean; onChange: () => void; 
     </label>
   </div>
 )
-

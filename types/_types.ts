@@ -53,6 +53,8 @@ export interface FilterState {
   documentType: string[];
   language: string[];
   periodicType: string[];
+  categories: string[];
+  q: string;
 }
 
 export interface FilterProps {
