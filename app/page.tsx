@@ -9,7 +9,7 @@ export default async function Home() {
 
   return (
     <>
-    <main>
+    <main className="">
       <HeroLanding />
 
       <h2 className="ml-[4%] my-4 text-[50px] font-bold text-[#F1413E]">

@@ -191,7 +191,7 @@ export default function SearchBar({ searchInput, onSearch, isFilterOpen, setIsFi
               </div>
             </div>
           </div>
-          <div className="block md:hidden">
+          <div className="block lg:hidden">
             <button
               className={`flex border-solid bg-white border-[#F1413E] border-[2px] p-3 rounded-full mr-4 transition-all duration-300 ${
                 isFilterOpen ? 'bg-opacity-80' : ''

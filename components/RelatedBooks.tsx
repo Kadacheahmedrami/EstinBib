@@ -91,7 +91,7 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
       {showLeftButton && (
         <button
           onClick={() => scroll("left")}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#F1413E]"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110 "
           aria-label="Scroll left"
         >
           <ChevronLeftCircle size={48} color="#F1413E" strokeWidth={1.5} />
@@ -118,7 +118,7 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
       {showRightButton && (
         <button
           onClick={() => scroll("right")}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#F1413E]"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110 "
           aria-label="Scroll right"
         >
           <ChevronRightCircle size={48} color="#F1413E" strokeWidth={1.5} />

@@ -60,7 +60,7 @@ export default function ParentComponent({ books }: ParentComponentProps) {
         />
       </div>
       
-      <div className="flex flex-col md:flex-row w-full mt-10">
+      <div className="flex flex-col mt-[100px] md:flex-row w-full">
         <div className="lg:w-1/4">
           <BookFilter 
             isMobileOpen={isFilterOpen}
@@ -69,7 +69,6 @@ export default function ParentComponent({ books }: ParentComponentProps) {
             onFilterChange={handleFilterChange}
           />
         </div>
-
         <div className="w-full lg:w-3/4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
             {filteredBooks.map((book, index) => (
