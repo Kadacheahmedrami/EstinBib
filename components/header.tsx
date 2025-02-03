@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
   const mobilelinks = !session ? ["", "catalog", "contact-us", "login"] : ["", "catalog", "contact-us", "profile"];
   const links = ["", "catalog", "contact-us"] ;
   return (
-    <div className="h-[70px] fixed z-20  py-8 px-[7%] flex justify-center items-center w-full bg-white">
+    <nav className="h-[70px] fixed z-20  py-8 px-[7%] flex justify-center items-center w-full bg-white">
     
         {/* Logo - Preloaded image for faster load */}
         <div   className="gap-2 mr-auto flex justify-center items-center text-[30px] font-bold"> 
@@ -75,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
     
      
     
-    </div>
+    </nav>
   );
 };
 

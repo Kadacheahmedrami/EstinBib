@@ -7,36 +7,31 @@ import { FilterState, Book } from "@/types/_types";
 import API from "@/lib/axios";
 
 interface ParentComponentProps {
-  books: Book[]; // Ensure that books is an array of Book objects
+  books: Book[];
 }
 
 export default function ParentComponent({ books }: ParentComponentProps) {
   const [searchInput, setSearchInput] = useState("");
-  // filteredBooks holds the currently displayed books, either the initial ones or search results.
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(books);
   const [filterParams, setFilterParams] = useState<FilterState>({
     schoolYear: [],
-    size: '',
-    availability: '',
+    size: "",
+    availability: "",
     documentType: [],
     language: [],
     periodicType: [],
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Fetch search results whenever searchInput changes.
   useEffect(() => {
-    // If the search input is empty, reset to the initial books list.
     if (searchInput.trim() === "") {
       setFilteredBooks(books);
       return;
     }
-
+    
     const fetchSearchResults = async () => {
       try {
         const response = await API.get(`/api/search?q=${encodeURIComponent(searchInput)}`);
-        // Assuming the response contains { books: Book[] }
-        console.log(response.data)
         setFilteredBooks(response.data.books);
       } catch (error) {
         console.error("Error fetching search results:", error);
@@ -46,33 +41,16 @@ export default function ParentComponent({ books }: ParentComponentProps) {
     fetchSearchResults();
   }, [searchInput, books]);
 
-  // Debug logging for searchInput changes
-  useEffect(() => {
-    console.log("Search Input changed:", searchInput);
-  }, [searchInput]);
+  const handleSearch = (input: string) => setSearchInput(input);
+  const handleFilterChange = (params: FilterState) => setFilterParams(params);
 
-  useEffect(() => {
-    // Uncomment to log filter parameters when they change.
-    // console.log("Filter Params changed:", filterParams);
-  }, [filterParams]);
-
-  const handleSearch = (input: string) => {
-    setSearchInput(input);
-  };
-
-  const handleFilterChange = (params: FilterState) => {
-    setFilterParams(params);
-    // You could integrate filterParams into your API query as needed.
-  };
-
-  // Add safety check for books
   if (!Array.isArray(books)) {
     console.warn("Books prop is not an array:", books);
     return <div>No books available</div>;
   }
 
   return (
-    <div>
+    <div className="w-screen mx-auto ">
       <div className="h-[150px]">
         <SearchBar 
           searchInput={searchInput}
@@ -81,8 +59,8 @@ export default function ParentComponent({ books }: ParentComponentProps) {
           setIsFilterOpen={setIsFilterOpen}
         />
       </div>
-   
-      <div className="flex flex-col mt-[100px] md:flex-row w-full">
+      
+      <div className="flex flex-col md:flex-row w-full mt-10">
         <div className="lg:w-1/4">
           <BookFilter 
             isMobileOpen={isFilterOpen}
@@ -93,7 +71,7 @@ export default function ParentComponent({ books }: ParentComponentProps) {
         </div>
 
         <div className="w-full lg:w-3/4">
-          <div className="m-8 relative flex flex-col gap-[80px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
             {filteredBooks.map((book, index) => (
               <BookCard
                 key={book.id || index}
@@ -104,9 +82,9 @@ export default function ParentComponent({ books }: ParentComponentProps) {
                 size={book.size}
                 available={book.available}
                 coverImage={book.coverImage}
-                publishedAt={book.publishedAt || new Date()} // Use a valid date or fallback date
-                addedAt={book.addedAt || null} // Use null or a valid date
-                language={book.language || ""} // Use a valid string or fallback to empty string
+                publishedAt={book.publishedAt || new Date()}
+                addedAt={book.addedAt || null}
+                language={book.language || ""}
                 isbn={book.isbn}
               />
             ))}

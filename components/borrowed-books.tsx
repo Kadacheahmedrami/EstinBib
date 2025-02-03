@@ -2,10 +2,12 @@
 import React, { useState } from "react";
 import BookCard from "@/components/ui/card";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
-import { ActiveBorrows } from "@/types/_types"; // Importing the BorrowedBook type
+import { ActiveBorrows } from "@/types/_types"; 
+
 interface BorrowedBooksProps {
   books: ActiveBorrows[];
 }
+
 const BorrowedBooks = ({ books }: BorrowedBooksProps) => {
   const [scrollPosition, setScrollPosition] = useState(0);
 
@@ -13,9 +15,7 @@ const BorrowedBooks = ({ books }: BorrowedBooksProps) => {
     const container = document.getElementById("book-container");
     if (container) {
       const scrollAmount =
-        direction === "left"
-          ? -container.clientWidth / 3
-          : container.clientWidth / 3;
+        direction === "left" ? -container.clientWidth / 2 : container.clientWidth / 2;
       const newPosition = Math.max(
         0,
         Math.min(
@@ -33,8 +33,8 @@ const BorrowedBooks = ({ books }: BorrowedBooksProps) => {
   };
 
   return (
-    <div className="relative w-screen ">
-      <div className="max-w-[2000px]">
+    <div className="relative w-full">
+      <div className="max-w-[2000px] mx-auto px-4">
         <button
           onClick={() => scroll("left")}
           className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
@@ -45,13 +45,13 @@ const BorrowedBooks = ({ books }: BorrowedBooksProps) => {
 
         <div
           id="book-container"
-          className="flex overflow-x-hidden scroll-smooth py-8"
+          className="flex overflow-x-auto py-8 gap-4 snap-x scroll-smooth"
           style={{ scrollSnapType: "x mandatory" }}
         >
           {books.map((book, index) => (
             <div
               key={index}
-              className="w-1/3 flex-shrink-0"
+              className="flex-shrink-0 mx-4"
               style={{ scrollSnapAlign: "start" }}
             >
               <BookCard
@@ -59,7 +59,7 @@ const BorrowedBooks = ({ books }: BorrowedBooksProps) => {
                 title={book.title}
                 dateBorrowed={book.borrowedAt.toDateString()}
                 dueDate={book.dueDate.toDateString()}
-                status={book.dueDate < new Date() ? " true " : " false "}
+                status={book.dueDate < new Date() ? "true" : "false"}
                 description={book.description}
               />
             </div>

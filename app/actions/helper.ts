@@ -22,7 +22,7 @@ export async function getRandomBooks(): Promise<Book[]> {
         ? response.data.books
         : [];
       // Get 5 random items
-      const randomBooks = getRandomItems(books, 5);
+      const randomBooks = getRandomItems(books, 8);
       return randomBooks;
     } catch (error) {
       console.error("Error fetching random books:", error);

@@ -1,32 +1,35 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import BookCard from "@/components/ui/card";
 import { BooksHistory } from "@/types/_types";
 import { motion } from "framer-motion";
+
 interface BorrowHistoryProps {
   books: BooksHistory[];
 }
+
 const BorrowHistory = ({ books }: BorrowHistoryProps) => {
-  const [visibleBooks, setVisibleBooks] = useState(3); // Set the initial number of books to display
-  const [isOpen, setIsOpen] = useState(false); // For toggling the dropdown
+  const [visibleBooks, setVisibleBooks] = useState(3); // Initial number of books
+  const [shouldScroll, setShouldScroll] = useState(false); // Flag to indicate scroll after update
 
-  // Reference for the "Show More" button to scroll to it
-  const showMoreButtonRef = useRef<HTMLButtonElement | null>(null);
+  const lastBookRef = useRef<HTMLDivElement | null>(null); // Reference for the last book element
 
+  // Function to show more books and set the scroll flag
   const showMoreBooks = () => {
-    setVisibleBooks((prev) => Math.min(prev + 3, history.length)); // Show 3 more books at a time
-    setIsOpen(!isOpen); // Toggle the dropdown state
+    setVisibleBooks((prev) => Math.min(prev + 3, books.length));
+    setShouldScroll(true); // Set the flag so we know to scroll after rendering
+  };
 
-    // Scroll to the "Show More" button after it is clicked
-    if (showMoreButtonRef.current) {
-      showMoreButtonRef.current.scrollIntoView({
+  // useEffect to scroll only after visibleBooks updates and if the flag is set
+  useEffect(() => {
+    if (shouldScroll && lastBookRef.current) {
+      lastBookRef.current.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
+      setShouldScroll(false); // Reset the flag after scrolling
     }
-  };
-
-  // Placeholder content for the cards during loading
+  }, [visibleBooks, shouldScroll]);
 
   return (
     <div className="w-full p-4">
@@ -43,25 +46,22 @@ const BorrowHistory = ({ books }: BorrowHistoryProps) => {
               title={book.title}
               dateBorrowed={book.borrowedAt.toDateString()}
               dueDate={book.dueDate.toDateString()}
-              status={book.dueDate < new Date() ? " true " : " false "}
+              status={book.dueDate < new Date() ? "true" : "false"}
               description={book.description}
             />
           </motion.div>
         ))}
       </div>
 
-      {visibleBooks < history.length && (
-        <div className="flex justify-center mt-6">
+      {visibleBooks < books.length && (
+        <div className="flex justify-center items-center mt-6">
           <button
-            ref={showMoreButtonRef}
             onClick={showMoreBooks}
-            className="text-[#F1413E] font-semibold flex items-center gap-2 py-3 px-6 rounded-lg border-2 border-[#F1413E] transition-all hover:bg-[#F1413E] hover:text-white"
+            className="text-[#F1413E] font-semibold text-[28px] flex items-center gap-2 py-3 px-6 rounded-lg transition-all"
           >
-            Show More
+            View more 
             <svg
-              className={`w-5 h-5 transition-transform ${
-                isOpen ? "transform " : ""
-              }`}
+              className="w-8 h-8 transition-transform transform rotate-180"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -71,12 +71,14 @@ const BorrowHistory = ({ books }: BorrowHistoryProps) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M19 9l-7 7-7-7"
+                d="M19 15l-7-7-7 7"
               />
             </svg>
           </button>
         </div>
       )}
+      {/* This div serves as a reference point for scrolling */}
+      <div ref={lastBookRef} />
     </div>
   );
 };
