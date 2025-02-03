@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { ChevronLeftCircle, ChevronRightCircle ,ChevronLeft, ChevronRight} from "lucide-react";
+import { ChevronLeftCircle, ChevronRightCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 // --- BookCard Component ---
@@ -12,15 +12,52 @@ const BookCard: React.FC<RecentBooks> = ({
   description,
   coverImage,
 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true); // Trigger animation when the element is in view
+          } else {
+            setIsVisible(false); // Reset animation when the element goes out of view
+          }
+        });
+      },
+      {
+        threshold: 0.5, // 50% of the element must be visible to trigger the animation
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="rounded-lg overflow-hidden w-[380px] mx-8 flex-shrink-0">
+    <div
+      ref={cardRef}
+      className={`rounded-lg overflow-hidden w-[380px] mx-8 flex-shrink-0 transition-all duration-700 ease-out transform ${
+        isVisible
+          ? "opacity-100 translateY-0 scale-105"
+          : "opacity-0 translateY-10 scale-95"
+      }`}
+    >
       <div className="w-[90%] mx-auto h-[450px] relative">
         <Image
           src={coverImage && coverImage !== "" ? coverImage : "/svg/display.svg"}
           alt={title}
           layout="fill"
           objectFit="cover"
-          className="rounded-lg"
+          className="rounded-lg transition-all duration-500 ease-in-out"
         />
       </div>
 
@@ -30,7 +67,7 @@ const BookCard: React.FC<RecentBooks> = ({
           {description || "No description available."}
         </p>
         <Link href={`/catalog/${id}`}>
-          <button className="mt-4 rounded-lg w-full text-[#F1413E] px-4 py-2 border-2 border-solid border-[#F1413E] hover:bg-[#F1413E] hover:text-white transition duration-300 focus:outline-none focus:ring-2 focus:ring-[#F1413E]">
+          <button className="mt-4 rounded-lg w-full text-[#F1413E] px-4 py-2 border-2 border-solid border-[#F1413E] hover:bg-[#F1413E] hover:text-white transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#F1413E]">
             Learn More
           </button>
         </Link>
@@ -49,15 +86,10 @@ interface RecentBooks {
 interface RelatedBooksProps {
   containerId: string;
   books: RecentBooks[];
-  /**
-   * scrollButtonType:
-   * - 1: Use the original scrolling button style.
-   * - 2: Use an alternative scrolling button style.
-   */
   scrollButtonType: number;
 }
 
-const RelatedBooks: React.FC<RelatedBooksProps> = ({
+ const RelatedBooks: React.FC<RelatedBooksProps> = ({
   containerId,
   books,
   scrollButtonType,
@@ -96,15 +128,14 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({
     }
   };
 
-  // Define button classes based on the scrollButtonType prop
   const leftButtonClass =
     scrollButtonType === 1
-      ? "absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
-      : "absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-[#EAF2EF] rounded-full p-3 shadow-[0px_6px_15px_rgba(0,0,0,0.3)] hover:bg-[#EAF3EF] transition-colors"
+      ? "absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-all duration-300 hover:scale-110 hover:text-[#F1413E]"
+      : "absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-[#EAF2EF] rounded-full p-3 shadow-[0px_6px_15px_rgba(0,0,0,0.3)] hover:bg-[#EAF3EF] transition-colors";
 
   const rightButtonClass =
     scrollButtonType === 1
-      ? "absolute right-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
+      ? "absolute right-4 top-1/2 transform -translate-y-1/2 z-10 transition-all duration-300 hover:scale-110 hover:text-[#F1413E]"
       : "absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-[#EAF2EF] rounded-full p-3 shadow-[0px_6px_15px_rgba(0,0,0,0.3)] hover:bg-[#EAF3EF] transition-colors";
 
   return (
@@ -112,24 +143,14 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({
       {showLeftButton && (
         <button
           onClick={() => scroll("left")}
-          className={leftButtonClass}
+          className={`${leftButtonClass} hidden md:block`} // Hide on mobile, show on larger screens
           aria-label="Scroll left"
         >
-          {
-            scrollButtonType === 1 ? 
-            <ChevronLeftCircle
-            size={scrollButtonType === 1 ? 48 : 52}
-            color={"#F1413E"}
-            strokeWidth={1.5}
-          />
-            :
-            <ChevronLeft
-            size={scrollButtonType === 1 ? 48 : 52}
-            color={"#F1413E"}
-            strokeWidth={1.5}
-          />
-          }
-         
+          {scrollButtonType === 1 ? (
+            <ChevronLeftCircle size={48} color={"#F1413E"} strokeWidth={1.5} />
+          ) : (
+            <ChevronLeft size={48} color={"#F1413E"} strokeWidth={1.5} />
+          )}
         </button>
       )}
 
@@ -153,28 +174,19 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({
       {showRightButton && (
         <button
           onClick={() => scroll("right")}
-          className={rightButtonClass}
+          className={`${rightButtonClass} hidden md:block`} // Hide on mobile, show on larger screens
           aria-label="Scroll right"
         >
-              {
-            scrollButtonType === 1 ? 
-            <ChevronRightCircle
-            size={scrollButtonType === 1 ? 48 : 52}
-            color={"#F1413E"}
-            strokeWidth={1.5}
-          />
-            :
-            <ChevronRight
-            size={scrollButtonType === 1 ? 48 : 52}
-            color={"#F1413E"}
-            strokeWidth={1.5}
-          />
-          }
-      
+          {scrollButtonType === 1 ? (
+            <ChevronRightCircle size={48} color={"#F1413E"} strokeWidth={1.5} />
+          ) : (
+            <ChevronRight size={48} color={"#F1413E"} strokeWidth={1.5} />
+          )}
         </button>
       )}
     </div>
   );
 };
+
 
 export default RelatedBooks;

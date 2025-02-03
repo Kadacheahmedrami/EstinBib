@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
     const locationName = 'ESTIN, Béjaia, Algeria';
 
     return (
-        <footer className="bg-gray-800 text-white pt-8 pb-4 px-6 lg:px-16 md:px-10" 
+        <footer className="bg-gray-800 text-white py-12 px-6 lg:px-16 md:px-10" 
             style={{ fontFamily: 'Poppins, sans-serif', backgroundImage: 'url(/jpg/Gradient.png)' }}>
 
             <div className="flex flex-col md:flex-row justify-between items-start gap-8 space-y-6 md:space-y-0">
