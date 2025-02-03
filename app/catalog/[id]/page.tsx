@@ -46,6 +46,7 @@ export default async function BookPage({ params }: PageProps) {
           <div className="bg-black mt-2 h-[2px] w-[70%]" />
         </div>
         <RelatedBooks
+        scrollButtonType={1}
           containerId="book-container-detail"
           books={randomBooks1}
         />
@@ -57,6 +58,7 @@ export default async function BookPage({ params }: PageProps) {
           <div className="bg-black mt-2 h-[2px] w-[70%]" />
         </div>
         <RelatedBooks
+        scrollButtonType={1}
           containerId="book-container-detail"
           books={randomBooks2}
         />

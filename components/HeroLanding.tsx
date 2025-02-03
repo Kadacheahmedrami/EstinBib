@@ -18,7 +18,7 @@ const HeroLanding: React.FC = () => {
           <Image src="/svg/landingLogo.svg" alt="Logo" width={300} height={250} className="mb-6" />
   
           <p className="md:text-xl lg:text-2xl text-gray-300 mb-8">
-          Welcome to Biblio Estin, the online platform of ESTIN's Higher School of Computer Science Library. Here, you can access our library catalog and conveniently reserve, renew, and review your borrowed books.  
+          Welcome to Biblio Estin, the online platform of ESTIN s Higher School of Computer Science Library. Here, you can access our library catalog and conveniently reserve, renew, and review your borrowed books.  
           </p>
 
           {/* Search Bar */}

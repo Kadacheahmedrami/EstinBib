@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
+import { ChevronLeftCircle, ChevronRightCircle ,ChevronLeft, ChevronRight} from "lucide-react";
 import Link from "next/link";
 
 // --- BookCard Component ---
@@ -13,8 +13,8 @@ const BookCard: React.FC<RecentBooks> = ({
   coverImage,
 }) => {
   return (
-    <div className="bg-white rounded-lg overflow-hidden w-72 mx-4 flex-shrink-0">
-      <div className="w-full h-[450px] relative">
+    <div className="rounded-lg overflow-hidden w-[380px] mx-8 flex-shrink-0">
+      <div className="w-[90%] mx-auto h-[450px] relative">
         <Image
           src={coverImage && coverImage !== "" ? coverImage : "/svg/display.svg"}
           alt={title}
@@ -49,9 +49,19 @@ interface RecentBooks {
 interface RelatedBooksProps {
   containerId: string;
   books: RecentBooks[];
+  /**
+   * scrollButtonType:
+   * - 1: Use the original scrolling button style.
+   * - 2: Use an alternative scrolling button style.
+   */
+  scrollButtonType: number;
 }
 
-const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
+const RelatedBooks: React.FC<RelatedBooksProps> = ({
+  containerId,
+  books,
+  scrollButtonType,
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showLeftButton, setShowLeftButton] = useState(false);
   const [showRightButton, setShowRightButton] = useState(true);
@@ -77,8 +87,8 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
   const scroll = (direction: "left" | "right") => {
     const container = containerRef.current;
     if (container) {
-      const cardWidth = 320; // width (w-72) + margin (mx-4)
-      const scrollAmount = cardWidth; // Scroll by one card at a time
+      const cardWidth = 320; // Adjust card width as needed
+      const scrollAmount = cardWidth;
       container.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -86,15 +96,40 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
     }
   };
 
+  // Define button classes based on the scrollButtonType prop
+  const leftButtonClass =
+    scrollButtonType === 1
+      ? "absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
+      : "absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-[#EAF2EF] rounded-full p-3 shadow-[0px_6px_15px_rgba(0,0,0,0.3)] hover:bg-[#EAF3EF] transition-colors"
+
+  const rightButtonClass =
+    scrollButtonType === 1
+      ? "absolute right-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110"
+      : "absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-[#EAF2EF] rounded-full p-3 shadow-[0px_6px_15px_rgba(0,0,0,0.3)] hover:bg-[#EAF3EF] transition-colors";
+
   return (
     <div className="relative w-full overflow-hidden">
       {showLeftButton && (
         <button
           onClick={() => scroll("left")}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110 "
+          className={leftButtonClass}
           aria-label="Scroll left"
         >
-          <ChevronLeftCircle size={48} color="#F1413E" strokeWidth={1.5} />
+          {
+            scrollButtonType === 1 ? 
+            <ChevronLeftCircle
+            size={scrollButtonType === 1 ? 48 : 52}
+            color={"#F1413E"}
+            strokeWidth={1.5}
+          />
+            :
+            <ChevronLeft
+            size={scrollButtonType === 1 ? 48 : 52}
+            color={"#F1413E"}
+            strokeWidth={1.5}
+          />
+          }
+         
         </button>
       )}
 
@@ -118,10 +153,24 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({ containerId, books }) => {
       {showRightButton && (
         <button
           onClick={() => scroll("right")}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 transition-transform duration-300 hover:scale-110 "
+          className={rightButtonClass}
           aria-label="Scroll right"
         >
-          <ChevronRightCircle size={48} color="#F1413E" strokeWidth={1.5} />
+              {
+            scrollButtonType === 1 ? 
+            <ChevronRightCircle
+            size={scrollButtonType === 1 ? 48 : 52}
+            color={"#F1413E"}
+            strokeWidth={1.5}
+          />
+            :
+            <ChevronRight
+            size={scrollButtonType === 1 ? 48 : 52}
+            color={"#F1413E"}
+            strokeWidth={1.5}
+          />
+          }
+      
         </button>
       )}
     </div>

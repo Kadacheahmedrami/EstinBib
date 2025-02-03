@@ -12,15 +12,25 @@ export default async function Home() {
     <main className="">
       <HeroLanding />
 
-      <h2 className="ml-[4%] my-4 text-[50px] font-bold text-[#F1413E]">
+      <h2 className="ml-[4%]  my-4  mt-20 text-[50px] font-bold text-[#F1413E]">
         What&apos;s New?
       </h2>
-      <RelatedBooks containerId="book-container-1" books={newBooks} />
+      <div className="bg-[#EAF2EF] py-8 mb-20">
+      <RelatedBooks containerId="book-container-1" books={newBooks} scrollButtonType={2} />
+      </div>
+
+
+
 
       <h2 className="ml-[4%] my-4 text-[50px] font-bold text-[#F1413E]">
         Most Borrowed
       </h2>
-      <RelatedBooks containerId="book-container-2" books={mostBorrowedBooks} />
+      <div className="bg-[#EAF2EF] py-8 mb-20">
+      <RelatedBooks containerId="book-container-2" books={mostBorrowedBooks} scrollButtonType={2} />
+</div>
+  
+
+   
      
     </main>
     <Footer />
