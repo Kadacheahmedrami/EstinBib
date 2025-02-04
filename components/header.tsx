@@ -11,7 +11,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ session }) => {
-  const mobilelinks = !session ? ["", "catalog", "contact-us", "login"] : ["", "catalog", "contact-us", "profile"];
+  const mobilelinks = !session ? ["", "catalog", "contact-us", "auth/login"] : ["", "catalog", "contact-us", "profile"];
   const links = ["", "catalog", "contact-us"] ;
   return (
     <nav className="h-[70px] fixed z-20  py-8 px-[7%] flex justify-center items-center w-full bg-white">
