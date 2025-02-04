@@ -5,7 +5,7 @@ import Signout from "./signout";
 
 const UserInfo = async () => {
   const info = await getUserInfo();
-
+  
   return (
     <div className="p-4 sm:p-8 bg-white">
       <div className="flex flex-col lg:flex-row justify-center items-center gap-8 lg:gap-12 max-w-7xl mx-auto">

@@ -25,7 +25,7 @@ export default async function Home() {
       <h2 className="ml-[4%] my-4 text-[50px] font-bold text-[#F1413E]">
         Most Borrowed
       </h2>
-      <div className="bg-[#EAF2EF] py-8 mb-20">
+      <div className="bg-[#EAF2EF] py-8 ">
       <RelatedBooks containerId="book-container-2" books={mostBorrowedBooks} scrollButtonType={2} />
 </div>
   

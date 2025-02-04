@@ -209,8 +209,8 @@ export default function ParentComponent({ books }: ParentComponentProps) {
   }
 
   return (
-    <div className="w-screen mx-auto">
-      <div className="h-[150px]">
+    <div className="w-screen  mx-auto">
+      <div className="h-[150px] ">
         <SearchBar
           searchInput={searchInput}
           onSearch={handleSearch}
@@ -219,8 +219,8 @@ export default function ParentComponent({ books }: ParentComponentProps) {
         />
       </div>
 
-      <div className="flex flex-col mt-[100px] md:flex-row w-full">
-        <div className="lg:w-1/4">
+      <div className="grid grid-cols-12 gap-5 mt-[100px] md:flex-row w-full">
+        <div className="col-span-2">
           <BookFilter
             isMobileOpen={isFilterOpen}
             onClose={() => setIsFilterOpen(false)}
@@ -228,7 +228,7 @@ export default function ParentComponent({ books }: ParentComponentProps) {
             onFilterChange={handleFilterChange}
           />
         </div>
-        <div className="w-full lg:w-3/4">
+        <div className="col-span-10  ">
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <p className="text-xl font-medium text-gray-600">
@@ -240,8 +240,11 @@ export default function ParentComponent({ books }: ParentComponentProps) {
               title="No Books Found"
               subtitle="No books found matching your search criteria. Please try different keywords or filters."
             />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
+          ) : 
+          
+          (
+            <div className="container mx-auto px-10  justify-center">
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 p-4">
               {filteredBooks.map((book, index) => (
                 <BookCard
                   key={book.id || index}
@@ -259,6 +262,8 @@ export default function ParentComponent({ books }: ParentComponentProps) {
                 />
               ))}
             </div>
+            </div>
+           
           )}
         </div>
       </div>

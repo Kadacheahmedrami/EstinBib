@@ -27,7 +27,7 @@ const BookCard: React.FC<RecentBooks> = ({
         });
       },
       {
-        threshold: 0.5, // 50% of the element must be visible to trigger the animation
+        threshold: 0, // 50% of the element must be visible to trigger the animation
       }
     );
 
@@ -45,10 +45,10 @@ const BookCard: React.FC<RecentBooks> = ({
   return (
     <div
       ref={cardRef}
-      className={`rounded-lg overflow-hidden w-[380px] mx-8 flex-shrink-0 transition-all duration-700 ease-out transform ${
+      className={`rounded-lg overflow-hidden   mx-8 flex-shrink-0 transition-all duration-700 ease-out transform ${
         isVisible
-          ? "opacity-100 translateY-0 scale-105"
-          : "opacity-0 translateY-10 scale-95"
+          ? "opacity-100 translateY-10 scale-100"
+          : "opacity-0 translate-y-20 scale-90"
       }`}
     >
       <div className="w-[90%] mx-auto h-[450px] relative">
@@ -60,7 +60,6 @@ const BookCard: React.FC<RecentBooks> = ({
           className="rounded-lg transition-all duration-500 ease-in-out"
         />
       </div>
-
       <div className="p-4">
         <h3 className="font-bold text-xl mb-2 truncate">{title}</h3>
         <p className="text-gray-700 text-base mb-4 truncate">
@@ -89,7 +88,7 @@ interface RelatedBooksProps {
   scrollButtonType: number;
 }
 
- const RelatedBooks: React.FC<RelatedBooksProps> = ({
+const RelatedBooks: React.FC<RelatedBooksProps> = ({
   containerId,
   books,
   scrollButtonType,
@@ -119,7 +118,7 @@ interface RelatedBooksProps {
   const scroll = (direction: "left" | "right") => {
     const container = containerRef.current;
     if (container) {
-      const cardWidth = 320; // Adjust card width as needed
+      const cardWidth = 380; // Adjust card width as needed
       const scrollAmount = cardWidth;
       container.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
@@ -139,7 +138,7 @@ interface RelatedBooksProps {
       : "absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-[#EAF2EF] rounded-full p-3 shadow-[0px_6px_15px_rgba(0,0,0,0.3)] hover:bg-[#EAF3EF] transition-colors";
 
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className="relative  w-full  overflow-hidden">
       {showLeftButton && (
         <button
           onClick={() => scroll("left")}
@@ -157,13 +156,13 @@ interface RelatedBooksProps {
       <div
         ref={containerRef}
         id={containerId}
-        className="flex overflow-x-auto gap-4 py-8 scrollbar-hide"
+        className="grid grid-flow-col auto-cols-[minmax(380px,1fr)] gap-4 overflow-y-hidden overflow-x-auto py-8 scrollbar-hide"
         style={{ scrollSnapType: "x mandatory" }}
       >
         {books.map((book, index) => (
           <div
             key={index}
-            className="flex-shrink-0 mx-4"
+            className="flex-shrink-0"
             style={{ scrollSnapAlign: "start" }}
           >
             <BookCard {...book} />
@@ -187,6 +186,5 @@ interface RelatedBooksProps {
     </div>
   );
 };
-
 
 export default RelatedBooks;

@@ -139,7 +139,7 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
 
       {/* Sidebar */}
       <div
-        className={`w-full z-[20] sm:w-[300px] bg-[#F8F8F8] p-6 rounded-r-[15px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 overflow-y-auto custom-scrollbar transition-transform duration-300 ${
+        className={`w-full z-[20]  bg-[#F8F8F8] p-6 rounded-r-[15px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 overflow-y-auto custom-scrollbar transition-transform duration-300 ${
           isMobile
             ? isMobileOpen
               ? "fixed inset-y-0 left-0 z-50 transform translate-x-0"
