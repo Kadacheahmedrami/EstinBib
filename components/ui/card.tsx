@@ -19,56 +19,54 @@ const BookCard: React.FC<BookCardProps> = ({
   const isOverdue = status.toLowerCase() === "overdue";
 
   return (
-    <div className="bg-[#F5F8F7] rounded-2xl shadow-lg p-10 w-[600px] h-[600px] mx-auto transform my-8 transition-all duration-500">
-      <h2 className="text-3xl h-[50px] font-semibold text-center mb-10 sm:mb-12 text-gray-800 tracking-tight">
+    <div className="bg-[#F5F8F7] w-full rounded-2xl shadow-lg p-6  max-w-[600px] min-h-[600px] mx-auto my-8 transition-all duration-500">
+      {/* Book Title */}
+      <h2 className=" text-lg w-full md:text-xl lg:text-3xl font-semibold text-center mb-6 sm:mb-10 text-gray-800 tracking-tight">
         “{title}”
       </h2>
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-8 sm:mb-12">
+
+      {/* Book Content Wrapper */}
+      <div className="flex flex-col  sm:flex-row items-center sm:items-start gap-6 sm:gap-10">
         {/* Book Cover Image */}
-        <div className="relative w-[300px] h-[420px] overflow-hidden rounded-lg">
+        <div className="relative w-[100%] sm:w-[350px] h-[350px] sm:h-[420px] rounded-lg overflow-hidden">
           <Image
             src={coverImage}
-            alt={title}
-            width={600} // Width of the image
-            height={480} // Height of the image
-            className="object-cover w-full h-full" // This ensures the image fills the div and maintains aspect ratio
+            alt={`Cover of ${title}`}
+            width={600}
+            height={480}
+            className="object-cover w-full h-full"
+            priority
           />
         </div>
 
         {/* Book Information */}
-        <div className="flex flex-col mt-auto justify-between h-[420px] items-start pl-16 w-[300px]">
-          <p className="flex flex-col items-start">
-            <span className="text-[24px] font-semibold">Date Borrowed:</span>
-            <span className="text-gray-600">{dateBorrowed ? dateBorrowed : "N/A"}</span>
+        <div className="flex flex-col justify-between sm:h-[420px] w-full sm:w-[300px]">
+          <p className="flex flex-col">
+            <span className="text-lg font-semibold">Date Borrowed:</span>
+            <span className="text-gray-600">{dateBorrowed || "N/A"}</span>
           </p>
-          <p className="flex flex-col items-start">
-            <span className="text-[24px] font-semibold">Due Date:</span>
+
+          <p className="flex flex-col mt-2">
+            <span className="text-lg font-semibold">Due Date:</span>
             <span className="text-gray-600">{dueDate}</span>
           </p>
-          <p className="flex flex-col items-start">
-            <span className="text-[24px] font-semibold">Status:</span>
-            <span
-              className={`font-semibold text-xl ${
-                isOverdue ? "text-red-600" : "text-green-600"
-              }`}
-            >
+
+          <p className="flex flex-col mt-2">
+            <span className="text-lg font-semibold">Status:</span>
+            <span className={`font-semibold text-lg ${isOverdue ? "text-red-600" : "text-green-600"}`}>
               {status}
             </span>
           </p>
 
           {/* Action Button (Renew or View More) */}
-          <div className="mt-6 w-full flex justify-end ml-auto">
+          <div className="mt-6 w-full">
             {actionType === "viewMore" ? (
-              <Link
-                className="menu-item menu-link"
-                href={`/catalog/${id}`}
-              >
-                <span className="mr-2">See Book Details </span>
-                <span className="font-bold">&#8594;</span> {/* Bold left arrow */}
+              <Link href={`/catalog/${id}`} className="ml-auto menu-link">
+                <span>See Book Details</span> <span className="font-bold">&#8594;</span>
               </Link>
             ) : (
               <button
-                className="py-3 px-6 ml-auto rounded-lg border-solid w-full text-[#F1413E] hover:bg-[#F1413E] hover:text-white hover:font-bold border-[#F1413E] border-[1px] hover:scale-105 transition duration-300"
+                className="py-3 px-6 w-full text-[#F1413E] border-[#F1413E] border-2 rounded-lg hover:bg-[#F1413E] hover:text-white hover:font-bold transition duration-300"
                 aria-label="Renew Book"
               >
                 Renew

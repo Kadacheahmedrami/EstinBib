@@ -16,18 +16,22 @@ export default async function Profile() {
   const activeBorrows = await getActiveBorrows();
  
   return (
-    <main className="flex w-full flex-col">
+    <main >
+         <div className="w-full flex md:flex-row flex-col  justifystart  items-center md:gap-[20px] ">
+          <h3 className="font-bold   px-10  text-[24px] lg:text-[30px]">My Account :</h3>
+          <div className="bg-black mt-2 h-[4px] opacity-20 rounded-full  w-full md:w-[75%]"></div>
+        </div>
       <UserInfo />
-      <div className="md:col-span-2 space-y-8">
-        <div className="w-full flex justify-center items-center gap-[70px] flex-row">
-          <h3 className="font-bold text-[30px]">My Borrowed Books :</h3>
-          <div className="bg-black mt-2 h-[2px] w-[70%]"></div>
+      <div className="w-full flex flex-col   justifystart   items-center md:gap-[20px] ">
+        <div className="w-full flex  px-10 md:flex-row flex-col justify-start mx-10 items-center md:gap-[20px] ">
+          <h3 className="font-bold  text-[24px] lg:text-[30px]">My Borrowed Books :</h3>
+          <div className="bg-black mt-2 h-[4px] opacity-20 rounded-full w-full md:w-[75%]"></div>
         </div>
         <BorrowedBooks key={1} books={activeBorrows}  />
-
-        <div className="w-full flex justify-center items-center gap-[70px] flex-row">
-          <h3 className="font-bold text-[30px]">My Borrow History</h3>
-          <div className="bg-black mt-2 h-[2px] w-[70%]"></div>
+ 
+        <div className="w-full   px-10 flex md:flex-row flex-col  justifystart md:mx-10  items-center md:gap-[20px] ">
+          <h3 className="font-bold  text-[24px] lg:text-[30px]">My Borrow History</h3>
+          <div className="bg-black mt-2 h-[4px] opacity-20 rounded-full w-full md:w-[75%]"></div>
         </div>
         <BorrowHistory key={2} books={borrowHistory} />
       </div>
