@@ -69,7 +69,7 @@ const Footer: React.FC = () => {
                             placeholder="Your message" 
                             className="w-full px-4 py-3 bg-white border rounded-lg text-black text-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
                         />
-                        <button className="h-12 w-36 bg-[#F1413E] text-white text-lg rounded-lg hover:shadow-lg transition-all">
+                        <button className="h-12 w-36 bg-[#F1413E] ml-auto text-white text-lg rounded-lg hover:shadow-lg transition-all">
                             Send
                         </button>
                     </form>

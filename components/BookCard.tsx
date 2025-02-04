@@ -39,11 +39,11 @@ const BookCard = ({ id, title, author, description, size, available, coverImage 
       <div className="p-4 flex flex-col gap-3 text-start">
         <h2 className="text-xl font-bold text-gray-900 truncate md:text-xl">{title}</h2>
         <div className="flex justify-between flex-row w-full" >
-        <div className="flex items-center gap-[2px]  justify-start text-gray-600 ">
+        <div className="flex items-center gap-1  justify-start text-gray-600 ">
           <User size={15} className=" text-gray-700" />
           <span className="font-normal line-clamp-1  text-gray-900">{author}</span>
         </div>
-        <div className="flex items-center  justify-end text-gray-600">
+        <div className="flex items-center gap-1 justify-end text-gray-600">
           <Layers size={15} className=" text-gray-700" />
           <span className="font-normal line-clamp-1 text-gray-900">{size} </span>
         </div>

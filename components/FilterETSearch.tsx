@@ -257,7 +257,7 @@ useEffect(() => {
       </div>
 
       <div className="grid grid-cols-12 gap-5 mt-24 md:flex-row w-full">
-        <div className="col-span-0 lg:col-span-2">
+        <div className="col-span-0 relative bottom-4 lg:col-span-2">
           <BookFilter
             isMobileOpen={isFilterOpen}
             onClose={() => setIsFilterOpen(false)}

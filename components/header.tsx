@@ -19,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
         {/* Logo - Preloaded image for faster load */}
         <div   className="gap-2 mr-auto flex justify-center items-center text-[30px] font-bold"> 
         <Link href={'/'} className="gap-2 mr-auto flex justify-center items-center text-[30px] font-bold">
-        <Image src="/svg/logo.svg" alt="logo" width={180} height={180} priority />
+        <Image src="/svg/logo.svg" alt="logo" width={120} height={100} priority />
       </Link>
        
     
