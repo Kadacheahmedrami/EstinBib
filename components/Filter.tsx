@@ -6,23 +6,25 @@ import RadioButton from "@/components/radioInput/radiobutton"
 import { X } from "lucide-react"
 import { FilterState, FilterProps } from "@/types/_types"
 
-export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilterChange }: FilterProps) {
-  const [filters, setFilters] = useState<FilterState>({
-    schoolYear: [],
-    size: "",
-    availability: "",
-    documentType: [],
-    language: [],
-    periodicType: [],
-    categories: [], // New: added categories
-    q: "", // New: added search query
-  })
+// Define the initial filters as a constant
+const initialFilters: FilterState = {
+  schoolYear: [],
+  size: "",
+  availability: "",
+  documentType: [],
+  language: [],
+  periodicType: [],
+  categories: [],
+  q: "",
+}
 
+export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilterChange }: FilterProps) {
+  const [filters, setFilters] = useState<FilterState>(initialFilters)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 992)
+      setIsMobile(window.innerWidth <= 1044)
     }
 
     window.addEventListener("resize", handleResize)
@@ -58,8 +60,7 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
     })
   }
 
-  // Each handler now uses updateFilters to update the state and apply the filter
-
+  // Handlers for each filter change
   const handleYearChange = (subject: string, checked: boolean) => {
     updateFilters(prev => ({
       ...prev,
@@ -104,7 +105,6 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
     }))
   }
 
-  // New: Handle categories change
   const handleCategoriesChange = (category: string, checked: boolean) => {
     updateFilters(prev => ({
       ...prev,
@@ -114,13 +114,11 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
     }))
   }
 
-
-
-  // The manual apply button remains as an option
-  const handleApplyFilter = () => {
-    console.log("Applied filters:", filters)
+  // Reset filter: reset the state to initial values and apply the change.
+  const handleResetFilter = () => {
+    setFilters(initialFilters)
     if (onFilterChange) {
-      onFilterChange(filters)
+      onFilterChange(initialFilters)
     }
     if (isMobile && onClose) {
       onClose()
@@ -131,15 +129,12 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
     <>
       {/* Overlay for Mobile */}
       {isMobile && isMobileOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={onClose}
-        />
+    <></>
       )}
 
       {/* Sidebar */}
       <div
-        className={`w-full z-[20]  bg-[#F8F8F8] p-6 rounded-r-[15px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 overflow-y-auto custom-scrollbar transition-transform duration-300 ${
+        className={` z-[20] bg-[#F8F8F8] min-w-[240px] p-6 rounded-r-[15px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100  overflow-x-auto overflow-y-auto custom-scrollbar transition-transform duration-300 ${
           isMobile
             ? isMobileOpen
               ? "fixed inset-y-0 left-0 z-50 transform translate-x-0"
@@ -177,7 +172,7 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
 
         {/* Filter sections */}
         <div className="space-y-8">
-          {/* New: Categories Section */}
+          {/* Categories Section */}
           <FilterSection title="Categories">
             {["Business", "Commerce", "Science", "Technology", "Arts", "Literature"].map((category, index) => (
               <CheckboxItem
@@ -271,19 +266,19 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
           </FilterSection>
         </div>
 
-        {/* Apply Filter Button */}
+        {/* Reset Filter Button */}
         <button
           className="w-full py-3 bg-[#F1413E] text-white font-semibold rounded-lg transition-all hover:bg-[#F1412E] mt-8"
-          onClick={handleApplyFilter}
+          onClick={handleResetFilter}
         >
-          Apply Filters
+          Reset Filters
         </button>
       </div>
     </>
   )
 }
 
-// Helper components remain the same as in the previous implementation
+// Helper components remain the same
 const FilterSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div>
     <h3 className="text-lg font-semibold mb-4 text-gray-700 uppercase tracking-wide">{title}:</h3>

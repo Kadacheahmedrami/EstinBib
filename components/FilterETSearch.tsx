@@ -219,8 +219,8 @@ export default function ParentComponent({ books }: ParentComponentProps) {
         />
       </div>
 
-      <div className="grid grid-cols-12 gap-5 mt-[100px] md:flex-row w-full">
-        <div className="col-span-2">
+      <div className="grid grid-cols-12 gap-5 mt-24 md:flex-row w-full">
+        <div className="col-span-0    lg:col-span-2">
           <BookFilter
             isMobileOpen={isFilterOpen}
             onClose={() => setIsFilterOpen(false)}
@@ -228,7 +228,7 @@ export default function ParentComponent({ books }: ParentComponentProps) {
             onFilterChange={handleFilterChange}
           />
         </div>
-        <div className="col-span-10  ">
+        <div className="col-span-12   lg:col-span-10  ">
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <p className="text-xl font-medium text-gray-600">

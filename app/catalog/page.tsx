@@ -14,7 +14,7 @@ export default async function Catalog() {
         subTitle="Welcome to Biblio Estin, the online platform of ESTIN's Higher School of Computer Science Library Here"
       />
       <div
-        className="absolute bg-red-400 z-[-1] h-[450px] w-full"
+        className="absolute bg-red-400 z-[-1] h-[55.5vh] w-full"
         style={{
           backgroundImage: `url('/jpg/hero.png')`,
           backgroundSize: 'cover',

@@ -13,10 +13,11 @@ const BookCard = ({ id, title, author, description, size, available, coverImage 
   };
 
   return (
-    <div
-      className="bg-white rounded-2xl  shadow-lg overflow-hidden transition-transform duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col"
-      onClick={handleClick}
-    >
+<div
+  className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-500 ease-out cursor-pointer flex flex-col hover:shadow-2xl hover:translate-y-[-5px] hover:scale-[1.03]"
+  onClick={handleClick} 
+>
+
       {/* Book Cover */}
       <div className="relative w-full aspect-[1/1.4142] border-b rounded-t-2xl overflow-hidden">
       <Image
