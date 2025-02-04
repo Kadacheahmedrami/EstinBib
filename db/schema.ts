@@ -19,6 +19,7 @@ export const users = pgTable("user", {
     .$defaultFn(() => createId()),
   name: varchar("name").notNull(),
   email: varchar("email").notNull().unique(),
+  password: varchar("password"),
   emailVerified: timestamp("emailVerified"),
   image: varchar("image"),
   role: roleEnum("role").notNull().default("STUDENT"),
