@@ -39,7 +39,6 @@ export default async function BookPage({ params }: PageProps) {
   // Fetch the main book data
   const book = await bookDetails(id);
 
-  console.log(book);
 
   const randomBooks1 = await getRandomBooks();
   const randomBooks2 = await getRandomBooks();

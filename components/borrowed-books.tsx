@@ -55,12 +55,15 @@ const BorrowedBooks = ({ books }: BorrowedBooksProps) => {
               style={{ scrollSnapAlign: "start" }}
             >
               <BookCard
+                id={book.id}
                 coverImage={book.coverImage}
                 title={book.title}
                 dateBorrowed={book.borrowedAt.toDateString()}
                 dueDate={book.dueDate.toDateString()}
                 status={book.dueDate < new Date() ? "true" : "false"}
                 description={book.description}
+                actionType="renew"
+                
               />
             </div>
           ))}

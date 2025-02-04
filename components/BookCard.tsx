@@ -21,14 +21,13 @@ const BookCard = ({ id, title, author, description, size, available, coverImage 
       {/* Book Cover */}
       <div className="relative w-full aspect-[1/1.4142] border-b rounded-t-2xl overflow-hidden">
       <Image
-        src={coverImage || "/default-book.jpg"}
-        alt={title || "cover"}
-        layout="fill"
-        // objectFit="cover"
-        objectPosition="top"
-        className="transition-transform duration-300 group-hover:scale-110  object-contain"
-        priority
-      />
+      src={coverImage || "/default-book.jpg"}
+      alt={title || "bookcover"}
+      fill // Replaces layout="fill"
+      style={{ objectFit: "contain", objectPosition: "top" }} // Updated objectFit & objectPosition
+      className="transition-transform duration-300 group-hover:scale-110"
+    />
+
         {/* Availability Badge */}
         <span className={`absolute top-4 left-4 px-3 py-1 text-sm font-semibold rounded-full ${available ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
           {available ? <Check size={16} className="inline-block mr-1" /> : <X size={16} className="inline-block mr-1" />}

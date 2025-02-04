@@ -52,13 +52,14 @@ const BookCard: React.FC<RecentBooks> = ({
       }`}
     >
       <div className="w-[90%] mx-auto h-[450px] relative">
-        <Image
-          src={coverImage && coverImage !== "" ? coverImage : "/svg/display.svg"}
-          alt={title}
-          layout="fill"
-          objectFit="cover"
-          className="rounded-lg transition-all duration-500 ease-in-out"
-        />
+      <Image
+      src={coverImage && coverImage !== "" ? coverImage : "/svg/display.svg"}
+      alt={title}
+      fill // Replaces layout="fill"
+      style={{ objectFit: "cover" }} // Replaces objectFit="cover"
+      className="rounded-lg transition-all duration-500 ease-in-out"
+    />
+
       </div>
       <div className="p-4">
         <h3 className="font-bold text-xl mb-2 truncate">{title}</h3>

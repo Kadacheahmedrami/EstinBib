@@ -12,7 +12,9 @@ export default async function Profile() {
     redirect("/auth/login");
   }
   const borrowHistory = await borrowsHistory();
+ 
   const activeBorrows = await getActiveBorrows();
+ 
   return (
     <main className="flex w-full flex-col">
       <UserInfo />
@@ -21,7 +23,7 @@ export default async function Profile() {
           <h3 className="font-bold text-[30px]">My Borrowed Books :</h3>
           <div className="bg-black mt-2 h-[2px] w-[70%]"></div>
         </div>
-        <BorrowedBooks key={1} books={activeBorrows} />
+        <BorrowedBooks key={1} books={activeBorrows}  />
 
         <div className="w-full flex justify-center items-center gap-[70px] flex-row">
           <h3 className="font-bold text-[30px]">My Borrow History</h3>

@@ -33,6 +33,7 @@ export async function getActiveBorrows() {
 
   return await db
     .select({
+      id:books.id,
       title: books.title,
       borrowedAt: borrows.borrowedAt,
       dueDate: borrows.dueDate,
@@ -53,6 +54,7 @@ export async function borrowsHistory() {
 
   return await db
     .select({
+      id:books.id,
       title: books.title,
       borrowedAt: borrows.borrowedAt,
       dueDate: borrows.dueDate,

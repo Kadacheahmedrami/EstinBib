@@ -206,10 +206,17 @@ export default function ParentComponent({ books }: ParentComponentProps) {
     }
   }, [searchInput, filterParams]);
 
+  const [isInitialRender, setIsInitialRender] = useState(true);
+
   // EFFECT: Scroll to the top whenever filteredBooks change.
-  useEffect(() => {
+useEffect(() => {
+  if (isInitialRender) {
+    setIsInitialRender(false);
+  } else {
     window.scrollTo({ top: 450, behavior: "smooth" });
-  }, [filteredBooks]);
+  }
+}, [filteredBooks]);
+
 
   // Handlers for search and filter changes.
   const handleSearch = (input: string) => {

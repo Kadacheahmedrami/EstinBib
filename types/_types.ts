@@ -20,6 +20,7 @@ export interface Book extends BaseBook {
 }
 
 export interface BorrowedBook {
+  id : string;
   description: string;
   title: string;
   dateBorrowed: string;
@@ -93,6 +94,7 @@ export interface CheckboxProps {
 }
 
 export interface ActiveBorrows {
+  id:string;
   title: string;
   borrowedAt: Date;
   dueDate: Date;
@@ -101,6 +103,7 @@ export interface ActiveBorrows {
 }
 
 export interface BooksHistory {
+  id:string;
   title: string;
   borrowedAt: Date;
   dueDate: Date;
