@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -118,73 +117,72 @@ export default function ParentComponent({ books }: ParentComponentProps) {
   /**
    * Performs the API search (or fetches all books if no parameters exist).
    */
-const fetchSearchResults = async () => {
-  const searchParameters: Record<string, string | string[]> = {};
+  const fetchSearchResults = async () => {
+    const searchParameters: Record<string, string | string[]> = {};
 
-  // Check if search input is provided, otherwise show all books.
-  if (searchInput.trim()) {
-    searchParameters.q = searchInput;
-  }
-  
-  if (filterParams.size) {
-    const cleanSize = filterParams.size
-      .replace(/\s+pages/g, "")
-      .replace(/\s*-\s*/g, "-")
-      .replace(/\s*\+\s*/g, "-");
-    searchParameters.size = cleanSize;
-  }
-  
-  if (filterParams.availability) {
-    searchParameters.available = filterParams.availability === "Available" ? "true" : "false";
-  }
-  
-  if (filterParams.categories.length) {
-    searchParameters.categories = filterParams.categories;
-  }
-  
-  if (filterParams.schoolYear.length) {
-    searchParameters.schoolYear = filterParams.schoolYear;
-  }
-  
-  if (filterParams.documentType.length) {
-    searchParameters.documentType = filterParams.documentType;
-  }
-  
-  if (filterParams.language.length) {
-    searchParameters.language = filterParams.language;
-  }
-  
-  if (filterParams.periodicType.length) {
-    searchParameters.periodicType = filterParams.periodicType;
-  }
+    // Check if search input is provided, otherwise show all books.
+    if (searchInput.trim()) {
+      searchParameters.q = searchInput;
+    }
+    
+    if (filterParams.size) {
+      const cleanSize = filterParams.size
+        .replace(/\s+pages/g, "")
+        .replace(/\s*-\s*/g, "-")
+        .replace(/\s*\+\s*/g, "-");
+      searchParameters.size = cleanSize;
+    }
+    
+    if (filterParams.availability) {
+      searchParameters.available = filterParams.availability === "Available" ? "true" : "false";
+    }
+    
+    if (filterParams.categories.length) {
+      searchParameters.categories = filterParams.categories;
+    }
+    
+    if (filterParams.schoolYear.length) {
+      searchParameters.schoolYear = filterParams.schoolYear;
+    }
+    
+    if (filterParams.documentType.length) {
+      searchParameters.documentType = filterParams.documentType;
+    }
+    
+    if (filterParams.language.length) {
+      searchParameters.language = filterParams.language;
+    }
+    
+    if (filterParams.periodicType.length) {
+      searchParameters.periodicType = filterParams.periodicType;
+    }
 
-  // Update the URL with these parameters.
-  updateUrlParams(searchParameters);
+    // Update the URL with these parameters.
+    updateUrlParams(searchParameters);
 
-  // If searchInput is empty, return all books without any filters applied.
-  if (!searchInput.trim() && Object.keys(searchParameters).length === 0) {
-    setFilteredBooks(books);
-    return;
-  }
+    // If searchInput is empty, return all books without any filters applied.
+    if (!searchInput.trim() && Object.keys(searchParameters).length === 0) {
+      setFilteredBooks(books);
+      return;
+    }
 
-  try {
-    setIsLoading(true);
-    const queryString = new URLSearchParams(
-      Object.entries(searchParameters).map(([key, value]) =>
-        Array.isArray(value) ? [key, value.join("+")] : [key, String(value)]
-      )
-    ).toString();
+    try {
+      setIsLoading(true);
+      const queryString = new URLSearchParams(
+        Object.entries(searchParameters).map(([key, value]) =>
+          Array.isArray(value) ? [key, value.join("+")] : [key, String(value)]
+        )
+      ).toString();
 
-    const response = await API.get(`/api/search?${queryString}`);
-    setFilteredBooks(response.data.books);
-  } catch (error) {
-    console.error("Error fetching search results:", error);
-    setFilteredBooks(books);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+      const response = await API.get(`/api/search?${queryString}`);
+      setFilteredBooks(response.data.books);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      setFilteredBooks(books);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // EFFECT: On mount, check if there is a "q" parameter. If not, reset filters.
   useEffect(() => {
@@ -208,21 +206,23 @@ const fetchSearchResults = async () => {
     }
   }, [searchInput, filterParams]);
 
+  // EFFECT: Scroll to the top whenever filteredBooks change.
+  useEffect(() => {
+    window.scrollTo({ top: 450, behavior: "smooth" });
+  }, [filteredBooks]);
+
   // Handlers for search and filter changes.
   const handleSearch = (input: string) => {
     setSearchInput(input);
     // Update the filter's q as well.
-   
-      if(input=='')
-      {
-        console.log("damn")
-        setFilterParams(prev => ({ ...prev, q: 'for some reason this works' }));
-      }
-      else{
-        setFilterParams(prev => ({ ...prev, q: input }));
-      }
-  
+    if (input === '') {
+      console.log("damn")
+      setFilterParams(prev => ({ ...prev, q: 'for some reason this works' }));
+    } else {
+      setFilterParams(prev => ({ ...prev, q: input }));
+    }
   };
+
   const handleFilterChange = (params: FilterState) => {
     setFilterParams(params);
   };
