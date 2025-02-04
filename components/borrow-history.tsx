@@ -35,9 +35,9 @@ const BorrowHistory = ({ books }: BorrowHistoryProps) => {
     <div className="w-full p-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {books.slice(0, visibleBooks).map((book, index) => (
-           <div className="col-span-1 ">
+           <div   key={index}  className="col-span-1 ">
           <motion.div
-            key={index}
+          
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }} // Animation for each book
