@@ -1,12 +1,12 @@
-"use client"
-import type React from "react"
-import { useState, useEffect } from "react"
-import NeonCheckbox from "@/components/checkBox/checkbox"
-import RadioButton from "@/components/radioInput/radiobutton"
-import { X } from "lucide-react"
-import { FilterState, FilterProps } from "@/types/_types"
+"use client";
 
-// Define the initial filters as a constant
+import { useState, useEffect } from "react";
+import NeonCheckbox from "@/components/checkBox/checkbox";
+import RadioButton from "@/components/radioInput/radiobutton";
+import { X } from "lucide-react";
+import { FilterState, FilterProps } from "@/types/_types";
+
+// Define the initial filters as a constant.
 const initialFilters: FilterState = {
   schoolYear: [],
   size: "",
@@ -16,125 +16,122 @@ const initialFilters: FilterState = {
   periodicType: [],
   categories: [],
   q: "",
-}
+};
 
-export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilterChange }: FilterProps) {
-  const [filters, setFilters] = useState<FilterState>(initialFilters)
-  const [isMobile, setIsMobile] = useState(false)
+export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilterChange ,onResetFilters }: FilterProps) {
+  const [filters, setFilters] = useState<FilterState>(initialFilters);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1044)
-    }
+      setIsMobile(window.innerWidth <= 1044);
+    };
 
-    window.addEventListener("resize", handleResize)
-    handleResize()
+    window.addEventListener("resize", handleResize);
+    handleResize();
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [])
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     if (filterParams) {
       setFilters(prevFilters => ({
         ...prevFilters,
-        ...filterParams
-      }))
+        ...filterParams,
+      }));
     }
-  }, [filterParams])
-
+  }, [filterParams]);
+  
   // Helper: update filters state and immediately apply the changes.
   const updateFilters = (updater: (prev: FilterState) => FilterState) => {
     setFilters(prev => {
-      const newFilters = updater(prev)
-      // Immediately apply the new filters
+      const newFilters = updater(prev);
       if (onFilterChange) {
-        onFilterChange(newFilters)
+        onFilterChange(newFilters);
       }
-      // If on mobile, close the filter sidebar
       if (isMobile && onClose) {
-        onClose()
+        onClose();
       }
-      return newFilters
-    })
-  }
+      return newFilters;
+    });
+  };
 
-  // Handlers for each filter change
+  // Handlers for each filter change.
   const handleYearChange = (subject: string, checked: boolean) => {
     updateFilters(prev => ({
       ...prev,
-      schoolYear: checked 
-        ? [...prev.schoolYear, subject] 
-        : prev.schoolYear.filter(item => item !== subject)
-    }))
-  }
+      schoolYear: checked ? [...prev.schoolYear, subject] : prev.schoolYear.filter(item => item !== subject),
+    }));
+  };
 
   const handleSizeChange = (size: string) => {
-    updateFilters(prev => ({ ...prev, size }))
-  }
+    updateFilters(prev => ({ ...prev, size }));
+  };
 
   const handleAvailabilityChange = (availability: string) => {
-    updateFilters(prev => ({ ...prev, availability }))
-  }
+    updateFilters(prev => ({ ...prev, availability }));
+  };
 
   const handleDocumentTypeChange = (type: string, checked: boolean) => {
     updateFilters(prev => ({
       ...prev,
-      documentType: checked 
-        ? [...prev.documentType, type] 
-        : prev.documentType.filter(item => item !== type)
-    }))
-  }
+      documentType: checked ? [...prev.documentType, type] : prev.documentType.filter(item => item !== type),
+    }));
+  };
 
   const handleLanguageChange = (lang: string, checked: boolean) => {
     updateFilters(prev => ({
       ...prev,
-      language: checked 
-        ? [...prev.language, lang] 
-        : prev.language.filter(item => item !== lang)
-    }))
-  }
+      language: checked ? [...prev.language, lang] : prev.language.filter(item => item !== lang),
+    }));
+  };
 
   const handlePeriodicTypeChange = (type: string, checked: boolean) => {
     updateFilters(prev => ({
       ...prev,
-      periodicType: checked 
-        ? [...prev.periodicType, type] 
-        : prev.periodicType.filter(item => item !== type)
-    }))
-  }
+      periodicType: checked ? [...prev.periodicType, type] : prev.periodicType.filter(item => item !== type),
+    }));
+  };
 
   const handleCategoriesChange = (category: string, checked: boolean) => {
     updateFilters(prev => ({
       ...prev,
-      categories: checked 
-        ? [...prev.categories, category] 
-        : prev.categories.filter(item => item !== category)
-    }))
-  }
+      categories: checked ? [...prev.categories, category] : prev.categories.filter(item => item !== category),
+    }));
+  };
 
   // Reset filter: reset the state to initial values and apply the change.
   const handleResetFilter = () => {
-    setFilters(initialFilters)
+    // Reset local filters to initial values.
+    setFilters(initialFilters);
+    
+    // Notify the parent about the filter change.
     if (onFilterChange) {
-      onFilterChange(initialFilters)
+      onFilterChange(initialFilters);
     }
+    
+    // Call the parent's reset function if it exists.
+    if (onResetFilters) {
+      onResetFilters();
+    }
+    
+    // Close the sidebar on mobile devices.
     if (isMobile && onClose) {
-      onClose()
+      onClose();
     }
-  }
+  };
+  
 
   return (
     <>
       {/* Overlay for Mobile */}
-      {isMobile && isMobileOpen && (
-    <></>
-      )}
+      {isMobile && isMobileOpen && <></>}
 
       {/* Sidebar */}
       <div
-        className={` z-[20] bg-[#F8F8F8] min-w-[240px] p-6 rounded-r-[15px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100  overflow-x-auto overflow-y-auto custom-scrollbar transition-transform duration-300 ${
+        className={`z-[20] bg-[#F8F8F8] min-w-[240px] p-6 rounded-r-[15px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 overflow-x-auto overflow-y-auto custom-scrollbar transition-transform duration-300 ${
           isMobile
             ? isMobileOpen
               ? "fixed inset-y-0 left-0 z-50 transform translate-x-0"
@@ -239,7 +236,7 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
 
           {/* Size Section */}
           <FilterSection title="Size">
-            {["0 - 250 pages", "250 - 500 pages", "500 - 750 pages", "More than 750 pages"].map((size, index) => (
+            {["0 - 250 pages", "250 - 500 pages", "500 - 750 pages", "750 - 1000 pages"].map((size, index) => (
               <RadioItem
                 key={index}
                 id={`size-${index}`}
@@ -275,23 +272,23 @@ export default function BookFilter({ isMobileOpen, onClose, filterParams, onFilt
         </button>
       </div>
     </>
-  )
+  );
 }
 
-// Helper components remain the same
+// Helper components.
 const FilterSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div>
     <h3 className="text-lg font-semibold mb-4 text-gray-700 uppercase tracking-wide">{title}:</h3>
     <div className="space-y-3">{children}</div>
   </div>
-)
+);
 
-const CheckboxItem: React.FC<{ id: string; checked: boolean; onChange: (checked: boolean) => void; label: string }> = ({
-  id,
-  checked,
-  onChange,
-  label,
-}) => (
+const CheckboxItem: React.FC<{
+  id: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+}> = ({ id, checked, onChange, label }) => (
   <div className="flex items-center group cursor-pointer">
     <NeonCheckbox id={id} checked={checked} onChange={onChange} />
     <label
@@ -301,15 +298,15 @@ const CheckboxItem: React.FC<{ id: string; checked: boolean; onChange: (checked:
       {label}
     </label>
   </div>
-)
+);
 
-const RadioItem: React.FC<{ id: string; checked: boolean; onChange: () => void; label: string; name: string }> = ({
-  id,
-  checked,
-  onChange,
-  label,
-  name,
-}) => (
+const RadioItem: React.FC<{
+  id: string;
+  checked: boolean;
+  onChange: () => void;
+  label: string;
+  name: string;
+}> = ({ id, checked, onChange, label, name }) => (
   <div className="flex items-center group cursor-pointer">
     <RadioButton id={id} checked={checked} onChange={onChange} name={name} value={label} label="" />
     <label
@@ -319,4 +316,4 @@ const RadioItem: React.FC<{ id: string; checked: boolean; onChange: () => void; 
       {label}
     </label>
   </div>
-)
+);

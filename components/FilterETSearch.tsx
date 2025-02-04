@@ -1,6 +1,6 @@
-/* eslint-disable */
 
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/components/searchBar";
@@ -19,7 +19,7 @@ interface NoResultsMessageProps {
 }
 
 const NoResultsMessage = ({ title, subtitle }: NoResultsMessageProps) => (
-  <div className="flex flex-col justify-center items-center h-64 text-center p-4">
+  <div className="flex flex-col justify-center items-center h-screen text-center p-4">
     <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4">
       {title}
     </h2>
@@ -33,7 +33,7 @@ export default function ParentComponent({ books }: ParentComponentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Default empty filter state
+  // Default empty filter state.
   const DEFAULT_FILTER_STATE: FilterState = {
     schoolYear: [],
     size: "",
@@ -45,7 +45,7 @@ export default function ParentComponent({ books }: ParentComponentProps) {
     q: "",
   };
 
-  // Initialize state from URL parameters
+  // Initialize state from URL parameters.
   const [searchInput, setSearchInput] = useState(searchParams.get("q") || "");
   const [filteredBooks, setFilteredBooks] = useState<Book[]>(books);
   const [filterParams, setFilterParams] = useState<FilterState>({
@@ -61,7 +61,11 @@ export default function ParentComponent({ books }: ParentComponentProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Updates the URL parameters without reloading the page.
+  /**
+   * Updates the URL parameters without reloading the page.
+   *
+   * @param params - An object representing the query parameters to include.
+   */
   const updateUrlParams = (params: {
     q?: string;
     size?: string;
@@ -83,90 +87,106 @@ export default function ParentComponent({ books }: ParentComponentProps) {
       ) {
         return;
       } else if (Array.isArray(value)) {
-        // For categories use '+' separator, otherwise comma
+        // Use the '+' separator for categories, otherwise comma.
         newParams.set(key, key === "categories" ? value.join("+") : value.join(","));
       } else {
         newParams.set(key, value);
       }
     });
 
+    // Replace the URL without a page reload.
     router.replace(`?${newParams.toString()}`, { scroll: false });
   };
 
-  // Resets all filters and clears URL parameters.
+  /**
+   * Reset filters so that all filter query parameters are cleared from the URL except for the "q" parameter.
+   */
   const handleResetFilters = () => {
-    setSearchInput("");
-    setFilterParams(DEFAULT_FILTER_STATE);
+    // Preserve the current search query ("q").
+    const preservedQuery = filterParams.q;
+
+    // Reset the filter parameters, but keep the "q" value.
+    setFilterParams({ ...DEFAULT_FILTER_STATE, q: preservedQuery });
+
+    // Reset the book list to the original set.
     setFilteredBooks(books);
 
-    // Clear the URL query string.
-    router.replace("", { scroll: false });
+    // Update the URL to include only the "q" parameter (if present).
+    updateUrlParams({ q: preservedQuery });
   };
 
-  // Performs the API search (or shows the full list if no parameters exist).
-  const fetchSearchResults = async () => {
-    const searchParameters: Record<string, string | string[]> = {};
+  /**
+   * Performs the API search (or fetches all books if no parameters exist).
+   */
+const fetchSearchResults = async () => {
+  const searchParameters: Record<string, string | string[]> = {};
 
-    if (searchInput.trim()) {
-      searchParameters.q = searchInput;
-    }
-    if (filterParams.size) {
-      // Clean up the size string.
-      const cleanSize = filterParams.size
-        .replace(/\s+pages/g, "")
-        .replace(/\s*-\s*/g, "-")
-        .replace(/\s*\+\s*/g, "-");
-      searchParameters.size = cleanSize;
-    }
-    if (filterParams.availability) {
-      searchParameters.available = filterParams.availability === "Available" ? "true" : "false";
-    }
-    if (filterParams.categories.length) {
-      searchParameters.categories = filterParams.categories;
-    }
-    if (filterParams.schoolYear.length) {
-      searchParameters.schoolYear = filterParams.schoolYear;
-    }
-    if (filterParams.documentType.length) {
-      searchParameters.documentType = filterParams.documentType;
-    }
-    if (filterParams.language.length) {
-      searchParameters.language = filterParams.language;
-    }
-    if (filterParams.periodicType.length) {
-      searchParameters.periodicType = filterParams.periodicType;
-    }
+  // Check if search input is provided, otherwise show all books.
+  if (searchInput.trim()) {
+    searchParameters.q = searchInput;
+  }
+  
+  if (filterParams.size) {
+    const cleanSize = filterParams.size
+      .replace(/\s+pages/g, "")
+      .replace(/\s*-\s*/g, "-")
+      .replace(/\s*\+\s*/g, "-");
+    searchParameters.size = cleanSize;
+  }
+  
+  if (filterParams.availability) {
+    searchParameters.available = filterParams.availability === "Available" ? "true" : "false";
+  }
+  
+  if (filterParams.categories.length) {
+    searchParameters.categories = filterParams.categories;
+  }
+  
+  if (filterParams.schoolYear.length) {
+    searchParameters.schoolYear = filterParams.schoolYear;
+  }
+  
+  if (filterParams.documentType.length) {
+    searchParameters.documentType = filterParams.documentType;
+  }
+  
+  if (filterParams.language.length) {
+    searchParameters.language = filterParams.language;
+  }
+  
+  if (filterParams.periodicType.length) {
+    searchParameters.periodicType = filterParams.periodicType;
+  }
 
-    // Update the URL with these parameters.
-    updateUrlParams(searchParameters);
+  // Update the URL with these parameters.
+  updateUrlParams(searchParameters);
 
-    // If no parameters were provided, show the original list.
-    if (Object.keys(searchParameters).length === 0) {
-      setFilteredBooks(books);
-      return;
-    }
+  // If searchInput is empty, return all books without any filters applied.
+  if (!searchInput.trim() && Object.keys(searchParameters).length === 0) {
+    setFilteredBooks(books);
+    return;
+  }
 
-    try {
-      setIsLoading(true);
-      // Build a query string ensuring arrays use the '+' separator.
-      const queryString = new URLSearchParams(
-        Object.entries(searchParameters).map(([key, value]) =>
-          Array.isArray(value) ? [key, value.join("+")] : [key, String(value)]
-        )
-      ).toString();
+  try {
+    setIsLoading(true);
+    const queryString = new URLSearchParams(
+      Object.entries(searchParameters).map(([key, value]) =>
+        Array.isArray(value) ? [key, value.join("+")] : [key, String(value)]
+      )
+    ).toString();
 
-      let response = await API.get(`/api/search?${queryString}`);
-      setFilteredBooks(response.data.books);
-    } catch (error) {
-      console.error("Error fetching search results:", error);
-      setFilteredBooks(books);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const response = await API.get(`/api/search?${queryString}`);
+    setFilteredBooks(response.data.books);
+  } catch (error) {
+    console.error("Error fetching search results:", error);
+    setFilteredBooks(books);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-  // EFFECT: On mount, check if there is a "q" parameter.
-  // Delay the reset until after the first render.
+
+  // EFFECT: On mount, check if there is a "q" parameter. If not, reset filters.
   useEffect(() => {
     setTimeout(() => {
       const initialQuery = searchParams.get("q");
@@ -174,11 +194,10 @@ export default function ParentComponent({ books }: ParentComponentProps) {
         handleResetFilters();
       }
     }, 0);
-  }, []); // run once on mount
+  }, []); // Run once on mount.
 
   // EFFECT: Whenever searchInput or filterParams change, perform a search.
   useEffect(() => {
-    // Only perform a search if any parameter is set.
     if (
       searchInput.trim() ||
       Object.values(filterParams).some(val =>
@@ -192,6 +211,17 @@ export default function ParentComponent({ books }: ParentComponentProps) {
   // Handlers for search and filter changes.
   const handleSearch = (input: string) => {
     setSearchInput(input);
+    // Update the filter's q as well.
+   
+      if(input=='')
+      {
+        console.log("damn")
+        setFilterParams(prev => ({ ...prev, q: 'for some reason this works' }));
+      }
+      else{
+        setFilterParams(prev => ({ ...prev, q: input }));
+      }
+  
   };
   const handleFilterChange = (params: FilterState) => {
     setFilterParams(params);
@@ -209,8 +239,8 @@ export default function ParentComponent({ books }: ParentComponentProps) {
   }
 
   return (
-    <div className="w-screen  mx-auto">
-      <div className="h-[150px] ">
+    <div className="w-screen mx-auto">
+      <div className="h-[150px]">
         <SearchBar
           searchInput={searchInput}
           onSearch={handleSearch}
@@ -220,50 +250,46 @@ export default function ParentComponent({ books }: ParentComponentProps) {
       </div>
 
       <div className="grid grid-cols-12 gap-5 mt-24 md:flex-row w-full">
-        <div className="col-span-0    lg:col-span-2">
+        <div className="col-span-0 lg:col-span-2">
           <BookFilter
             isMobileOpen={isFilterOpen}
             onClose={() => setIsFilterOpen(false)}
             filterParams={filterParams}
             onFilterChange={handleFilterChange}
+            onResetFilters={handleResetFilters}
           />
         </div>
-        <div className="col-span-12   lg:col-span-10  ">
+        <div className="col-span-12 lg:col-span-10">
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
-              <p className="text-xl font-medium text-gray-600">
-                Loading results...
-              </p>
+              <p className="text-xl font-medium text-gray-600">Loading results...</p>
             </div>
           ) : filteredBooks.length === 0 ? (
             <NoResultsMessage
               title="No Books Found"
               subtitle="No books found matching your search criteria. Please try different keywords or filters."
             />
-          ) : 
-          
-          (
-            <div className="container mx-auto px-10  justify-center">
- <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 p-4">
-              {filteredBooks.map((book, index) => (
-                <BookCard
-                  key={book.id || index}
-                  id={book.id}
-                  title={book.title}
-                  author={book.author}
-                  description={book.description}
-                  size={book.size}
-                  available={book.available}
-                  coverImage={book.coverImage}
-                  publishedAt={book.publishedAt || new Date()}
-                  addedAt={book.addedAt || null}
-                  language={book.language || ""}
-                  isbn={book.isbn}
-                />
-              ))}
+          ) : (
+            <div className="container mx-auto px-10 justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 p-4">
+                {filteredBooks.map((book, index) => (
+                  <BookCard
+                    key={book.id || index}
+                    id={book.id}
+                    title={book.title}
+                    author={book.author}
+                    description={book.description}
+                    size={book.size}
+                    available={book.available}
+                    coverImage={book.coverImage}
+                    publishedAt={book.publishedAt || new Date()}
+                    addedAt={book.addedAt || null}
+                    language={book.language || ""}
+                    isbn={book.isbn}
+                  />
+                ))}
+              </div>
             </div>
-            </div>
-           
           )}
         </div>
       </div>

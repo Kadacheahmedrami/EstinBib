@@ -62,6 +62,7 @@ export interface FilterProps {
   onClose?: () => void;
   filterParams: FilterState;
   onFilterChange?: (filters: FilterState) => void;
+  onResetFilters?: () => void; // <-- new prop
 }
 export interface BookFilterProps {
   isMobileOpen?: boolean;
