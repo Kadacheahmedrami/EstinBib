@@ -7,7 +7,7 @@ export default function PdfUnavailable() {
             Oops!
           </h1>
           <p className="text-xl text-gray-700 mb-8 max-w-md mx-auto">
-            We don't have access to the PDF at the moment. Please try again later.
+            We don t have access to the PDF at the moment. Please try again later.
           </p>
           <button className="mt-8 px-8 py-3 bg-[#F1413E] text-white text-lg font-semibold rounded-lg shadow-lg hover:bg-[#e02c26] focus:outline-none focus:ring-4 focus:ring-[#F1413E] focus:ring-opacity-50 transform transition-all duration-300 ease-in-out hover:scale-105">
             Go Back
