@@ -50,18 +50,7 @@
     transform-origin: center;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  
-  .neonCheckboxGlow {
-    position: absolute;
-    inset: -2px;
-    border-radius: 6px;
-    background: var(--primary);
-    opacity: 0;
-    filter: blur(8px);
-    transform: scale(1.2);
-    transition: all 0.4s ease;
-  }
-  
+
   .neonCheckboxBorders {
     position: absolute;
     inset: 0;
@@ -151,7 +140,7 @@
   /* Checked State */
   .neonCheckbox .hiddenInput:checked ~ .neonCheckboxFrame .neonCheckboxBox {
     border-color: var(--primary);
-    background: rgba(0, 255, 170, 0.1);
+  
   }
   
   .neonCheckbox .hiddenInput:checked ~ .neonCheckboxFrame .neonCheckboxCheck {
@@ -167,38 +156,8 @@
     opacity: 1;
   }
   
-  /* Particle Animations */
-  .neonCheckbox .hiddenInput:checked ~ .neonCheckboxFrame .neonCheckboxParticles span {
-    animation: particleExplosion 0.6s ease-out forwards;
-  }
-  
-  .neonCheckbox .hiddenInput:checked ~ .neonCheckboxFrame .neonCheckboxRings .ring {
-    animation: ringPulse 0.6s ease-out forwards;
-  }
-  
-  .neonCheckbox .hiddenInput:checked ~ .neonCheckboxFrame .neonCheckboxSparks span {
-    animation: sparkFlash 0.6s ease-out forwards;
-  }
-  
-  /* Animations */
-  @keyframes borderFlow1 {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(200%);
-    }
-  }
-  
-  @keyframes borderFlow2 {
-    0% {
-      transform: translateY(0);
-    }
-    100% {
-      transform: translateY(200%);
-    }
-  }
-  
+ 
+
   /* @keyframes borderFlow3 {
     0% {
       transform: translateX(0);
@@ -257,85 +216,4 @@
     }
   } */
   
-  /* Particle Positions */
-  .neonCheckboxParticles span:nth-child(1) {
-    --x: 25px;
-    --y: -25px;
-  }
-  .neonCheckboxParticles span:nth-child(2) {
-    --x: -25px;
-    --y: -25px;
-  }
-  .neonCheckboxParticles span:nth-child(3) {
-    --x: 25px;
-    --y: 25px;
-  }
-  .neonCheckboxParticles span:nth-child(4) {
-    --x: -25px;
-    --y: 25px;
-  }
-  .neonCheckboxParticles span:nth-child(5) {
-    --x: 35px;
-    --y: 0px;
-  }
-  .neonCheckboxParticles span:nth-child(6) {
-    --x: -35px;
-    --y: 0px;
-  }
-  .neonCheckboxParticles span:nth-child(7) {
-    --x: 0px;
-    --y: 35px;
-  }
-  .neonCheckboxParticles span:nth-child(8) {
-    --x: 0px;
-    --y: -35px;
-  }
-  .neonCheckboxParticles span:nth-child(9) {
-    --x: 20px;
-    --y: -30px;
-  }
-  .neonCheckboxParticles span:nth-child(10) {
-    --x: -20px;
-    --y: 30px;
-  }
-  .neonCheckboxParticles span:nth-child(11) {
-    --x: 30px;
-    --y: 20px;
-  }
-  .neonCheckboxParticles span:nth-child(12) {
-    --x: -30px;
-    --y: -20px;
-  }
-  
-  /* Spark Rotations */
-  .neonCheckboxSparks span:nth-child(1) {
-    --r: 0deg;
-    top: 50%;
-    left: 50%;
-  }
-  .neonCheckboxSparks span:nth-child(2) {
-    --r: 90deg;
-    top: 50%;
-    left: 50%;
-  }
-  .neonCheckboxSparks span:nth-child(3) {
-    --r: 180deg;
-    top: 50%;
-    left: 50%;
-  }
-  .neonCheckboxSparks span:nth-child(4) {
-    --r: 270deg;
-    top: 50%;
-    left: 50%;
-  }
-  
-  /* Ring Delays */
-  .neonCheckboxRings .ring:nth-child(1) {
-    animation-delay: 0s;
-  }
-  .neonCheckboxRings .ring:nth-child(2) {
-    animation-delay: 0.1s;
-  }
-  .neonCheckboxRings .ring:nth-child(3) {
-    animation-delay: 0.2s;
-  }
+ 

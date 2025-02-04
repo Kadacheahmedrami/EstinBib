@@ -4,7 +4,7 @@ import BookDetails from "@/components/BookDetails"; // Component for detailed vi
 import RelatedBooks from "@/components/RelatedBooks";
 import { getRandomBooks } from "@/app/actions/helper";
 import { bookDetails } from "@/app/actions/books";
-import Footer from '@/components/Foter';
+import Footer from "@/components/Foter";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -27,10 +27,8 @@ interface Book {
   language: string;
   available: boolean;
   publishedAt: Date;
-  categories: Category[]; // Ensure this matches expected type
+  categories: Category[];
 }
-
-
 
 export default async function BookPage({ params }: PageProps) {
   // Await the params before destructuring its properties.
@@ -39,19 +37,19 @@ export default async function BookPage({ params }: PageProps) {
   // Fetch the main book data
   const book = await bookDetails(id);
 
-
+  // Fetch two sets of random books for related sections
   const randomBooks1 = await getRandomBooks();
   const randomBooks2 = await getRandomBooks();
 
-  // If no book found, show an error message
+  // If no book is found, show an error message
   if (!book) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Book Not Found
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-base sm:text-lg">
             The requested book could not be found.
           </p>
         </div>
@@ -61,37 +59,41 @@ export default async function BookPage({ params }: PageProps) {
 
   return (
     <>
-      <main>
-        <div>
+      <main className=" py-8">
+        {/* Book Details Section */}
+        <section className="mb-12">
           <BookDetails book={book as Book} />
-          
-        </div>
-
+        </section>
 
         {/* Related Books Section */}
-        <div>
-          <div className="w-full flex justify-center items-center gap-[70px] flex-row">
-            <h3 className="font-bold text-[30px]">In the same section:</h3>
-            <div className="bg-black mt-2 h-[2px] w-[70%]" />
+        <section className="mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10 mb-4">
+            <h3 className="font-bold text-2xl sm:text-3xl text-center">
+              In the same section:
+            </h3>
+            <div className="hidden sm:block bg-gray-300 mt-2 h-1 w-1/2" />
           </div>
           <RelatedBooks
             scrollButtonType={1}
             containerId="book-container-detail"
             books={randomBooks1}
           />
-        </div>
+        </section>
 
-        <div>
-          <div className="w-full flex justify-center items-center gap-[70px] flex-row">
-            <h3 className="font-bold text-[30px]">You Might Like ::</h3>
-            <div className="bg-black mt-2 h-[2px] w-[70%]" />
+        {/* You Might Like Section */}
+        <section className="mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10 mb-4">
+            <h3 className="font-bold text-2xl sm:text-3xl text-center">
+              You Might Like ::
+            </h3>
+            <div className="hidden sm:block bg-gray-300 mt-2 h-1 w-1/2" />
           </div>
           <RelatedBooks
             scrollButtonType={1}
             containerId="book-container-detail"
             books={randomBooks2}
           />
-        </div>
+        </section>
       </main>
 
       <Footer />

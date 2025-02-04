@@ -14,22 +14,22 @@ const BookCard = ({ id, title, author, description, size, available, coverImage 
 
   return (
 <div
-  className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-500 ease-out cursor-pointer flex flex-col hover:shadow-2xl hover:translate-y-[-5px] hover:scale-[1.03]"
+  className="bg-white rounded-2xl p-2 shadow-lg overflow-hidden transition-all duration-500 ease-out cursor-pointer flex flex-col hover:shadow-2xl hover:translate-y-[-5px] hover:scale-[1.03]"
   onClick={handleClick} 
 >
 
       {/* Book Cover */}
-      <div className="relative w-full aspect-[1/1.4142] border-b rounded-t-2xl overflow-hidden">
+      <div className="relative w-full aspect-[1/1.5242]   border-b rounded-t-2xl overflow-hidden">
       <Image
       src={coverImage || "/default-book.jpg"}
       alt={title || "bookcover"}
       fill // Replaces layout="fill"
       style={{ objectFit: "contain", objectPosition: "top" }} // Updated objectFit & objectPosition
-      className="transition-transform duration-300 group-hover:scale-110"
+      className="transition-transform  rounded-[20px] duration-300 group-hover:scale-110"
     />
 
         {/* Availability Badge */}
-        <span className={`absolute top-4 left-4 px-3 py-1 text-sm font-semibold rounded-full ${available ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
+        <span className={`relative top-4 left-[-7px] px-3 py-[5px] text-sm font-semibold rounded-full ${available ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
           {available ? <Check size={16} className="inline-block mr-1" /> : <X size={16} className="inline-block mr-1" />}
           {available ? "Available" : "Not Available"}
         </span>

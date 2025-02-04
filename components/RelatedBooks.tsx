@@ -2,7 +2,12 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { ChevronLeftCircle, ChevronRightCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeftCircle,
+  ChevronRightCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import Link from "next/link";
 
 // --- BookCard Component ---
@@ -27,7 +32,7 @@ const BookCard: React.FC<RecentBooks> = ({
         });
       },
       {
-        threshold: 0, // 50% of the element must be visible to trigger the animation
+        threshold: 0, // Adjust as needed
       }
     );
 
@@ -45,21 +50,24 @@ const BookCard: React.FC<RecentBooks> = ({
   return (
     <div
       ref={cardRef}
-      className={`rounded-lg overflow-hidden   mx-8 flex-shrink-0 transition-all duration-700 ease-out transform ${
+      className={`rounded-lg overflow-hidden mx-8 flex-shrink-0 transition-all duration-700 ease-out transform ${
         isVisible
           ? "opacity-100 translateY-10 scale-100"
           : "opacity-0 translate-y-20 scale-90"
       }`}
     >
       <div className="w-[90%] mx-auto h-[450px] relative">
-      <Image
-      src={coverImage && coverImage !== "" ? coverImage : "/svg/display.svg"}
-      alt={title}
-      fill // Replaces layout="fill"
-      style={{ objectFit: "cover" }} // Replaces objectFit="cover"
-      className="rounded-lg transition-all duration-500 ease-in-out"
-    />
-
+        <Image
+          src={
+            coverImage && coverImage !== ""
+              ? coverImage
+              : "/svg/display.svg"
+          }
+          alt={title}
+          fill
+          style={{ objectFit: "cover" }}
+          className="rounded-lg transition-all duration-500 ease-in-out"
+        />
       </div>
       <div className="p-4">
         <h3 className="font-bold text-xl mb-2 truncate">{title}</h3>
@@ -112,7 +120,8 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({
       container.addEventListener("scroll", updateScrollButtons);
       updateScrollButtons();
 
-      return () => container.removeEventListener("scroll", updateScrollButtons);
+      return () =>
+        container.removeEventListener("scroll", updateScrollButtons);
     }
   }, [updateScrollButtons]);
 
@@ -120,7 +129,7 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({
     const container = containerRef.current;
     if (container) {
       const cardWidth = 380; // Adjust card width as needed
-      const scrollAmount = cardWidth;
+      const scrollAmount = cardWidth * 4; // Slide with four cards at a time
       container.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -139,7 +148,7 @@ const RelatedBooks: React.FC<RelatedBooksProps> = ({
       : "absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-[#EAF2EF] rounded-full p-3 shadow-[0px_6px_15px_rgba(0,0,0,0.3)] hover:bg-[#EAF3EF] transition-colors";
 
   return (
-    <div className="relative  w-full  overflow-hidden">
+    <div className="relative w-full overflow-hidden">
       {showLeftButton && (
         <button
           onClick={() => scroll("left")}
