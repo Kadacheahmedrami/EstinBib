@@ -6,8 +6,10 @@ import {
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/db";
-
+import { users } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 type UserRole = "STUDENT" | "LIBRARIAN";
 
 /**
@@ -63,6 +65,43 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "your-email@example.com",
+        },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Missing email or password");
+        }
+
+        // Example: Find the user in the database based on email.
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(
+            and(
+              eq(users.email, credentials.email),
+              eq(users.password, credentials.password)
+            )
+          );
+        if (!user) {
+          throw new Error("No user found with the given email");
+        }
+
+        // Return a user object on successful authentication.
+        return {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        };
+      },
     }),
   ],
 };
