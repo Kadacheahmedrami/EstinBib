@@ -1,6 +1,6 @@
 import Title from '@/components/Title';
-import ParentComponent from '@/components/FilterETSearch';
 
+import Catalogue from '@/components/Catalogue';
 import { getBooks } from '@/app/actions/books';
 import Footer from '@/components/Foter'
 // Catalog component expects the books prop to be an array of Book objects
@@ -22,7 +22,8 @@ export default async function Catalog() {
           backgroundRepeat: 'no-repeat',
         }}
       ></div>
-      <ParentComponent books={books} />
+      <Catalogue></Catalogue>
+    
       <Footer />
     </>
   );

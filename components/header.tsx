@@ -1,80 +1,106 @@
-
+"use client";
 import Link from "next/link";
-
 import { Session } from "next-auth";
 import './hover.css';
 import Image from "next/image";
-import DropdownImageMenu from "./Hamb"
-import ProfileDropdown from '@/components/profile'
+import { Menu, X } from "lucide-react";
+import { useState } from "react";
+import ProfileDropdown from '@/components/profile';
+
 interface HeaderProps {
   session?: Session | null;
 }
 
 const Header: React.FC<HeaderProps> = ({ session }) => {
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const mobilelinks = !session ? ["", "catalog", "contact-us", "auth/login"] : ["", "catalog", "contact-us", "profile"];
-  const links = ["", "catalog", "contact-us"] ;
+  const links = ["", "catalog", "contact-us"];
+
+  const toggleMenu = (): void => {
+    setMenuOpen(!menuOpen);
+  };
+
   return (
-    <nav className="h-[70px] fixed z-20  py-8 px-[7%] flex justify-center items-center w-full bg-white">
-    
-        {/* Logo - Preloaded image for faster load */}
-        <div   className="gap-2 mr-auto flex justify-center items-center text-[30px] font-bold"> 
-        <Link href={'/'} className="gap-2 mr-auto flex justify-center items-center text-[30px] font-bold">
-        <Image src="/svg/logo.svg" alt="logo" width={120} height={100} priority />
-      </Link>
-       
-    
+    <nav className="fixed z-20 w-full bg-white shadow-sm">
+      <div className="container mx-auto px-4">
+        <div className="flex h-[70px] items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2">
+            <Image 
+              src="/svg/logo.png" 
+              alt="logo" 
+              width={60} 
+              height={60} 
+              priority 
+              className="h-auto w-auto"
+            />
+          </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden lg:block">
+            <ul className="menu-list flex items-center space-x-8">
+              {links.map((menuItem, index) => (
+                <li key={index} className="menu-item">
+                  <Link href={`/${menuItem}`} className="menu-link">
+                    {menuItem === "" ? "Home" : menuItem}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden">
+            <button
+              onClick={toggleMenu}
+              className="p-2 rounded-md hover:bg-gray-100 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? (
+                <X className="h-6 w-6 text-gray-700" />
+              ) : (
+                <Menu className="h-6 w-6 text-gray-700" />
+              )}
+            </button>
+          </div>
+
+          {/* Desktop Buttons */}
+          <div className="hidden lg:block">
+            {session ? (
+              <ProfileDropdown session={session} />
+            ) : (
+              <Link href="/auth/login">
+                <button className="h-12 w-40 border-2 border-[#F1413E] text-[#F1413E] rounded-md bg-white transition-all hover:font-bold ease-in-out duration-100 hover:text-white hover:bg-[#F1413E]">
+                  Log In
+                </button>
+              </Link>
+            )}
+          </div>
         </div>
-     
 
-        {/* Desktop Navigation */}
-        <div className="hidden mr-auto lg:block">
-        <ul className="menu-list  ">
-        {links.map((menuItem, index) => (
-          <li key={index} className="menu-item">
-            <Link href={`/${menuItem}`} className="menu-link">
-              {
-              menuItem == '' ? 
-              "Home"
-              :
-              menuItem
-              }
-           
-            </Link>
-          </li>
-        ))}
-
-        </ul>
+        {/* Mobile Menu */}
+        <div
+          className={`lg:hidden absolute top-full left-0 w-full bg-white shadow-lg transition-all duration-300 ease-in-out ${
+            menuOpen 
+              ? "opacity-100 visible translate-y-0" 
+              : "opacity-0 invisible -translate-y-2"
+          }`}
+        >
+          <ul className="py-2">
+            {mobilelinks.map((linkName, index) => (
+              <li key={index}>
+                <Link
+                  href={`/${linkName}`}
+                  onClick={toggleMenu}
+                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-[#F1413E] transition-colors"
+                >
+                  {linkName === "" ? "Home" : linkName === "auth/login" ? "Login" : linkName}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-
-        <div className="lg:hidden flex ml-auto">  
-        <DropdownImageMenu links={mobilelinks} />
-        </div>
-       
-
-
-
-
-
-        {/* Desktop Buttons */}
-
-        <div className="hidden flex-row gap-6 lg:flex lg:items-center">
-          { session ?
-          <ProfileDropdown session={session}  />
-          :
-          <Link href="/auth/login">
-          <button className="h-12 w-40 border-2 border-[#F1413E] text-[#F1413E] rounded-md bg-white transition-all  hover:font-bold ease-in-out duration-100 hover:text-white hover:bg-[#F1413E] ">
-            Log In
-          </button>
-        </Link>
-          }
-     
-</div>
-
-          
-
-    
-     
-    
+      </div>
     </nav>
   );
 };
