@@ -1,12 +1,10 @@
 import Title from '@/components/Title';
 
 import Catalogue from '@/components/Catalogue';
-import { getBooks } from '@/app/actions/books';
 import Footer from '@/components/Foter'
 // Catalog component expects the books prop to be an array of Book objects
 
 export default async function Catalog() {
-  const books = await getBooks();
   return (
     <>
       <Title

@@ -25,24 +25,28 @@ const BookCard: React.FC<RecentBooks> = ({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setIsVisible(true); // Trigger animation when the element is in view
+            setIsVisible(true);
           } else {
-            setIsVisible(false); // Reset animation when the element goes out of view
+            setIsVisible(false);
           }
         });
       },
       {
-        threshold: 0, // Adjust as needed
+        threshold: 0,
       }
     );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
+  
+    // Store the current value in a variable inside the effect
+    const currentRef = cardRef.current;
+  
+    if (currentRef) {
+      observer.observe(currentRef);
     }
-
+  
     return () => {
-      if (cardRef.current) {
-        observer.unobserve(cardRef.current);
+      // Use the variable in the cleanup function
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, []);

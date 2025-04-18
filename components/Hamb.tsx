@@ -1,6 +1,5 @@
 "use client"
 import { useState } from "react";
-import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
 interface DropdownImageMenuProps {
@@ -13,7 +12,7 @@ const DropdownImageMenu: React.FC<DropdownImageMenuProps> = ({ links }) => {
   const toggleMenu = (): void => {
     setMenuOpen(!menuOpen);
   };
-
+  console.log(links)
   return (
     <div className="relative ">
       {/* Hamburger Menu Button */}

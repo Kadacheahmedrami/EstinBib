@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect, useCallback, useRef, memo } from "react"
+import { useState, useEffect, useCallback, useRef, memo, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, Filter, X } from "lucide-react"
 import NeonCheckbox from "@/components/checkBox/checkbox"
@@ -47,6 +47,7 @@ const KeywordItem = memo(
     </div>
   ),
 )
+KeywordItem.displayName = "KeywordItem"
 
 const FilterSection = memo(({ title, children }: { title: string; children: React.ReactNode }) => (
   <div>
@@ -54,6 +55,7 @@ const FilterSection = memo(({ title, children }: { title: string; children: Reac
     <div className="space-y-3">{children}</div>
   </div>
 ))
+FilterSection.displayName = "FilterSection"
 
 const CheckboxItem = memo(
   ({
@@ -78,6 +80,7 @@ const CheckboxItem = memo(
     </div>
   ),
 )
+CheckboxItem.displayName = "CheckboxItem"
 
 const RadioItem = memo(
   ({
@@ -104,6 +107,7 @@ const RadioItem = memo(
     </div>
   ),
 )
+RadioItem.displayName = "RadioItem"
 
 export default function Catalogue() {
   const router = useRouter()
@@ -181,29 +185,29 @@ export default function Catalogue() {
   }, [])
 
   // Create debounced search function
-  const debouncedSearch = useCallback(
-    debounce(async (params: Record<string, string | string[]>) => {
-      try {
-        setIsLoading(true)
-        const queryString = new URLSearchParams(
-          Object.entries(params).map(([key, value]) =>
-            Array.isArray(value) ? [key, value.join("+")] : [key, String(value)],
-          ),
-        ).toString()
+// Move the debounce call outside of useCallback
+const debouncedSearch = useMemo(() => {
+  return debounce(async (params: Record<string, string | string[]>) => {
+    try {
+      setIsLoading(true);
+      const queryString = new URLSearchParams(
+        Object.entries(params).map(([key, value]) =>
+          Array.isArray(value) ? [key, value.join("+")] : [key, String(value)],
+        ),
+      ).toString();
 
-        const response = await fetch(`/api/search?${queryString}`)
-        if (!response.ok) throw new Error("Failed to fetch books")
-        const data = await response.json()
-        setBooks(data.books)
-      } catch (error) {
-        console.error("Error fetching search results:", error)
-        setBooks([])
-      } finally {
-        setIsLoading(false)
-      }
-    }, 500),
-    [],
-  )
+      const response = await fetch(`/api/search?${queryString}`);
+      if (!response.ok) throw new Error("Failed to fetch books");
+      const data = await response.json();
+      setBooks(data.books);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      setBooks([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, 500);
+}, [setIsLoading, setBooks]);
 
   // Update URL parameters
   const updateUrlParams = useCallback(
@@ -327,7 +331,22 @@ export default function Catalogue() {
     if (filters.periodicType.length) initialParams.periodicType = filters.periodicType
 
     debouncedSearch(initialParams)
-  }, [])
+  }, [
+    debouncedSearch, 
+    filters.q, 
+    filters.size, 
+    filters.availability, 
+    filters.categories, 
+    filters.schoolYear, 
+    filters.documentType,
+    filters.language,
+    filters.periodicType
+  ])
+
+  // Function to toggle search suggestions visibility
+  const toggleSearchSuggestions = useCallback(() => {
+    setIsVisible(prev => !prev);
+  }, []);
 
   return (
     <div className="w-screen mx-auto">
@@ -356,12 +375,21 @@ export default function Catalogue() {
                 type="text"
                 placeholder="Search a name, category, or a module"
                 className="flex-1 bg-transparent outline-none px-4 text-sm placeholder-gray-500"
-                onClick={() => setIsFocused(true)}
-                onFocus={() => setIsFocused(true)}
+                onClick={() => {
+                  setIsFocused(true);
+                  toggleSearchSuggestions();
+                }}
+                onFocus={() => {
+                  setIsFocused(true);
+                  toggleSearchSuggestions();
+                }}
                 onBlur={(e) => {
                   const relatedTarget = e.relatedTarget as HTMLElement | null
                   if (!relatedTarget?.closest(".search-container")) {
-                    setTimeout(() => setIsFocused(false), 200)
+                    setTimeout(() => {
+                      setIsFocused(false);
+                      setIsVisible(false);
+                    }, 200)
                   }
                 }}
                 onChange={(e) => handleSearch(e.target.value)}
