@@ -27,12 +27,12 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <Image 
-              src="/svg/logo.png" 
+              src="/svg/logo.svg" 
               alt="logo" 
-              width={60} 
-              height={60} 
+              width={70} 
+              height={70} 
               priority 
-              className="h-auto w-auto"
+             
             />
           </Link>
 
