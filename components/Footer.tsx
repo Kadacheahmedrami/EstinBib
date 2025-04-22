@@ -1,8 +1,8 @@
 import React from 'react';
 import Image from "next/image";
-import LocationMapClient from '@/components/LocationMapClient';
+import LocationMapClient from '@/components/ui/map/LocationMapClient';
 import Link from 'next/link';
-import SocialIcons from '@/components/socialicons';
+import SocialIcons from '@/components/ui/footer-comps/socialicons';
 
 const Footer: React.FC = () => {
     const estinLatitude = 36.6636426;
@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-8 gap-8">
                 {/* Left Section: Logo and Address */}
                 <div className="col-span-1 md:col-span-2 flex flex-col items-start space-y-3">
-                    <Image src="/svg/estin.svg" alt="ESTIN Logo" width={200} height={200} className="mx-auto cursor-pointer" />
+                    <Image src="/svg/estin.svg" alt="ESTIN Logo" width={200} height={200} className="mr-auto cursor-pointer" />
                     <p className="text-[24px]">
                         <a href="tel:+21334824916" className="text-[24px] underline">
                             +213-34-824-916
@@ -35,12 +35,12 @@ const Footer: React.FC = () => {
                 {/* Middle Section: Address and Map */}
                 <div className="col-span-1 md:col-span-3 flex flex-col items-start ">
 
-                    <h3 className='text-2xl  font-bold bg-opacity-80 relative left-7  '>Adress :</h3>
-                <p className="text-[20px] relative left-7   ">
+                    <h3 className='text-2xl  font-bold bg-opacity-80 relative md:left-7  '>Adress :</h3>
+                <p className="text-[20px] relative md:left-7   ">
                         National road n° 75, Amizour 06300 Bejaia, Algeria
                     </p>
                    
-                    <div className='w-[80%] bottom-4 relative left-7 '>
+                    <div className='w-[80%]  z-[1] bottom-4 relative md:left-7 '>
                     <LocationMapClient 
                         latitude={estinLatitude} 
                         longitude={estinLongitude} 

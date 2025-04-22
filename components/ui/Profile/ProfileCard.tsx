@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { BorrowedBook } from "@/types/_types";
 import Link from "next/link"; // Import Link for navigation
-import '../hover.css';
+import '@/components/hover.css';
 interface BookCardProps extends BorrowedBook {
   actionType: "renew" | "viewMore";
 }

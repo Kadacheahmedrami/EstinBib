@@ -1,5 +1,5 @@
 
-import LoginLayout from '@/components/LoginLayout';
+import LoginLayout from '@/components/ui/auth/LoginLayout';
 
 interface MainLayoutProps {
   children: React.ReactNode;

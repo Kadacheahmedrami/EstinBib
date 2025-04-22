@@ -19,9 +19,7 @@ export default async function RootLayout({
  
   return (
     <html lang="en">
-      <head>
-        
-      </head>
+  
       <body className="min-h-screen bg-background font-sans antialiased">
         <Header session={session} />
         <div className='mt-[75px]'></div>

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import HeroLanding from "@/components/HeroLanding";
+import HeroLanding from "@/components/ui/home/HeroLanding";
 import RelatedBooks from "@/components/RelatedBooks";
 import { getMostBorrowedBooks, getRecentBooks } from "@/app/actions/books";
-import Footer from '@/components/Foter';
+import Footer from '@/components/Footer';
 
 export default async function Home() {
   const newBooks = await getRecentBooks();

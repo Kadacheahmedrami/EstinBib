@@ -1,6 +1,6 @@
 import { getUserInfo } from "@/app/actions/user";
 import { CircleUserRound } from "lucide-react";
-import Signout from "./signout";
+import Signout from "../auth/signout";
 
 
 const UserInfo = async () => {

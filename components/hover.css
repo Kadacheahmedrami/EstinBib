@@ -12,17 +12,19 @@
   .menu-item {
     margin: 0 1.5rem; /* Adjust spacing */
     white-space: nowrap;
-    font-weight: 500;
+    font-weight: 400;
     flex-shrink: 0;
   }
   
   /* Link Styling */
   .menu-link {
-    font-size: 1.25rem; /* Adjust size */
+  
+    font-size: 1.15rem; /* Adjust size */
     color: var(--main-color); /* Define --main-color in your CSS variables */
     text-decoration: none;
     position: relative; /* Needed for the ::after pseudo-element */
-    display: inline-block; /* Required for proper sizing */
+    display: flex ;
+    flex-direction: row;
     transition: color 0.3s ease;
   }
   

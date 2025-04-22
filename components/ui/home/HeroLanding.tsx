@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import LandingPageSearch from '@/components/seach-bar';
+import LandingPageSearch from '@/components/ui/home/HomeSearch';
 
 const HeroLanding: React.FC = () => {
   const stats = [

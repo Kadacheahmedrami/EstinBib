@@ -4,7 +4,7 @@ import BookDetails from "@/components/BookDetails"; // Component for detailed vi
 import RelatedBooks from "@/components/RelatedBooks";
 import { getRandomBooks } from "@/app/actions/helper";
 import { bookDetails } from "@/app/actions/books";
-import Footer from "@/components/Foter";
+import Footer from "@/components/Footer";
 
 interface PageProps {
   params: Promise<{ id: string }>;

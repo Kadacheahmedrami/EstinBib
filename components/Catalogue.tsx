@@ -5,9 +5,9 @@ import type React from "react"
 import { useState, useEffect, useCallback, useRef, memo, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, Filter, X } from "lucide-react"
-import NeonCheckbox from "@/components/checkBox/checkbox"
-import RadioButton from "@/components/radioInput/radiobutton"
-import BookCard from "@/components/BookCard"
+import NeonCheckbox from "@/components/ui/checkBox/checkbox"
+import RadioButton from "@/components/ui/radioInput/radiobutton"
+import BookCard from "@/components/ui/catalogue/BookCard"
 import type { FilterState, Book } from "@/types/_types"
 import debounce from "lodash.debounce"
 
@@ -354,7 +354,7 @@ const debouncedSearch = useMemo(() => {
       <div
         ref={searchBarRef}
         className={`w-full transition-all duration-300 ${
-          isSticky ? "fixed top-[70px] left-0 z-50 py-4 " : "relative"
+            isSticky ? "fixed top-[70px] left-0 z-[2] py-4 " : "relative"
         }`}
         style={{
           width: "100%",
@@ -365,7 +365,7 @@ const debouncedSearch = useMemo(() => {
         <div className="flex w-[100%] px-4 justify-center items-start gap-4 flex-row">
           <div className="flex flex-col mx-auto w-[80%] md:max-w-[800px]">
             <div
-              className={`flex shadow items-center h-[57px] w-full bg-[#F8F7F7] rounded-[22px] p-3 transition-all duration-300 ${
+              className={`flex shadow overflow-hidden items-center h-[57px] w-full bg-[#F8F7F7] rounded-[22px] p-3 transition-all duration-300 ${
                 isSticky ? "shadow-lg" : ""
               }`}
             >
@@ -373,7 +373,7 @@ const debouncedSearch = useMemo(() => {
                 ref={inputRef}
                 value={searchInput}
                 type="text"
-                placeholder="Search a name, category, or a module"
+                placeholder= "Search a name, category, or a module"
                 className="flex-1 bg-transparent outline-none px-4 text-sm placeholder-gray-500"
                 onClick={() => {
                   setIsFocused(true);
@@ -458,16 +458,16 @@ const debouncedSearch = useMemo(() => {
       <div className = {`h-[160px] w-full ${isSticky ? "" : "hidden"}`} >
             </div>
       {/* Main Content */}
-      <div className={`grid grid-cols-12 gap-5 ${isSticky ? "mt-32" : "mt-24"} md:flex-row w-full`}>
+      <div className={`grid grid-cols-12 gap-5 ${isSticky ? "mt-32" : "mt-0 md:mt-16"} md:flex-row w-full`}>
         {/* Filter Sidebar */}
         <div className="col-span-0 relative bottom-4 lg:col-span-2">
           <div
-            className={`z-[20] bg-[#F8F8F8] min-w-[240px] p-6 rounded-r-[15px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
+            className={`z-[3] bg-[#F8F8F8] min-w-[240px] p-6 rounded-r-[15px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
               border border-gray-100 overflow-x-auto overflow-y-auto custom-scrollbar transition-transform duration-300 ${
                 isMobile
                   ? isFilterOpen
-                    ? "fixed inset-y-0 left-0 z-50 transform translate-x-0"
-                    : "fixed inset-y-0 left-0 z-50 transform -translate-x-full"
+                    ? "fixed inset-y-0 left-0 z-[3] transform translate-x-0"
+                    : "fixed inset-y-0 left-0 z-[3] transform -translate-x-full"
                   : "sticky top-[100px] max-h-[calc(100vh-8rem)]"
               }`}
           >
@@ -634,7 +634,7 @@ const debouncedSearch = useMemo(() => {
         </div>
 
         {/* Results */}
-        <div className="col-span-12 lg:col-span-10">
+        <div className="col-span-12 w-full lg:col-span-10">
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <p className="text-xl font-medium text-gray-600">Loading results...</p>
@@ -646,7 +646,7 @@ const debouncedSearch = useMemo(() => {
             />
           ) : (
             <div className="container mx-auto px-10 justify-center">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 p-4">
+              <div className="grid grid-cols-1  z-[0] sm:grid-cols-2 lg:grid-cols-5 gap-8 p-4">
                 {books.map((book, index) => (
                   <BookCard
                     key={book.id || index}
