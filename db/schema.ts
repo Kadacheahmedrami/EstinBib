@@ -167,3 +167,25 @@ export const verificationTokens = pgTable(
   },
   (table) => [primaryKey({ columns: [table.identifier, table.token] })]
 );
+
+
+
+export const ideas = pgTable(
+  "idea",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    idea: varchar("idea", { length: 500 })
+      .notNull(),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("createdAt")
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idea_user_id_idx").on(table.userId),
+  ]
+);

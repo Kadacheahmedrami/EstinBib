@@ -1,9 +1,22 @@
 "use client";
+
 import Link from "next/link";
 import { Session } from "next-auth";
-import './hover.css';
 import Image from "next/image";
-import { Menu, X, ChevronDown } from "lucide-react";
+import {
+  Menu,
+  X,
+  ChevronDown,
+  Home,
+  MessageCircle,
+  BookOpen,
+  Mail,
+  Lightbulb,
+  Clock,
+  FileText,
+  Globe,
+  GraduationCap
+} from "lucide-react";
 import { useState } from "react";
 import ProfileDropdown from '@/components/profile';
 
@@ -16,64 +29,73 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
   const toggleMenu = (): void => setMenuOpen(prev => !prev);
 
   const navItems = [
-    { key: "chat", label: "Chat", href: "/Bot" },
-    { key: "home", label: "Home", href: "/" },
-    { key: "catalog", label: "Catalog", href: "/catalog" },
-    { key: "contact", label: "Contact Us", href: "/contact-us" },
-    { key: "ideas", label: "Ideas", href: "/ideas" },
+    { key: "home", label: "Home", href: "/", Icon: Home },
+    { key: "chat", label: "Chat", href: "/Bot", Icon: MessageCircle },
+    { key: "catalog", label: "Catalog", href: "/catalog", Icon: BookOpen },
+    { key: "contact", label: "Contact Us", href: "/contact-us", Icon: Mail },
+    { key: "ideas", label: "Ideas", href: "/ideas", Icon: Lightbulb },
     {
       key: "services",
       label: "Services",
       href: "#",
+      Icon: FileText,
       submenu: [
-        { key: "hours", label: "Library Hours", href: "/hours" },
-        { key: "loans", label: "My Loans", href: "/profile" },
-        { key: "sndl", label: "SNDL Portal", href: "https://sndl.cerist.dz" },
-        { key: "formation", label: "Formation", href: "/formation" },
-        { key: "ressources", label: "Ressources Utiles", href: "/ressources-utiles" }
+        { key: "hours", label: "Library Hours", href: "/hours", Icon: Clock },
+        { key: "loans", label: "My Loans", href: "/profile", Icon: BookOpen },
+        { key: "sndl", label: "SNDL Portal", href: "https://sndl.cerist.dz", Icon: Globe },
+        { key: "formation", label: "Formation", href: "/formation", Icon: GraduationCap },
+        { key: "ressources", label: "Ressources Utiles", href: "/ressources-utiles", Icon: FileText }
       ]
     }
   ];
 
   return (
     <>
-      <nav className="fixed top-0 left-0 z-30 w-full bg-white/80 backdrop-blur-lg shadow-sm">
+      <nav className="fixed top-0 left-0 z-[40] w-full bg-white backdrop-blur-lg shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex h-[70px] items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <Image src="/svg/logo.svg" alt="logo" width={70} height={70} priority />
             </Link>
 
-            <div className="hidden lg:flex items-center space-x-8">
+            <div className="hidden z-[4] lg:flex items-center space-x-8">
               {navItems.map(item => (
                 <div key={item.key} className="relative group">
                   <Link
                     href={item.href}
-                    className="menu-link flex flex-row items-center hover:text-gray-900 transition-colors py-2"
+                    className="flex items-center text-gray-700 text-lg font-normal py-2 relative transition-colors hover:text-[#F1413E] after:content-[''] after:absolute after:bottom-[-3px] after:left-0 after:w-0 after:h-0.5 after:bg-[#F1413E] after:transition-all group-hover:after:w-full"
                   >
+                    <item.Icon className="mr-2 h-5 w-5" />
                     {item.label}
                     {item.submenu && (
-                      <ChevronDown className="ml-1 h-4 w-4 flex flex-row text-gray-700 transition-transform group-hover:rotate-180" />
+                      <ChevronDown className="ml-1 h-4 w-4 transition-transform group-hover:rotate-180" />
                     )}
                   </Link>
+
                   {item.submenu && (
-                    <ul className="absolute left-0 mt-2 w-48 bg-white shadow-md rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-                      {item.submenu.map((sub) => (
+                    <ul
+                      className="absolute left-0 mt-1 w-48 bg-white shadow-md rounded-md
+                        opacity-0 group-hover:opacity-100 transition-opacity
+                        pointer-events-none group-hover:pointer-events-auto"
+                    >
+                      {item.submenu.map(sub => (
                         <li key={sub.key} className="border-b last:border-none">
                           {sub.href.startsWith('http') ? (
                             <a
                               href={sub.href}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="block px-4 py-2 hover:bg-gray-100"
+                              className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-[#F1413E] transition-colors"
                             >
+                              <sub.Icon className="mr-2 h-4 w-4" />
                               {sub.label}
                             </a>
                           ) : (
                             <Link
                               href={sub.href}
-                              className="block px-4 py-2 hover:bg-gray-100"
+                              className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-[#F1413E] transition-colors"
                             >
+                              <sub.Icon className="mr-2 h-4 w-4" />
                               {sub.label}
                             </Link>
                           )}
@@ -112,38 +134,41 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
 
       {/* Mobile Menu */}
       <div
-        className={`lg:hidden fixed top-[70px] left-0 w-full bg-white shadow-lg transition-all duration-300 ease-in-out ${
+        className={`lg:hidden fixed top-[70px] z-[4] left-0 w-full bg-white shadow-lg transition-all duration-300 ease-in-out ${
           menuOpen 
             ? "opacity-100 visible translate-y-0" 
             : "opacity-0 invisible -translate-y-2"
         }`}
       >
         <ul className="py-2">
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <li key={item.key}>
               {item.submenu ? (
                 <div className="space-y-1">
-                  <div className="px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-[#F1413E] transition-colors">
+                  <div className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-[#F1413E] transition-colors">
+                    <item.Icon className="mr-2 h-5 w-5" />
                     {item.label}
                   </div>
-                  <ul className="pl-4 space-y-1">
-                    {item.submenu.map((sub) => (
+                  <ul className="pl-8 space-y-1">
+                    {item.submenu.map(sub => (
                       <li key={sub.key}>
                         {sub.href.startsWith('http') ? (
                           <a
                             href={sub.href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="block px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-[#F1413E] transition-colors"
+                            className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-[#F1413E] transition-colors"
                           >
+                            <sub.Icon className="mr-2 h-4 w-4" />
                             {sub.label}
                           </a>
                         ) : (
                           <Link
                             href={sub.href}
                             onClick={toggleMenu}
-                            className="block px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-[#F1413E] transition-colors"
+                            className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-[#F1413E] transition-colors"
                           >
+                            <sub.Icon className="mr-2 h-4 w-4" />
                             {sub.label}
                           </Link>
                         )}
@@ -155,8 +180,9 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
                 <Link
                   href={item.href}
                   onClick={toggleMenu}
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-[#F1413E] transition-colors"
+                  className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-[#F1413E] transition-colors"
                 >
+                  <item.Icon className="mr-2 h-5 w-5" />
                   {item.label}
                 </Link>
               )}

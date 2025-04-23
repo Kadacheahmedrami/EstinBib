@@ -47,19 +47,31 @@ interface BookWithEmbedding {
   embedding: number[]
 }
 
+// Enhanced conversation message with potential book references
+interface ConversationMessage {
+  role: 'user' | 'ai'
+  content: string
+  // Track which books were referenced in this message
+  referencedBooks?: {
+    id: string
+    title: string
+  }[]
+}
+
 // In-memory storage for book embeddings
 const bookEmbeddingsCache: BookWithEmbedding[] = []
 
-// Define the request payload type
+// Define the enhanced request payload type
 interface ChatRequest {
   message: string
-  conversation: string[] // Keep track of the conversation history
+  conversation: ConversationMessage[]
+  discussedBookIds?: string[] // Track specific book IDs being discussed
 }
 
 // POST handler for generating AI chat content
 export async function POST(req: NextRequest) {
   try {
-    const { message, conversation = [] }: ChatRequest = await req.json()
+    const { message, conversation = [], discussedBookIds = [] }: ChatRequest = await req.json()
 
     if (!message) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 })
@@ -70,19 +82,26 @@ export async function POST(req: NextRequest) {
     const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
     // Add the current message to the conversation history
-    const updatedConversation = [...conversation, `User: ${message}`]
+    const updatedConversation = [
+      ...conversation,
+      { role: 'user', content: message }
+    ]
+
+    // Track books being discussed
+    let currentDiscussedBookIds = [...discussedBookIds]
 
     // Retrieve all books from the database
     const allBooks = await db.select().from(books).execute()
 
     if (!allBooks.length) {
       const noBookResponse = "I don't have any books in my database to discuss yet."
-      updatedConversation.push(`AI: ${noBookResponse}`)
+      updatedConversation.push({ role: 'ai', content: noBookResponse })
 
       return NextResponse.json(
         {
           text: noBookResponse,
           conversation: updatedConversation,
+          discussedBookIds: currentDiscussedBookIds
         },
         { status: 200 },
       )
@@ -112,11 +131,31 @@ export async function POST(req: NextRequest) {
     // Sort by similarity score (descending)
     similarityScores.sort((a, b) => b.similarity - a.similarity)
 
-    // Take top 2 most relevant books (changed from 5 to 2)
+    // First look for books already being discussed
+    let discussedBooks: BaseBook[] = []
+    if (currentDiscussedBookIds.length > 0) {
+      discussedBooks = allBooks.filter(book => currentDiscussedBookIds.includes(book.id))
+    }
+
+    // Take top 2 most relevant books
     const topBooks = similarityScores.slice(0, 2)
+    
+    // Add newly discovered books to the tracking list
+    topBooks.forEach(item => {
+      if (!currentDiscussedBookIds.includes(item.book.id)) {
+        currentDiscussedBookIds.push(item.book.id)
+      }
+    })
+
+    // Create context from previously discussed books
+    const discussedBooksContext = discussedBooks.length > 0 
+      ? `PREVIOUSLY DISCUSSED BOOKS:\n${discussedBooks.map(book => 
+          `Title: ${book.title}, Author: ${book.author}, Description: ${book.description || "No description available"}`
+        ).join("\n\n")}`
+      : "";
 
     // Create context from most relevant books
-    const booksContext = topBooks
+    const relevantBooksContext = topBooks
       .map((item) => {
         const book = item.book
         return `Title: ${book.title}, Author: ${book.author}, Description: ${book.description || "No description available"}, Language: ${book.language || "Unknown"}, Published: ${book.publishedAt instanceof Date ? book.publishedAt.toDateString() : "Unknown date"}, Relevance: ${(item.similarity * 100).toFixed(1)}%`
@@ -133,27 +172,42 @@ export async function POST(req: NextRequest) {
     4. **Engage Naturally:** Maintain a conversational, friendly tone while providing accurate information.
     5. **Suggest Books Inline:** When recommending books, mention that the user can click on the book cards below your message to view more details.
     6. **Limited Suggestions:** You will only suggest the top 2 most relevant books for each query.
+    7. **Remember Previous Context:** If the user is referring to a previously discussed book, continue the conversation about that book.
 
+    ${discussedBooksContext ? discussedBooksContext + "\n\n" : ""}
     MOST RELEVANT BOOKS FOR THIS QUERY:
-    ${booksContext}
+    ${relevantBooksContext}
     
     TOTAL BOOKS IN DATABASE: ${allBooks.length}
     
-    Remember to focus your responses primarily on the most relevant books listed above, but you can mention other books from the database if they're more appropriate for the user's question.
+    Remember to focus your responses primarily on the most relevant books listed above, but you can mention other books from the database if they're more appropriate for the user's question. If the user is asking about a specific book they mentioned before, make sure to talk about that book rather than introducing new books.
     `
 
+    // Format the conversation for Gemini
+    const formattedConversation = updatedConversation.map(msg => 
+      `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.content}`
+    ).join("\n")
+
     // Generate the content using the provided message and conversation context
-    const result = await chatModel.generateContent(`${systemPrompt}\n${updatedConversation.join("\n")}`)
+    const result = await chatModel.generateContent(`${systemPrompt}\n${formattedConversation}`)
 
     const aiResponse = result.response.text()
 
     // Add AI's response to the conversation history
-    updatedConversation.push(`AI: ${aiResponse}`)
+    updatedConversation.push({ 
+      role: 'ai', 
+      content: aiResponse,
+      referencedBooks: [...topBooks.map(item => ({ 
+        id: item.book.id, 
+        title: item.book.title 
+      }))]
+    })
 
     // Return the AI response, updated conversation, and complete book details
     return NextResponse.json({
       text: aiResponse,
       conversation: updatedConversation,
+      discussedBookIds: currentDiscussedBookIds,
       relevantBooks: topBooks.map((item) => ({
         id: item.book.id,
         title: item.book.title,

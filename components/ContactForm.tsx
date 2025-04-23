@@ -2,97 +2,132 @@
 
 import { useState, type FormEvent, type ChangeEvent } from "react";
 import Image from "next/image";
+import { suggestBook } from "@/app/actions/forms";
 
-interface FormData {
+interface BookData {
   isbn: string;
   title: string;
   author: string;
   publisher: string;
   releaseYear: string;
+  coverUrl?: string;
 }
 
 interface FormErrors {
   isbn?: string;
   title?: string;
+  auth?: string;
 }
 
 export function ContactForm() {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<BookData>({
     isbn: "",
     title: "",
     author: "",
     publisher: "",
-    releaseYear: "2004/22/22",
+    releaseYear: "",
+    coverUrl: undefined,
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [bookFound, setBookFound] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-
-    if (!formData.isbn.trim()) {
-      newErrors.isbn = "ISBN is required";
-    }
-
-    if (!formData.title.trim()) {
-      newErrors.title = "Book title is required";
-    }
-
+    if (!formData.isbn.trim()) newErrors.isbn = "ISBN is required";
+    if (!formData.title.trim()) newErrors.title = "Book title is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: undefined,
-      }));
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const searchBookByISBN = async () => {
+    const cleanIsbn = formData.isbn.replace(/[-\s]/g, "").trim();
+    if (!cleanIsbn) {
+      setErrors(prev => ({ ...prev, isbn: "ISBN is required for lookup" }));
+      return;
+    }
+    setIsSearching(true);
+    setSearchError(null);
+    try {
+      const res = await fetch(
+        `https://openlibrary.org/api/books?bibkeys=ISBN:${cleanIsbn}&format=json&jscmd=data`
+      );
+      const data = await res.json();
+      const key = `ISBN:${cleanIsbn}`;
+      let bookInfo = data[key];
+      if (!bookInfo) {
+        const gRes = await fetch(
+          `https://www.googleapis.com/books/v1/volumes?q=isbn:${cleanIsbn}`
+        );
+        const gData = await gRes.json();
+        if (gData.items?.length) bookInfo = gData.items[0].volumeInfo;
+      }
+      if (bookInfo) {
+        setFormData({
+          isbn: cleanIsbn,
+          title: bookInfo.title || "",
+          author: bookInfo.authors ? bookInfo.authors.map((a: any) => a.name || a).join(", ") : "",
+          publisher: bookInfo.publishers ? bookInfo.publishers[0].name : bookInfo.publisher || "",
+          releaseYear: (bookInfo.publish_date || bookInfo.publishedDate || "").slice(-4),
+          coverUrl: bookInfo.cover?.medium || bookInfo.imageLinks?.thumbnail,
+        });
+        setBookFound(true);
+      } else {
+        setSearchError("No book found. Check ISBN and try again.");
+      }
+    } catch {
+      setSearchError("Failed to search. Please try later.");
+    } finally {
+      setIsSearching(false);
     }
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     setIsSubmitting(true);
+    setSubmissionError(null);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      console.log("Form submitted:", formData);
+      await suggestBook(formData.title, formData.author);
       setIsSubmitted(true);
-    } catch (error) {
-      console.error("Submission error:", error);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Submission failed";
+      setSubmissionError(msg);
+      if (msg === "User not authenticated") {
+        setErrors(prev => ({ ...prev, auth: "Please sign in to suggest a book." }));
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleReset = () => {
-    setFormData({
-      isbn: "",
-      title: "",
-      author: "",
-      publisher: "",
-      releaseYear: "2004/22/22",
-    });
+    setFormData({ isbn: "", title: "", author: "", publisher: "", releaseYear: "", coverUrl: undefined });
+    setBookFound(false);
     setIsSubmitted(false);
+    setSearchError(null);
+    setSubmissionError(null);
+    setErrors({});
   };
 
   return (
     <>
-      {/* Custom Modal */}
-      {isSubmitted && (
+      {/* Submission Modal */}
+       {/* Custom Modal */}
+       {isSubmitted && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white max-w-2xl rounded-[15px] mx-4 animate-fade-in">
             <Image
@@ -135,111 +170,147 @@ export function ContactForm() {
         </div>
       )}
 
-      <div className="bg-white py-8 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-[#0A2942] text-4xl font-bold mb-6">
-              Suggest{" "}
-              <span className="relative">
-                A Book
-                <span
-                  className="absolute inset-x-0 bottom-0 h-3 -z-10"
-                  style={{
-                    backgroundColor: "rgba(239, 68, 68, 0.2)",
-                    transform: "translateY(2px)",
-                  }}
-                />
-              </span>
-            </h1>
-            <p className="text-gray-700 text-lg">
-              If there is a book that you think would be a great addition to our shelves but you don&apos;t see it
-              listed in our catalog, please fill out this Book Suggestion Form.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="form-group">
-              <label className="block text-gray-700 mb-2">
-                Book&apos;s ISBN<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="isbn"
-                value={formData.isbn}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-md border ${
-                  errors.isbn ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+      <div className="bg-white rounded-2xl p-8 max-w-2xl mx-auto">
+        <div className="text-center mb-10">
+          <h1 className="text-[#0A2942] text-4xl font-bold mb-4">
+            Suggest{' '}
+            <span className="relative inline-block">
+              A Book
+              <span
+                className="absolute inset-x-0 bottom-0 h-3 -z-10"
+                style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', transform: 'translateY(2px)' }}
               />
-              {errors.isbn && <p className="text-red-500 text-sm mt-1">{errors.isbn}</p>}
-            </div>
-
-            <div className="form-group">
-              <label className="block text-gray-700 mb-2">
-                Book title<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-md border ${
-                  errors.title ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              />
-              {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
-            </div>
-
-            <div className="form-group">
-              <label className="block text-gray-700 mb-2">Book&apos;s author(s)</label>
-              <input
-                type="text"
-                name="author"
-                value={formData.author}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-gray-700 mb-2">Book publisher</label>
-              <input
-                type="text"
-                name="publisher"
-                value={formData.publisher}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="block text-gray-700 mb-2">Release year</label>
-              <input
-                type="text"
-                name="releaseYear"
-                value={formData.releaseYear}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`px-8 py-3 bg-[#EF4444] hover:bg-[#DC2626] text-white rounded-md transition-colors ${
-                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                {isSubmitting ? "Sending..." : "Send →"}
-              </button>
-            </div>
-          </form>
-
-          <p className="mt-8 text-gray-500">
-            <span className="text-red-500">*</span> : Required Fields
+            </span>
+          </h1>
+          <p className="text-gray-700 text-lg">
+            If there is a book you’d love to see on our shelves but don’t see it listed, fill out this form.
           </p>
         </div>
+
+        {errors.auth && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
+            <p>{errors.auth}</p>
+            <a href="/login" className="text-red-500 hover:underline">Sign in</a>
+          </div>
+        )}
+        {submissionError && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
+            {submissionError}
+          </div>
+        )}
+
+        {/* ISBN Lookup */}
+        <div className="mb-8 p-6 bg-gray-50 rounded-lg">
+          <h2 className="text-[#0A2942] text-xl font-semibold mb-3">Find by ISBN</h2>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              name="isbn"
+              value={formData.isbn}
+              onChange={handleChange}
+              placeholder="1101872055"
+              className={`flex-1 px-4 py-2 rounded-md border focus:ring-2 focus:ring-blue-400 ${errors.isbn ? 'border-red-500' : 'border-gray-300'}`}
+            />
+            <button
+              type="button"
+              onClick={searchBookByISBN}
+              disabled={isSearching}
+              className={`px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition ${isSearching ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isSearching ? 'Searching...' : 'Search'}
+            </button>
+          </div>
+          {searchError && <p className="mt-2 text-red-500">{searchError}</p>}
+          <p className="mt-2 text-sm text-gray-500">Powered by Open Library & Google Books</p>
+        </div>
+
+        {/* Preview */}
+        {bookFound && (
+          <div className="mb-8 p-6 bg-white rounded-lg shadow-sm flex gap-4">
+            {formData.coverUrl && (
+              <img src={formData.coverUrl} alt={formData.title} className="w-24 rounded-md" />
+            )}
+            <div>
+              <h3 className="text-[#0A2942] text-lg font-semibold">{formData.title}</h3>
+              <p className="text-gray-700">By {formData.author || 'Unknown'}</p>
+              <p className="text-gray-600">Publisher: {formData.publisher || 'N/A'}</p>
+              <p className="text-gray-600">Year: {formData.releaseYear || 'N/A'}</p>
+              <p className="text-gray-600">ISBN: {formData.isbn}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Suggestion Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-gray-700 mb-2">ISBN <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              name="isbn"
+              value={formData.isbn}
+              onChange={handleChange}
+              className={`w-full px-4 py-2 rounded-md border focus:ring-2 focus:ring-blue-400 ${errors.isbn ? 'border-red-500' : 'border-gray-300'}`}
+            />
+            {errors.isbn && <p className="text-red-500 text-sm mt-1">{errors.isbn}</p>}
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2">Title <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className={`w-full px-4 py-2 rounded-md border focus:ring-2 focus:ring-blue-400 ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
+            />
+            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2">Author(s)</label>
+            <input
+              type="text"
+              name="author"
+              value={formData.author}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2">Publisher</label>
+            <input
+              type="text"
+              name="publisher"
+              value={formData.publisher}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2">Release Year</label>
+            <input
+              type="text"
+              name="releaseYear"
+              value={formData.releaseYear}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-md transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isSubmitting ? 'Sending...' : bookFound ? 'Suggest This Book →' : 'Send →'}
+            </button>
+          </div>
+        </form>
+
+        <p className="mt-8 text-gray-500 text-sm"><span className="text-red-500">*</span> Required fields</p>
       </div>
     </>
   );

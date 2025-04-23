@@ -121,17 +121,14 @@ export default function ChatPageClient() {
     router.push(`/catalog/${bookId}`)
   }
 
-
-
   return (
-    <div className="min-h-[90vh] overflow-hidden bg-white text-gray-800 flex flex-col">
-    
-      <main className="flex-1 h-full container mx-auto px-3 sm:px-4 py-3 sm:py-6 flex flex-col">
+    <div className=" bg-white text-gray-800 flex flex-col">
+      <main className="flex-1 h-full  mx-auto px-3 sm:px-4 py-3 sm:py-6 flex flex-col">
         <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col">
           {/* Chat Container */}
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden flex-1 flex flex-col shadow-sm">
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 sm:space-y-6 bg-gray-50">
+          <div className="bg-white border  border-gray-200 rounded-lg flex-1 flex flex-col shadow-sm ">
+            {/* Messages Area with fixed height and overflow */}
+            <div className=" h-[75vh] overflow-y-scroll p-3 sm:p-4  space-y-4 sm:space-y-6  bg-gray-50">
               {messages.map((message, index) => (
                 <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
@@ -254,14 +251,14 @@ export default function ChatPageClient() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area - Optimized for mobile */}
+            {/* Input Area - Fixed at bottom */}
             <div className="p-3 sm:p-4 border-t border-gray-200 bg-white">
               <form onSubmit={handleSubmit} className="flex items-end gap-2">
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask about books..."
-                  className="flex-1 resize-none bg-white border border-gray-300 rounded-md p-2 sm:p-3 text-sm sm:text-base text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#e63946] focus:ring-1 focus:ring-[#e63946] min-h-[45px] sm:min-h-[60px]"
+                  className="flex-1 resize-none bg-white border border-gray-300 rounded-md p-2 sm:p-3 text-sm sm:text-base text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#e63946] focus:ring-1 focus:ring-[#e63946] min-h-[45px] sm:min-h-[60px] max-h-[120px] overflow-y-auto"
                   rows={1}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
