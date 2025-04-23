@@ -1,8 +1,8 @@
 import React from 'react';
 import Image from "next/image";
-import LocationMapClient from '@/components/ui/map/LocationMapClient';
+import LocationMapClient from '@/components/pages/map/LocationMapClient';
 import Link from 'next/link';
-import SocialIcons from '@/components/ui/footer-comps/socialicons';
+import SocialIcons from '@/components/pages/footer-comps/socialicons';
 
 const Footer: React.FC = () => {
     const estinLatitude = 36.6636426;

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import BookCard from "@/components/ui/Profile/ProfileCard";
+import BookCard from "@/components/pages/Profile/ProfileCard";
 import { ChevronLeftCircle, ChevronRightCircle } from "lucide-react";
 import { ActiveBorrows } from "@/types/_types"; 
 

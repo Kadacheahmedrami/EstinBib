@@ -1,4 +1,4 @@
-import PasswordRecoveryForm from '@/components/ui/auth/RecoverForm';
+import PasswordRecoveryForm from '@/components/pages/auth/RecoverForm';
 
 const PasswordRecoveryPage = () => {
   return (

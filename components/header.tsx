@@ -16,23 +16,21 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
   const toggleMenu = (): void => setMenuOpen(prev => !prev);
 
   const navItems = [
-    { label: "Chat", href: "/Bot" },
-    { key: "", label: "Home", href: "/" },
+    { key: "chat", label: "Chat", href: "/Bot" },
+    { key: "home", label: "Home", href: "/" },
     { key: "catalog", label: "Catalog", href: "/catalog" },
-    { key: "contact-us", label: "Contact Us", href: "/contact-us" },
-    { label: "Ideas", href: "/ideas" },
-  
+    { key: "contact", label: "Contact Us", href: "/contact-us" },
+    { key: "ideas", label: "Ideas", href: "/ideas" },
     {
       key: "services",
       label: "Services",
       href: "#",
       submenu: [
-        { label: "Library Hours", href: "/hours" },
-        { label: "My Loans", href: "/profile" },
-       
-        { label: "SNDL Portal", href: "https://sndl.cerist.dz" },
-        { label: "Formation", href: "/formation" },
-        { label: "Ressources Utiles", href: "/ressources-utiles" }
+        { key: "hours", label: "Library Hours", href: "/hours" },
+        { key: "loans", label: "My Loans", href: "/profile" },
+        { key: "sndl", label: "SNDL Portal", href: "https://sndl.cerist.dz" },
+        { key: "formation", label: "Formation", href: "/formation" },
+        { key: "ressources", label: "Ressources Utiles", href: "/ressources-utiles" }
       ]
     }
   ];
@@ -60,8 +58,8 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
                   </Link>
                   {item.submenu && (
                     <ul className="absolute left-0 mt-2 w-48 bg-white shadow-md rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-                      {item.submenu.map((sub, idx) => (
-                        <li key={idx} className="border-b last:border-none">
+                      {item.submenu.map((sub) => (
+                        <li key={sub.key} className="border-b last:border-none">
                           {sub.href.startsWith('http') ? (
                             <a
                               href={sub.href}
@@ -112,7 +110,60 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
         </div>
       </nav>
 
-      {/* Mobile menu omitted for brevity; similar dropdown arrow logic could be applied */}
+      {/* Mobile Menu */}
+      <div
+        className={`lg:hidden fixed top-[70px] left-0 w-full bg-white shadow-lg transition-all duration-300 ease-in-out ${
+          menuOpen 
+            ? "opacity-100 visible translate-y-0" 
+            : "opacity-0 invisible -translate-y-2"
+        }`}
+      >
+        <ul className="py-2">
+          {navItems.map((item) => (
+            <li key={item.key}>
+              {item.submenu ? (
+                <div className="space-y-1">
+                  <div className="px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-[#F1413E] transition-colors">
+                    {item.label}
+                  </div>
+                  <ul className="pl-4 space-y-1">
+                    {item.submenu.map((sub) => (
+                      <li key={sub.key}>
+                        {sub.href.startsWith('http') ? (
+                          <a
+                            href={sub.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-[#F1413E] transition-colors"
+                          >
+                            {sub.label}
+                          </a>
+                        ) : (
+                          <Link
+                            href={sub.href}
+                            onClick={toggleMenu}
+                            className="block px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-[#F1413E] transition-colors"
+                          >
+                            {sub.label}
+                          </Link>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <Link
+                  href={item.href}
+                  onClick={toggleMenu}
+                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-[#F1413E] transition-colors"
+                >
+                  {item.label}
+                </Link>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
     </>
   );
 };

@@ -10,23 +10,21 @@ export default {
   ],
   theme: {
   	extend: {
-		clipPath: {
-			polygon: 'polygon(0% 0%, 100% 0%, 50% 54%, 100% 100%, 0% 100%)',
-		  },
+  		clipPath: {
+  			polygon: 'polygon(0% 0%, 100% 0%, 50% 54%, 100% 100%, 0% 100%)'
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			primary: {
-  				// DEFAULT: 'hsl(var(--primary))',
-          DEFAULT: '#007AFF', 
-  				foreground: 'hsl(var(--primary-foreground))' ,
-          primary: '#0C72E1',
+  				DEFAULT: 'hsl(var(--primary))',
+  				foreground: 'hsl(var(--primary-foreground))',
+  				primary: '#0C72E1'
   			},
-			light : {
-				DEFAULT: '#25B4F8', 
-				light : '#25B4F8' ,
-
-			},
+  			light: {
+  				DEFAULT: '#25B4F8',
+  				light: '#25B4F8'
+  			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'

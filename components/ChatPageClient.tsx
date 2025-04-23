@@ -1,13 +1,36 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 
+interface Book {
+  id: string
+  title: string
+  author: string
+  description: string
+  coverImage: string
+  isbn?: string
+  size: number
+  available: boolean
+  publishedAt: string
+  language: string
+  relevance?: number
+}
+
+interface BookSuggestion {
+  books: Book[]
+}
+
+interface Message {
+  role: "user" | "assistant"
+  content: string
+  bookSuggestions?: BookSuggestion
+}
+
 export default function ChatPageClient() {
-  const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([
+  const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
       content: "Hello! I'm your book recommendation assistant. What kind of books are you interested in?",
@@ -15,8 +38,8 @@ export default function ChatPageClient() {
   ])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [conversation, setConversation] = useState<string[]>([]) // Store conversation history
-  const [relevantBooks, setRelevantBooks] = useState<any[]>([]) // Store relevant books
+  const [conversation, setConversation] = useState<string[]>([])
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
@@ -25,12 +48,21 @@ export default function ChatPageClient() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (isMenuOpen) setIsMenuOpen(false)
+    }
+    document.addEventListener("click", handleClickOutside)
+    return () => document.removeEventListener("click", handleClickOutside)
+  }, [isMenuOpen])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
 
     // Add user message to chat
-    const userMessage: { role: "user" | "assistant"; content: string } = { role: "user", content: input }
+    const userMessage: Message = { role: "user", content: input }
     setMessages((prev) => [...prev, userMessage])
     setInput("")
     setIsLoading(true)
@@ -42,28 +74,35 @@ export default function ChatPageClient() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: input,
-          conversation: conversation 
+          conversation: conversation,
         }),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to get response")
+        throw new Error(`Error: ${response.status}`)
       }
 
       const data = await response.json()
 
-      // Add assistant response to chat
-      setMessages((prev) => [...prev, { role: "assistant", content: data.text }])
-      
+      // Add assistant response to chat with book suggestions if available
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: data.text,
+      }
+
+      // Add book suggestions if available
+      if (data.relevantBooks && Array.isArray(data.relevantBooks) && data.relevantBooks.length > 0) {
+        assistantMessage.bookSuggestions = {
+          books: data.relevantBooks,
+        }
+      }
+
+      setMessages((prev) => [...prev, assistantMessage])
+
       // Update conversation history
       setConversation(data.conversation || [])
-      
-      // Update relevant books if available
-      if (data.relevantBooks) {
-        setRelevantBooks(data.relevantBooks)
-      }
     } catch (error) {
       console.error("Error:", error)
       setMessages((prev) => [
@@ -78,142 +117,185 @@ export default function ChatPageClient() {
     }
   }
 
-  return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="flex items-center mb-6">
-        <button onClick={() => router.push("/")} className="mr-4 text-gray-600 hover:text-gray-900">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
-        <div>
-          <h1 className="text-3xl font-bold mb-1">Book Chat</h1>
-          <p className="text-gray-600">Ask me about books in our library. I can help you find your next great read!</p>
-        </div>
-      </div>
+  const navigateToBook = (bookId: string) => {
+    router.push(`/catalog/${bookId}`)
+  }
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Chat Container - Takes 2/3 of space on medium screens and up */}
-        <div className="md:col-span-2 flex flex-col h-[70vh] border rounded-lg overflow-hidden bg-white shadow-sm">
-          {/* Messages Area */}
-          <div className="flex-1 p-4 overflow-y-auto">
-            <div className="space-y-4">
+
+
+  return (
+    <div className="min-h-[90vh] overflow-hidden bg-white text-gray-800 flex flex-col">
+    
+      <main className="flex-1 h-full container mx-auto px-3 sm:px-4 py-3 sm:py-6 flex flex-col">
+        <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col">
+          {/* Chat Container */}
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden flex-1 flex flex-col shadow-sm">
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 sm:space-y-6 bg-gray-50">
               {messages.map((message, index) => (
-                <div
-                  key={index}
-                  className={`flex items-start gap-3 p-3 rounded-lg ${
-                    message.role === "user" ? "ml-auto max-w-[80%] bg-blue-50" : "mr-auto max-w-[80%] bg-gray-100"
-                  }`}
-                >
-                  {message.role === "assistant" && (
-                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      <Image src="/placeholder.svg?height=32&width=32" alt="AI" width={32} height={32} />
+                <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className={`flex items-start gap-2 sm:gap-3 max-w-[90%] sm:max-w-[80%] p-3 sm:p-4 rounded-lg ${
+                      message.role === "user"
+                        ? "bg-[#e63946] text-white"
+                        : "bg-white border border-gray-200 text-gray-800 shadow-sm"
+                    }`}
+                  >
+                    {message.role === "assistant" && (
+                      <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-[#e63946]"
+                        >
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                        </svg>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+
+                      {/* Book Suggestions - Optimized for mobile */}
+                      {message.bookSuggestions && message.bookSuggestions.books.length > 0 && (
+                        <div className="mt-3 sm:mt-4 space-y-2">
+                          <p className="text-xs sm:text-sm font-medium text-gray-700">Top Book Suggestions:</p>
+                          <div className="flex flex-col gap-2 sm:gap-3 mt-2">
+                            {message.bookSuggestions.books.map((book) => (
+                              <div
+                                key={book.id}
+                                className="flex gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer active:bg-gray-100"
+                                onClick={() => navigateToBook(book.id)}
+                              >
+                                <div className="flex-shrink-0 w-12 h-18 sm:w-16 sm:h-24 relative">
+                                  <Image
+                                    src={book.coverImage || "/placeholder.svg?height=96&width=64"}
+                                    alt={book.title}
+                                    fill
+                                    className="object-cover rounded-md"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-medium text-gray-800 text-xs sm:text-sm truncate">
+                                    {book.title}
+                                  </h3>
+                                  <p className="text-xs text-gray-600 truncate">by {book.author}</p>
+                                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 hidden sm:block">
+                                    {book.description}
+                                  </p>
+                                  <p className="text-xs text-gray-500 mt-1 line-clamp-1 sm:hidden">
+                                    {book.description}
+                                  </p>
+                                  <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1">
+                                    <span
+                                      className={`px-1 sm:px-1.5 py-0.5 text-[10px] sm:text-xs rounded-full text-white ${
+                                        book.available ? "bg-green-600" : "bg-gray-500"
+                                      }`}
+                                    >
+                                      {book.available ? "Available" : "Not Available"}
+                                    </span>
+                                    {book.relevance && (
+                                      <span className="text-[10px] sm:text-xs text-gray-500">
+                                        {Math.round(book.relevance * 100)}% match
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  <div className="flex-1 overflow-hidden">
-                    <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                   </div>
-                  {message.role === "user" && (
-                    <div className="h-8 w-8 rounded-full bg-blue-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      <Image src="/placeholder.svg?height=32&width=32" alt="User" width={32} height={32} />
-                    </div>
-                  )}
                 </div>
               ))}
               {isLoading && (
-                <div className="flex items-center space-x-2 p-3 rounded-lg bg-gray-100 max-w-[80%] mr-auto">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
-                  <span className="text-sm text-gray-500">Thinking...</span>
+                <div className="flex justify-start">
+                  <div className="flex items-center gap-2 sm:gap-3 max-w-[90%] sm:max-w-[80%] p-3 sm:p-4 rounded-lg bg-white border border-gray-200 text-gray-800 shadow-sm">
+                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-[#e63946]"
+                      >
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                      </svg>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-[#e63946] animate-bounce"></div>
+                      <div
+                        className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-[#e63946] animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
+                      <div
+                        className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-[#e63946] animate-bounce"
+                        style={{ animationDelay: "0.4s" }}
+                      ></div>
+                    </div>
+                  </div>
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
-          </div>
 
-          {/* Input Area */}
-          <form onSubmit={handleSubmit} className="border-t p-4">
-            <div className="flex space-x-2">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about books in our library..."
-                className="flex-1 resize-none border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows={1}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSubmit(e)
-                  }
-                }}
-              />
-              <button
-                type="submit"
-                disabled={isLoading || !input.trim()}
-                className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+            {/* Input Area - Optimized for mobile */}
+            <div className="p-3 sm:p-4 border-t border-gray-200 bg-white">
+              <form onSubmit={handleSubmit} className="flex items-end gap-2">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask about books..."
+                  className="flex-1 resize-none bg-white border border-gray-300 rounded-md p-2 sm:p-3 text-sm sm:text-base text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#e63946] focus:ring-1 focus:ring-[#e63946] min-h-[45px] sm:min-h-[60px]"
+                  rows={1}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSubmit(e)
+                    }
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading || !input.trim()}
+                  className="p-2.5 sm:p-3 bg-[#e63946] hover:bg-[#c1121f] text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Send message"
                 >
-                  <path d="M22 2L11 13" />
-                  <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m22 2-7 20-4-9-9-4Z" />
+                    <path d="M22 2 11 13" />
+                  </svg>
+                </button>
+              </form>
             </div>
-          </form>
-        </div>
-
-        {/* Relevant Books Panel - Takes 1/3 of space on medium screens and up */}
-        <div className="hidden md:block h-[70vh] border rounded-lg overflow-hidden bg-white shadow-sm">
-          <div className="p-4 bg-gray-50 border-b">
-            <h2 className="font-semibold">Relevant Books</h2>
-          </div>
-          <div className="p-4 overflow-y-auto h-[calc(100%-58px)]">
-            {relevantBooks.length > 0 ? (
-              <div className="space-y-4">
-                {relevantBooks.map((book) => (
-                  <div key={book.id} className="border rounded-lg p-3 hover:bg-gray-50">
-                    <h3 className="font-medium">{book.title}</h3>
-                    <p className="text-sm text-gray-600">by {book.author}</p>
-                    <div className="mt-2 bg-blue-100 rounded-full h-1.5">
-                      <div 
-                        className="bg-blue-600 h-1.5 rounded-full" 
-                        style={{ width: `${Math.round(book.relevance * 100)}%` }} 
-                      />
-                    </div>
-                    <p className="text-xs text-right mt-1 text-gray-500">
-                      {Math.round(book.relevance * 100)}% relevance
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 py-8">
-                <p>No relevant books yet</p>
-                <p className="text-sm mt-2">Ask a question to see matches</p>
-              </div>
-            )}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

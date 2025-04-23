@@ -1,5 +1,5 @@
 import Link from "next/link";
-import HeroLanding from "@/components/ui/home/HeroLanding";
+import HeroLanding from "@/components/pages/home/HeroLanding";
 import RelatedBooks from "@/components/RelatedBooks";
 import { getMostBorrowedBooks, getRecentBooks } from "@/app/actions/books";
 import Footer from '@/components/Footer';

@@ -1,8 +1,8 @@
 // pages/pdf-unavailable.js
 export default function PdfUnavailable() {
     return (
-      <div className="min-h-[92vh] bg-gradient-to-r from-[#F1413E] to-[#FF6F61] flex items-center justify-center">
-        <div className="text-center p-8 bg-white shadow-2xl rounded-lg max-w-xl w-full">
+      <div className="min-h-[92vh] flex items-center justify-center">
+        <div className="text-center p-8 bg-white rounded-lg max-w-xl w-full">
           <h1 className="text-6xl font-extrabold text-[#F1413E] mb-6 animate__animated animate__fadeInUp">
             Oops!
           </h1>

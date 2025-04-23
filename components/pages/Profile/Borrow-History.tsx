@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import BookCard from "@/components/ui/Profile/ProfileCard";
+import BookCard from "@/components/pages/Profile/ProfileCard";
 import { BooksHistory } from "@/types/_types";
 import { motion } from "framer-motion";
 

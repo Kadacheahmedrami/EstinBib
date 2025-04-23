@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import UserInfo from "@/components/ui/Profile/user-info";
-import BorrowedBooks from "@/components/ui/Profile/Borrowed-Books"
-import BorrowHistory from "@/components/ui/Profile/Borrow-History";
+import UserInfo from "@/components/pages/Profile/user-info";
+import BorrowedBooks from "@/components/pages/Profile/Borrowed-Books"
+import BorrowHistory from "@/components/pages/Profile/Borrow-History";
 import { getServerAuthSession } from "@/lib/auth";
 import { borrowsHistory, getActiveBorrows } from "@/app/actions/user";
 
