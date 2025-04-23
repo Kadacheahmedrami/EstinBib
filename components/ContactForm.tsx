@@ -19,6 +19,25 @@ interface FormErrors {
   auth?: string;
 }
 
+interface Author {
+  name?: string;
+}
+
+interface BookInfo {
+  title?: string;
+  authors?: (Author | string)[];
+  publishers?: Array<{ name: string }>;
+  publisher?: string;
+  publish_date?: string;
+  publishedDate?: string;
+  cover?: {
+    medium?: string;
+  };
+  imageLinks?: {
+    thumbnail?: string;
+  };
+}
+
 export function ContactForm() {
   const [formData, setFormData] = useState<BookData>({
     isbn: "",
@@ -67,7 +86,7 @@ export function ContactForm() {
       );
       const data = await res.json();
       const key = `ISBN:${cleanIsbn}`;
-      let bookInfo = data[key];
+      let bookInfo: BookInfo = data[key];
       if (!bookInfo) {
         const gRes = await fetch(
           `https://www.googleapis.com/books/v1/volumes?q=isbn:${cleanIsbn}`
@@ -79,7 +98,10 @@ export function ContactForm() {
         setFormData({
           isbn: cleanIsbn,
           title: bookInfo.title || "",
-          author: bookInfo.authors ? bookInfo.authors.map((a: any) => a.name || a).join(", ") : "",
+          author: bookInfo.authors ? 
+            bookInfo.authors.map(a => 
+              typeof a === 'string' ? a : a.name || ''
+            ).join(", ") : "",
           publisher: bookInfo.publishers ? bookInfo.publishers[0].name : bookInfo.publisher || "",
           releaseYear: (bookInfo.publish_date || bookInfo.publishedDate || "").slice(-4),
           coverUrl: bookInfo.cover?.medium || bookInfo.imageLinks?.thumbnail,
@@ -183,7 +205,7 @@ export function ContactForm() {
             </span>
           </h1>
           <p className="text-gray-700 text-lg">
-            If there is a book you’d love to see on our shelves but don’t see it listed, fill out this form.
+            If there is a book you d love to see on our shelves but don t see it listed, fill out this form.
           </p>
         </div>
 
@@ -228,7 +250,15 @@ export function ContactForm() {
         {bookFound && (
           <div className="mb-8 p-6 bg-white rounded-lg shadow-sm flex gap-4">
             {formData.coverUrl && (
-              <img src={formData.coverUrl} alt={formData.title} className="w-24 rounded-md" />
+              <div className="relative w-24 h-36">
+                <Image
+                  src={formData.coverUrl}
+                  alt={formData.title}
+                  fill
+                  className="rounded-md object-cover"
+                  sizes="96px"
+                />
+              </div>
             )}
             <div>
               <h3 className="text-[#0A2942] text-lg font-semibold">{formData.title}</h3>

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, type FormEvent, type ChangeEvent } from "react";
-import { SendIcon } from "lucide-react";
 import { suggestIdea } from "@/app/actions/forms";
 import Image from "next/image";
 
@@ -35,8 +34,9 @@ export function IdeaForm() {
     try {
       await suggestIdea(text);
       setIsSubmitted(true);
-    } catch (err: any) {
-      setErrors(err.message || "Une erreur est survenue.");
+    } catch (err: Error | unknown) {
+      const error = err instanceof Error ? err.message : "Une erreur est survenue.";
+      setErrors(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -77,7 +77,7 @@ export function IdeaForm() {
                       onClick={() => (window.location.href = "/")}
                       className="px-6 md:w-1/2 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-all duration-200 flex items-center justify-center gap-2"
                     >
-                      ← Retour à l'accueil
+                      ← Retour à l accueil
                     </button>
                     <button
                       onClick={handleReset}

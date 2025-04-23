@@ -1,6 +1,4 @@
-import Link from "next/link"
-import Image from "next/image"
-import { Calendar, Clock, Users, ArrowRight } from 'lucide-react'
+import { Calendar, Clock, ArrowRight } from 'lucide-react'
 import Footer from "@/components/Footer"
 
 export default function FormationsPage() {
@@ -112,7 +110,7 @@ export default function FormationsPage() {
             <div className="max-w-2xl">
               <h2 className="text-2xl font-bold text-white mb-4">Request a Custom Formation</h2>
               <p className="text-white/90 mb-6">
-                Don't see what you're looking for? We can create custom training programs for your needs.
+                Don t see what you re looking for? We can create custom training programs for your needs.
               </p>
               <button className="px-6 py-3 bg-white text-[#9a1c21] font-medium rounded-lg hover:bg-gray-100">
                 Contact Us

@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     ]
 
     // Track books being discussed
-    let currentDiscussedBookIds = [...discussedBookIds]
+    const currentDiscussedBookIds = [...discussedBookIds]
 
     // Retrieve all books from the database
     const allBooks = await db.select().from(books).execute()
