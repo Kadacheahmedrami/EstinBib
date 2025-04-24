@@ -15,7 +15,9 @@ import {
   Clock,
   FileText,
   Globe,
-  GraduationCap
+  GraduationCap,
+  Gavel,
+  Network
 } from "lucide-react";
 import { useState } from "react";
 import ProfileDropdown from '@/components/profile';
@@ -44,10 +46,13 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
         { key: "loans", label: "My Loans", href: "/profile", Icon: BookOpen },
         { key: "sndl", label: "SNDL Portal", href: "https://sndl.cerist.dz", Icon: Globe },
         { key: "formation", label: "Formation", href: "/formation", Icon: GraduationCap },
-        { key: "ressources", label: "Ressources Utiles", href: "/ressources-utiles", Icon: FileText }
+        { key: "ressources", label: "Ressources Utiles", href: "/ressources-utiles", Icon: FileText },
+        { key: "regulations", label: "Library Regulations", href: "/library-regulations", Icon: Gavel },
+        { key: "organigramme", label: "Organigramme", href: "/organigramme", Icon: Network }
       ]
     }
   ];
+  
 
   return (
     <>
