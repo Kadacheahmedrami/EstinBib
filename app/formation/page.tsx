@@ -8,7 +8,7 @@ export default function FormationsPage() {
 
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-[#9a1c21] to-[#c13b42] text-white">
-        <div className="absolute inset-0 bg-[url('/placeholder.svg?height=800&width=1600')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-[url('/jpg/hero.png')] bg-cover bg-center mix-blend-overlay"></div>
         <div className="container mx-auto px-4 py-16 relative z-10">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Formations</h1>
           <p className="text-xl max-w-3xl opacity-90">
@@ -106,6 +106,7 @@ export default function FormationsPage() {
       {/* CTA Section */}
       <div className="bg-gray-50 py-12">
         <div className="container mx-auto px-4">
+     
           <div className="bg-gradient-to-r from-[#9a1c21] to-[#c13b42] rounded-xl p-8">
             <div className="max-w-2xl">
               <h2 className="text-2xl font-bold text-white mb-4">Request a Custom Formation</h2>

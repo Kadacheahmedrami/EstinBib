@@ -21,7 +21,7 @@
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "drizzle-orm": "^0.39.3",
+    "drizzle-orm": "^0.40.1",
     "framer-motion": "^12.8.0",
     "intersection-observer": "^0.12.2",
     "leaflet": "^1.9.4",

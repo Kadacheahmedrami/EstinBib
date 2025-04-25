@@ -22,7 +22,7 @@ export default async function RootLayout({
   
       <body className="min-h-screen bg-background font-sans antialiased">
         <Header session={session} />
-        <div className='mt-[75px]'></div>
+        <div className='mt-[75px] md:mt-[100px]'></div>
     
           {children}
       

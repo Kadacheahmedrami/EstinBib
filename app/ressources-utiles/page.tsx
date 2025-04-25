@@ -9,7 +9,7 @@ export default function RessourcesUtilesPage() {
 
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-[#9a1c21] to-[#c13b42] text-white">
-        <div className="absolute inset-0 bg-[url('/placeholder.svg?height=800&width=1600')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-[url('/jpg/hero.png')] bg-cover bg-center mix-blend-overlay"></div>
         <div className="container mx-auto px-4 py-16 relative z-10">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Useful Resources</h1>
           <p className="text-xl max-w-3xl opacity-90">

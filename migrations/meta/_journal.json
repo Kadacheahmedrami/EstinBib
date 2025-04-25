@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1738426619723,
-      "tag": "0000_unique_warbird",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1738427157745,
-      "tag": "0001_equal_dreadnoughts",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1738460028018,
-      "tag": "0003_eminent_mac_gargan",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1738636717770,
-      "tag": "0004_lying_robin_chapel",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1745430496345,
-      "tag": "0005_adding ideas table ",
+      "when": 1745523005387,
+      "tag": "0000_normal_klaw",
       "breakpoints": true
     }
   ]

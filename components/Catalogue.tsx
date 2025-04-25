@@ -354,7 +354,7 @@ const debouncedSearch = useMemo(() => {
       <div
         ref={searchBarRef}
         className={`w-full transition-all duration-300 ${
-            isSticky ? "fixed top-[70px] left-0 z-[2] py-4 " : "relative"
+            isSticky ? "fixed top-[70px] md:top-[100px] left-0 z-[2] py-4 " : "relative"
         }`}
         style={{
           width: "100%",

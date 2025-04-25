@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react"
 import Link from "next/link"
 import { LogOut, User, ChevronDown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import Image from "next/image"
 
 interface ProfileDropdownProps {
   session: Session
@@ -33,7 +34,7 @@ export default function ProfileDropdown({ session }: ProfileDropdownProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const userInitial = session.user?.email?.[0].toUpperCase() || '?'
+
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -43,9 +44,19 @@ export default function ProfileDropdown({ session }: ProfileDropdownProps) {
         className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
       >
         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900">
-          <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
-            {userInitial}
-          </span>
+          {session.user?.image ? (
+            <Image 
+              src={session.user.image} 
+              alt="Profile" 
+              width={40} 
+              height={40} 
+              className="rounded-full" 
+            />
+          ) : (
+            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-gray-500" />
+            </div>
+          )}
         </div>
         <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
           {session.user?.email}
@@ -69,7 +80,7 @@ export default function ProfileDropdown({ session }: ProfileDropdownProps) {
             <Link 
               href="/profile"
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              onClick={() => setIsOpen(false)} // Close dropdown when a link is clicked
+              onClick={() => setIsOpen(false)}
             >
               <User className="w-4 h-4" />
               <span>Profile</span>
@@ -78,7 +89,7 @@ export default function ProfileDropdown({ session }: ProfileDropdownProps) {
             <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
 
             <button
-              onClick={() => { signOut(); setIsOpen(false) }} // Close dropdown when signing out
+              onClick={() => { signOut(); setIsOpen(false) }}
               className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full"
             >
               <LogOut className="w-4 h-4" />

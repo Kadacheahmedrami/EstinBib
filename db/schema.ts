@@ -189,3 +189,33 @@ export const ideas = pgTable(
     index("idea_user_id_idx").on(table.userId),
   ]
 );
+
+
+export const sndlDemandStatusEnum = pgEnum("sndl_demand_status", ["PENDING", "APPROVED", "REJECTED"]);
+
+export const sndlDemands = pgTable(
+  "sndl_demand",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    requestReason: text("request_reason").notNull(),
+    status: sndlDemandStatusEnum("status").default("PENDING"),
+    sndlEmail: varchar("sndl_email"),
+    sndlPassword: varchar("sndl_password"),
+    adminNotes: text("admin_notes"),
+    requestedAt: timestamp("requested_at").notNull().defaultNow(),
+    processedAt: timestamp("processed_at"),
+    processedBy: varchar("processed_by").references(() => users.id),
+    emailSent: boolean("email_sent").notNull().default(false),
+    emailSentAt: timestamp("email_sent_at"),
+  },
+  (table) => [
+    index("sndl_demand_user_id_idx").on(table.userId),
+    index("sndl_demand_status_idx").on(table.status),
+    index("sndl_demand_requested_at_idx").on(table.requestedAt),
+  ]
+);

@@ -12,7 +12,7 @@ export default async function Catalog() {
         subTitle="Welcome to Biblio Estin, the online platform of ESTIN's Higher School of Computer Science Library Here"
       />
       <div
-        className="absolute bg-red-400 z-[-1] h-[500px] w-full"
+        className="absolute bg-gradient-to-r from-[#9a1c21] to-[#c13b42] z-[-1] h-[500px] w-full"
         style={{
           backgroundImage: `url('/jpg/hero.webp')`,
           backgroundSize: 'cover',

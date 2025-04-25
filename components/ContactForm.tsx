@@ -81,20 +81,53 @@ export function ContactForm() {
     setIsSearching(true);
     setSearchError(null);
     try {
+      // Try OpenLibrary first
       const res = await fetch(
         `https://openlibrary.org/api/books?bibkeys=ISBN:${cleanIsbn}&format=json&jscmd=data`
       );
       const data = await res.json();
       const key = `ISBN:${cleanIsbn}`;
       let bookInfo: BookInfo = data[key];
+
+      // If no results from OpenLibrary, try Google Books
       if (!bookInfo) {
+        console.log("No results from OpenLibrary, trying Google Books...");
         const gRes = await fetch(
           `https://www.googleapis.com/books/v1/volumes?q=isbn:${cleanIsbn}`
         );
         const gData = await gRes.json();
-        if (gData.items?.length) bookInfo = gData.items[0].volumeInfo;
+        
+        if (gData.items && gData.items.length > 0) {
+          const volumeInfo = gData.items[0].volumeInfo;
+          bookInfo = {
+            title: volumeInfo.title,
+            authors: volumeInfo.authors || [],
+            publisher: volumeInfo.publisher,
+            publishedDate: volumeInfo.publishedDate,
+            imageLinks: {
+              thumbnail: volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:')
+            }
+          };
+        }
       }
+
       if (bookInfo) {
+        console.log("Book found:", bookInfo);
+        let coverUrl = bookInfo.cover?.medium || bookInfo.imageLinks?.thumbnail;
+        
+        // Ensure the URL uses HTTPS and handle Google Books URL patterns
+        if (coverUrl) {
+          coverUrl = coverUrl.replace('http:', 'https:');
+          // Handle special cases for Google Books URLs
+          if (coverUrl.includes('&edge=curl')) {
+            coverUrl = coverUrl.replace('&edge=curl', '');
+          }
+          if (coverUrl.includes('zoom=1')) {
+            coverUrl = coverUrl.replace('zoom=1', 'zoom=0');
+          }
+          console.log("Cover URL:", coverUrl);
+        }
+
         setFormData({
           isbn: cleanIsbn,
           title: bookInfo.title || "",
@@ -102,15 +135,17 @@ export function ContactForm() {
             bookInfo.authors.map(a => 
               typeof a === 'string' ? a : a.name || ''
             ).join(", ") : "",
-          publisher: bookInfo.publishers ? bookInfo.publishers[0].name : bookInfo.publisher || "",
-          releaseYear: (bookInfo.publish_date || bookInfo.publishedDate || "").slice(-4),
-          coverUrl: bookInfo.cover?.medium || bookInfo.imageLinks?.thumbnail,
+          publisher: bookInfo.publishers ? bookInfo.publishers[0]?.name : bookInfo.publisher || "",
+          releaseYear: (bookInfo.publish_date || bookInfo.publishedDate || "").slice(0, 4),
+          coverUrl: coverUrl,
         });
         setBookFound(true);
       } else {
+        console.log("No book found for ISBN:", cleanIsbn);
         setSearchError("No book found. Check ISBN and try again.");
       }
-    } catch {
+    } catch (error) {
+      console.error("Search error:", error);
       setSearchError("Failed to search. Please try later.");
     } finally {
       setIsSearching(false);

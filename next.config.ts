@@ -6,6 +6,16 @@ const nextConfig: NextConfig = {
       "loremflickr.com",
       "res.cloudinary.com",
       "lh3.googleusercontent.com",
+      "covers.openlibrary.org",
+      "books.google.com",
+      "books.googleusercontent.com",
+      "books-google.com",
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
+      },
     ],
   },
   /* config options here */
