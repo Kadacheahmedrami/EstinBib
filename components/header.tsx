@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Session } from "next-auth";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   Menu,
   X,
@@ -36,10 +37,16 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ session }) => {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [searchOpen, setSearchOpen] = useState<boolean>(false);
   const toggleMenu = (): void => setMenuOpen(prev => !prev);
   const toggleSearch = (): void => setSearchOpen(prev => !prev);
+
+  // Don't render header on dashboard routes
+  if (pathname?.startsWith('/dashboard')) {
+    return null;
+  }
 
   // Main navigation items
   const mainNavItems = [
@@ -141,6 +148,7 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
   return (
     <>
       {/* Top secondary header */}
+      <div className="mt-[75px] md:mt-[100px]"></div>
       <div className="hidden lg:block fixed top-0 left-0 z-[41] w-full bg-gray-100 shadow-sm py-1">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">

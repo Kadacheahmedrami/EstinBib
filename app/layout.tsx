@@ -1,8 +1,8 @@
 import "./globals.css";
 import Header from '@/components/header';
-
+import { ThemeProvider } from "@/components/theme-provider";
 import { getServerAuthSession } from "@/lib/auth";
-
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
   title: "Estin Bib",
@@ -10,23 +10,25 @@ export const metadata = {
   keywords: "Estin Bib, ESTIN library, academic resources, books for ESTIN students, research papers, ESTIN Algeria, educational platform, find books, library ESTIN",
 };
 
-
-
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const session = await getServerAuthSession();
  
   return (
-    <html lang="en">
-  
+    <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <Header session={session} />
-        <div className='mt-[75px] md:mt-[100px]'></div>
-    
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Header session={session} />
+          <div className=''></div>
           {children}
-      
-          
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
