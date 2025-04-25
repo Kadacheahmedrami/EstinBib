@@ -1,48 +1,45 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { bookRequests } from "@/db/schema"
-import { getServerSession } from "next-auth"
 import { eq } from "drizzle-orm"
+import { getServerAuthSession } from "@/lib/auth"
 
 export async function PUT(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
-  const session = await getServerSession()
-
-  if (session?.user?.role !== "LIBRARIAN") {
-    return NextResponse.json({ error: "Not authorized" }, { status: 403 })
-  }
-
   try {
+    const session = await getServerAuthSession()
+
+    if (!session?.user) {
+      return new NextResponse("Unauthorized", { status: 401 })
+    }
+
+    // Check if user is a librarian
+    if (session.user.role !== "LIBRARIAN") {
+      return new NextResponse("Forbidden", { status: 403 })
+    }
+
     const { status } = await request.json()
 
-    if (!status || !["pending", "approved", "rejected"].includes(status)) {
-      return NextResponse.json(
-        { error: "Invalid status" },
-        { status: 400 }
-      )
+    // Validate status
+    if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) {
+      return new NextResponse("Invalid status", { status: 400 })
     }
 
-    const [updatedRequest] = await db
+    // Update request status
+    await db
       .update(bookRequests)
-      .set({ status })
+      .set({ 
+        status,
+        ...(status === "APPROVED" ? { releasedAt: new Date() } : {})
+      })
       .where(eq(bookRequests.id, params.id))
-      .returning()
 
-    if (!updatedRequest) {
-      return NextResponse.json(
-        { error: "Request not found" },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(updatedRequest)
+    return new NextResponse(null, { status: 200 })
   } catch (error) {
-    console.error("Error updating request:", error)
-    return NextResponse.json(
-      { error: "Failed to update request" },
-      { status: 500 }
-    )
+    console.error("[REQUEST_UPDATE]", error)
+    console.error("Error details:", error instanceof Error ? error.message : error)
+    return new NextResponse("Internal error", { status: 500 })
   }
 }
