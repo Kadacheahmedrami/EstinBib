@@ -58,23 +58,32 @@ export default function BorrowsPage() {
   const [selectedBook, setSelectedBook] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
     loadBorrows()
-    loadUsers()
-    loadBooks()
   }, [])
+
+  useEffect(() => {
+    if (isDialogOpen) {
+      loadUsers()
+      loadBooks()
+    }
+  }, [isDialogOpen])
 
   const loadBorrows = async () => {
     try {
       const response = await fetch("/api/dashboard/borrows")
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
       const data = await response.json()
       setBorrows(data)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load borrows",
+        description: error instanceof Error ? error.message : "Failed to load borrows",
         variant: "destructive",
       })
     } finally {
@@ -85,12 +94,15 @@ export default function BorrowsPage() {
   const loadUsers = async () => {
     try {
       const response = await fetch("/api/users")
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
       const data = await response.json()
       setUsers(data)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load users",
+        description: error instanceof Error ? error.message : "Failed to load users",
         variant: "destructive",
       })
     }
@@ -99,12 +111,15 @@ export default function BorrowsPage() {
   const loadBooks = async () => {
     try {
       const response = await fetch("/api/books?available=true")
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
       const data = await response.json()
       setBooks(data)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load books",
+        description: error instanceof Error ? error.message : "Failed to load books",
         variant: "destructive",
       })
     }
@@ -131,8 +146,8 @@ export default function BorrowsPage() {
 
       setSelectedUser("")
       setSelectedBook("")
+      setIsDialogOpen(false)
       await loadBorrows()
-      await loadBooks() // Reload books to update availability
       toast({
         title: "Success",
         description: "Book borrowed successfully",
@@ -161,7 +176,6 @@ export default function BorrowsPage() {
       }
 
       await loadBorrows()
-      await loadBooks() // Reload books to update availability
       toast({
         title: "Success",
         description: "Book returned successfully",
@@ -210,7 +224,7 @@ export default function BorrowsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Borrows & Returns</h1>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button disabled={isSubmitting}>
               <Plus className="h-4 w-4 mr-2" />
@@ -227,7 +241,7 @@ export default function BorrowsPage() {
                   <SelectValue placeholder="Select user" />
                 </SelectTrigger>
                 <SelectContent>
-                  {users.map((user) => (
+                  {users?.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name}
                     </SelectItem>
@@ -240,7 +254,7 @@ export default function BorrowsPage() {
                   <SelectValue placeholder="Select book" />
                 </SelectTrigger>
                 <SelectContent>
-                  {books.map((book) => (
+                  {books?.map((book) => (
                     <SelectItem key={book.id} value={book.id}>
                       {book.title} - {book.author}
                     </SelectItem>
