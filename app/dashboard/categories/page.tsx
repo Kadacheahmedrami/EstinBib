@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,25 +35,28 @@ export default function CategoriesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
 
-  useEffect(() => {
-    loadCategories()
-  }, [])
-
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const response = await fetch("/api/dashboard/categories")
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
       const data = await response.json()
       setCategories(data)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load categories",
+        description: error instanceof Error ? error.message : "Failed to load categories",
         variant: "destructive",
       })
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    loadCategories()
+  }, [loadCategories])
 
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return

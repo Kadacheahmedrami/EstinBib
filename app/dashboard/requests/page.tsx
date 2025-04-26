@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect, useCallback } from "react"
 import {
   Table,
   TableBody,
@@ -29,24 +28,38 @@ interface BookRequest {
 
 export default function RequestsPage() {
   const [requests, setRequests] = useState<BookRequest[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
 
-  useEffect(() => {
-    loadRequests()
-  }, [])
-
-  const loadRequests = async () => {
+  const loadRequests = useCallback(async () => {
     try {
       const response = await fetch(`/api/dashboard/requests`)
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
       const data = await response.json()
       setRequests(data)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load book requests",
+        description: error instanceof Error ? error.message : "Failed to load book requests",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
+  }, [toast])
+
+  useEffect(() => {
+    loadRequests()
+  }, [loadRequests])
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[200px] w-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
   }
 
   return (
@@ -84,6 +97,13 @@ export default function RequestsPage() {
               </TableCell>
             </TableRow>
           ))}
+          {requests.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center text-muted-foreground">
+                No book requests found
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>

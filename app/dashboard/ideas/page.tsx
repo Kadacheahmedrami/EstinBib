@@ -1,13 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Trash2, MessageSquare } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -18,7 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
 
 interface User {
   id: string
@@ -31,62 +29,70 @@ interface Idea {
   user: User
   idea: string
   createdAt: string
-
-}
-
-interface Comment {
-  id: string
-  user: User
-  content: string
-  createdAt: string
 }
 
 export default function IdeasPage() {
   const [ideas, setIdeas] = useState<Idea[]>([])
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null)
-  const [newComment, setNewComment] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
 
-  useEffect(() => {
-    loadIdeas()
-  }, [])
-
-  const loadIdeas = async () => {
+  const loadIdeas = useCallback(async () => {
     try {
       const response = await fetch("/api/dashboard/ideas")
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
       const data = await response.json()
       setIdeas(data)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load ideas",
+        description: error instanceof Error ? error.message : "Failed to load ideas",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    loadIdeas()
+  }, [loadIdeas])
 
   const handleDeleteIdea = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this idea?")) return
+
     try {
       const response = await fetch(`/api/ideas/${id}`, {
         method: "DELETE",
       })
 
-      if (response.ok) {
-        loadIdeas()
-        toast({
-          title: "Success",
-          description: "Idea deleted successfully",
-        })
+      if (!response.ok) {
+        throw new Error(await response.text())
       }
+
+      await loadIdeas()
+      toast({
+        title: "Success",
+        description: "Idea deleted successfully",
+      })
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to delete idea",
+        description: error instanceof Error ? error.message : "Failed to delete idea",
         variant: "destructive",
       })
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex h-[200px] w-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
 
   return (
     <div className="p-6">
@@ -119,16 +125,20 @@ export default function IdeasPage() {
             <CardContent>
               <p className="whitespace-pre-wrap">{idea.idea}</p>
             </CardContent>
-     
           </Card>
         ))}
+        {ideas.length === 0 && (
+          <div className="col-span-full text-center text-muted-foreground py-8">
+            No ideas found
+          </div>
+        )}
       </div>
 
       {selectedIdea && (
         <Dialog open={true} onOpenChange={() => setSelectedIdea(null)}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Comments</DialogTitle>
+              <DialogTitle>Idea Details</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="border rounded-lg p-4 bg-muted/50">
@@ -142,10 +152,6 @@ export default function IdeasPage() {
                 </div>
                 <p className="whitespace-pre-wrap">{selectedIdea.idea}</p>
               </div>
-
-        
-
-        
             </div>
           </DialogContent>
         </Dialog>

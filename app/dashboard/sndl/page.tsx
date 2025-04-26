@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Check, X, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,7 +24,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -49,25 +48,31 @@ export default function SNDLDemandsPage() {
   const [filter, setFilter] = useState("PENDING")
   const [selectedDemand, setSelectedDemand] = useState<SNDLDemand | null>(null)
   const [responseMessage, setResponseMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
 
-  useEffect(() => {
-    loadDemands()
-  }, [filter])
-
-  const loadDemands = async () => {
+  const loadDemands = useCallback(async () => {
     try {
       const response = await fetch(`/api/dashboard/sndl?status=${filter}`)
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
       const data = await response.json()
       setDemands(data)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load SNDL demands",
+        description: error instanceof Error ? error.message : "Failed to load SNDL demands",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [filter, toast])
+
+  useEffect(() => {
+    loadDemands()
+  }, [loadDemands])
 
   const handleUpdateStatus = async (
     id: string,
@@ -80,19 +85,21 @@ export default function SNDLDemandsPage() {
         body: JSON.stringify({ status, responseMessage }),
       })
 
-      if (response.ok) {
-        setSelectedDemand(null)
-        setResponseMessage("")
-        loadDemands()
-        toast({
-          title: "Success",
-          description: `Demand ${status.toLowerCase()} successfully`,
-        })
+      if (!response.ok) {
+        throw new Error(await response.text())
       }
+
+      setSelectedDemand(null)
+      setResponseMessage("")
+      await loadDemands()
+      toast({
+        title: "Success",
+        description: `Demand ${status.toLowerCase()} successfully`,
+      })
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update demand status",
+        description: error instanceof Error ? error.message : "Failed to update demand status",
         variant: "destructive",
       })
     }
@@ -107,6 +114,14 @@ export default function SNDLDemandsPage() {
       default:
         return "text-yellow-600"
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[200px] w-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
   }
 
   return (
@@ -184,6 +199,13 @@ export default function SNDLDemandsPage() {
               </TableCell>
             </TableRow>
           ))}
+          {demands.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center text-muted-foreground">
+                No demands found
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
 

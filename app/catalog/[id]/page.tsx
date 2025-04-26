@@ -6,10 +6,6 @@ import { getRandomBooks } from "@/app/actions/helper";
 import { bookDetails } from "@/app/actions/books";
 import Footer from "@/components/Footer";
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
-
 interface Category {
   id: string;
   name: string;
@@ -28,6 +24,11 @@ interface Book {
   available: boolean;
   publishedAt: Date;
   categories: Category[];
+}
+
+interface PageProps {
+  params: Promise<{ id: string }>
+  
 }
 
 export default async function BookPage({ params }: PageProps) {

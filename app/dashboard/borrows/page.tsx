@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Plus, ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -61,18 +61,7 @@ export default function BorrowsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { toast } = useToast()
 
-  useEffect(() => {
-    loadBorrows()
-  }, [])
-
-  useEffect(() => {
-    if (isDialogOpen) {
-      loadUsers()
-      loadBooks()
-    }
-  }, [isDialogOpen])
-
-  const loadBorrows = async () => {
+  const loadBorrows = useCallback(async () => {
     try {
       const response = await fetch("/api/dashboard/borrows")
       if (!response.ok) {
@@ -89,9 +78,9 @@ export default function BorrowsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [toast])
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const response = await fetch("/api/users")
       if (!response.ok) {
@@ -106,9 +95,9 @@ export default function BorrowsPage() {
         variant: "destructive",
       })
     }
-  }
+  }, [toast])
 
-  const loadBooks = async () => {
+  const loadBooks = useCallback(async () => {
     try {
       const response = await fetch("/api/books?available=true")
       if (!response.ok) {
@@ -123,7 +112,18 @@ export default function BorrowsPage() {
         variant: "destructive",
       })
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    loadBorrows()
+  }, [loadBorrows])
+
+  useEffect(() => {
+    if (isDialogOpen) {
+      loadUsers()
+      loadBooks()
+    }
+  }, [isDialogOpen, loadUsers, loadBooks])
 
   const handleBorrow = async () => {
     if (!selectedUser || !selectedBook) return

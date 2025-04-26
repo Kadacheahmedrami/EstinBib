@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
-import { users, borrows, sndlDemands } from "@/db/schema"
+import { users, borrows } from "@/db/schema"
 import { getServerSession } from "next-auth"
-import { eq, sql, and, isNull, lt } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession()
+
 
 //   if (session?.user?.role !== "LIBRARIAN") {
 //     return NextResponse.json({ error: "Not authorized" }, { status: 403 })
@@ -48,10 +48,10 @@ export async function GET(req: NextRequest) {
     }
 
     // Get total count
-    const [{ count }] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(users)
-      .execute()
+    // const [{ count }] = await db
+    //   .select({ count: sql<number>`count(*)` })
+    //   .from(users)
+    //   .execute()
 
     // Get paginated results
     const results = await baseQuery

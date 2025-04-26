@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth/next"
+
 import { db } from "@/db"
 import { books, borrows, users, bookRequests } from "@/db/schema"
 import { count, eq, isNull, gt, and, sql } from "drizzle-orm"
@@ -7,7 +7,7 @@ import RecentBorrowsTable from "@/components/dashboard/RecentBorrowsTable"
 import PopularBooksChart from "@/components/dashboard/PopularBooksChart"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { redirect } from "next/navigation"
+
 
 interface PendingRequest {
   id: string
@@ -18,7 +18,6 @@ interface PendingRequest {
 }
 
 export default async function DashboardPage() {
-  const session = await getServerSession()
 
   // Ensure only librarians can access this page
   // if (!session || session.user?.role !== "LIBRARIAN") {

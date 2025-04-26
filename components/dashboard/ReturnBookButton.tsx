@@ -15,10 +15,10 @@ import { useToast } from "@/hooks/use-toast"
 
 interface ReturnBookButtonProps {
   borrowId: string
-  bookId: string
+
 }
 
-export function ReturnBookButton({ borrowId, bookId }: ReturnBookButtonProps) {
+export function ReturnBookButton({ borrowId }: ReturnBookButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()

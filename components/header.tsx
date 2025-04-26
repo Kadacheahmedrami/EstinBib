@@ -167,8 +167,8 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
          
           </div>
         </div>
-      </div>
-
+        </div>
+     
       {/* Main header */}
       <nav className="fixed top-0 lg:top-7  left-0 z-[40] w-full bg-white backdrop-blur-lg shadow-sm">
         <div className="container mx-auto px-4">
@@ -218,9 +218,9 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
                               {sub.label}
                             </Link>
                           )}
-                        </li>
-                      ))}
-                    </ul>
+          </li>
+        ))}
+        </ul>
                   )}
                 </div>
               ))}
@@ -279,8 +279,8 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
             <button className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full">E-books</button>
           </div>
         </div>
-      </div>
-
+        </div>
+       
       {/* Mobile Menu - Enhanced with categories */}
       <div
         className={`lg:hidden fixed top-[70px] z-[42] left-0 w-full h-[calc(100vh-70px)] bg-white shadow-lg overflow-y-auto transition-all duration-300 ease-in-out ${
@@ -319,9 +319,9 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
           ) : (
             <Link href="/auth/login" onClick={toggleMenu}>
               <button className="w-full py-3 border-2 border-[#F1413E] text-[#F1413E] rounded-md bg-white transition-colors hover:bg-[#F1413E] hover:text-white">
-                Log In
-              </button>
-            </Link>
+            Log In
+          </button>
+        </Link>
           )}
         </div>
 
@@ -364,7 +364,7 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
               </li>
             ))}
           </ul>
-        </div>
+</div>
 
         <div className="p-4 border-b border-gray-200">
           <h3 className="font-medium text-gray-800 mb-2">Quick Links</h3>

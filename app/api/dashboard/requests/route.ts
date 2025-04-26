@@ -4,7 +4,7 @@ import { bookRequests, users } from "@/db/schema"
 import { desc, eq } from "drizzle-orm"
 import { getServerAuthSession } from "@/lib/auth"
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerAuthSession()
 

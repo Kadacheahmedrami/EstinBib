@@ -7,12 +7,16 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from "next-auth/react"
+import { Session } from "next-auth"
+
+
+
 
 interface HeaderProps {
-  user: any
+  session?: Session | null;
 }
 
-export default function Header({ user }: HeaderProps) {
+export default function Header({ session }: HeaderProps) {
   const { theme, setTheme } = useTheme()
   const [notifications, setNotifications] = useState([
     {
@@ -78,10 +82,10 @@ export default function Header({ user }: HeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center space-x-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.image || "/placeholder.svg"} alt={user?.name} />
-                <AvatarFallback>{getInitials(user?.name || "User")}</AvatarFallback>
+                <AvatarImage src={session?.user?.image ?? "/placeholder.svg"} alt={session?.user?.name ?? ""} />
+                <AvatarFallback>{getInitials(session?.user?.name ?? "User")}</AvatarFallback>
               </Avatar>
-              <span className="hidden md:inline-block">{user?.name}</span>
+              <span className="hidden md:inline-block">{session?.user?.name}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

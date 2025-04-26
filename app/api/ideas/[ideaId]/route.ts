@@ -1,14 +1,26 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { ideas } from "@/db/schema"
-import { getServerSession } from "next-auth"
 import { eq } from "drizzle-orm"
+import { getServerSession } from "next-auth"
+
+type Context = {
+  params: Promise<{
+    ideaId: string | string[] | undefined
+  }>
+}
 
 export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: { ideaId: string } }
+  request: NextRequest,
+  context: Context
 ) {
   const session = await getServerSession()
+  const params = await context.params
+  const ideaId = Array.isArray(params.ideaId) ? params.ideaId[0] : params.ideaId
+
+  if (!ideaId) {
+    return NextResponse.json({ error: "Invalid idea ID" }, { status: 400 })
+  }
 
   if (!session?.user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
@@ -17,7 +29,7 @@ export async function DELETE(
   try {
     const [deletedIdea] = await db
       .delete(ideas)
-      .where(eq(ideas.id, params.ideaId))
+      .where(eq(ideas.id, ideaId))
       .returning()
 
     if (!deletedIdea) {

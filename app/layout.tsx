@@ -1,6 +1,6 @@
 import "./globals.css";
 import Header from '@/components/header';
-import { ThemeProvider } from "@/components/theme-provider";
+
 import { getServerAuthSession } from "@/lib/auth";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -18,17 +18,12 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+  
           <Header session={session} />
           <div className=''></div>
           {children}
           <Toaster />
-        </ThemeProvider>
+
       </body>
     </html>
   );

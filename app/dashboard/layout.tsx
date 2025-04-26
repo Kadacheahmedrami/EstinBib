@@ -29,7 +29,8 @@ export default async function DashboardLayout({
         {/* Main content area that takes remaining width */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-col min-h-screen">
-            <Header user={session.user} />
+       
+            <Header session={session}/>
             <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900">
               <div className="container mx-auto px-4 py-8">
                 {children}

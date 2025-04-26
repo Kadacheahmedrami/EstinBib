@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { UserCog, Shield, BookOpen, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -44,25 +44,31 @@ interface User {
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
 
-  useEffect(() => {
-    loadUsers()
-  }, [])
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const response = await fetch("/api/dashboard/users")
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
       const data = await response.json()
       setUsers(data)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load users",
+        description: error instanceof Error ? error.message : "Failed to load users",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    loadUsers()
+  }, [loadUsers])
 
   const handleUpdateRole = async (userId: string, role: string) => {
     try {
@@ -72,17 +78,19 @@ export default function UsersPage() {
         body: JSON.stringify({ role }),
       })
 
-      if (response.ok) {
-        loadUsers()
-        toast({
-          title: "Success",
-          description: "User role updated successfully",
-        })
+      if (!response.ok) {
+        throw new Error(await response.text())
       }
+
+      await loadUsers()
+      toast({
+        title: "Success",
+        description: "User role updated successfully",
+      })
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update user role",
+        description: error instanceof Error ? error.message : "Failed to update user role",
         variant: "destructive",
       })
     }
@@ -94,6 +102,14 @@ export default function UsersPage() {
       .map((n) => n[0])
       .join("")
       .toUpperCase()
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[200px] w-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
   }
 
   return (
@@ -176,6 +192,13 @@ export default function UsersPage() {
               </TableCell>
             </TableRow>
           ))}
+          {users.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center text-muted-foreground">
+                No users found
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
 

@@ -127,11 +127,7 @@ export default function TopBooksTable() {
                   href={`/dashboard/books/${book.id}`}
                   className="flex items-center hover:text-primary transition-colors"
                 >
-                  <img
-                    src={book.coverImage || "/placeholder.svg"}
-                    alt={book.title}
-                    className="h-10 w-7 object-cover mr-3"
-                  />
+             
                   <span className="font-medium">{book.title}</span>
                 </Link>
               </td>

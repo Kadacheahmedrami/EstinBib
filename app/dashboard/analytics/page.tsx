@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth/next"
+
 
 import { db } from "@/db"
 import { books, borrows, users } from "@/db/schema"
@@ -9,7 +9,7 @@ import TopBooksTable from "@/components/dashboard/analytics/TopBooksTable"
 import UserActivityChart from "@/components/dashboard/analytics/UserActivityChart"
 
 export default async function AnalyticsPage() {
-  const session = await getServerSession()
+
 
   // Redirect if not librarian
   // if (session?.user?.role !== "LIBRARIAN") {

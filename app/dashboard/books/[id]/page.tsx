@@ -4,23 +4,25 @@ import { books, categories, bookCategories, borrows, users } from "@/db/schema"
 import { eq, and, isNull } from "drizzle-orm"
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { BorrowBookButton } from "@/components/dashboard/BorrowBookButton"
 import { ReturnBookButton } from "@/components/dashboard/ReturnBookButton"
 
-export default async function BookDetailsPage({
-  params,
-}: {
-  params: { id: string }
-}) {
+
+interface PageProps {
+  params: Promise<{ id: string }>
+  
+}
+export default async function BookDetailsPage({ params }: PageProps) {
   const session = await getServerSession()
-  const isLibrarian = session?.user?.role === "LIBRARIAN"
+
 
   // Get book details
   const book = await db.query.books.findFirst({
-    where: eq(books.id, params.id),
+    where: eq(books.id, (await params).id),
   })
 
   if (!book) {
@@ -73,7 +75,7 @@ export default async function BookDetailsPage({
           <Button variant="outline" asChild>
             <Link href="/dashboard/books">Back to Books</Link>
           </Button>
-          {isLibrarian && (
+          { (
             <Button asChild>
               <Link href={`/dashboard/books/${book.id}/edit`}>Edit Book</Link>
             </Button>
@@ -84,13 +86,13 @@ export default async function BookDetailsPage({
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         <div className="md:flex">
           <div className="md:w-1/3 lg:w-1/4">
-            <div className="aspect-[2/3] relative">
-              <img
+              <Image
                 src={book.coverImage || "/placeholder.svg"}
                 alt={book.title}
                 className="object-cover w-full h-full"
+                width={500}
+                height={750}
               />
-            </div>
           </div>
           <div className="p-6 md:w-2/3 lg:w-3/4">
             <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -148,15 +150,15 @@ export default async function BookDetailsPage({
                 </p>
                 <p>Borrowed on: {format(new Date(currentBorrow[0].borrowedAt), "MMMM d, yyyy")}</p>
                 <p>Due date: {format(new Date(currentBorrow[0].dueDate), "MMMM d, yyyy")}</p>
-                {isLibrarian && (
+                {  (
                   <div className="mt-3">
-                    <ReturnBookButton borrowId={currentBorrow[0].id} bookId={book.id} />
+                    <ReturnBookButton borrowId={currentBorrow[0].id} />
                   </div>
                 )}
               </div>
             )}
 
-            {!isLibrarian && (
+            { (
               <div className="mt-6">
                 {book.available ? (
                   <BorrowBookButton bookId={book.id} />

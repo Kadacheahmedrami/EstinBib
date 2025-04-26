@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/db"
-import { books, categories, bookCategories } from "@/db/schema"
+import {  categories, bookCategories } from "@/db/schema"
 import { count, eq } from "drizzle-orm"
 import { getServerAuthSession } from "@/lib/auth"
 

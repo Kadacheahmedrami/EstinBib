@@ -8,7 +8,7 @@ interface DashboardCardProps {
 }
 
 export default function DashboardCard({ title, value, icon, color = "default" }: DashboardCardProps) {
-  const Icon = LucideIcons[icon]
+  const Icon: LucideIcons.LucideIcon = LucideIcons[icon] as LucideIcons.LucideIcon
 
   const colorClasses = {
     default: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",

@@ -1,15 +1,27 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { borrows, books } from "@/db/schema"
-import { eq, isNull } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { getServerAuthSession } from "@/lib/auth"
 
+type Context = {
+  params: Promise<{
+    id: string | string[] | undefined
+  }>
+}
+
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: Context
 ) {
   try {
     const session = await getServerAuthSession()
+    const params = await context.params
+    const id = Array.isArray(params.id) ? params.id[0] : params.id
+
+    if (!id) {
+      return new NextResponse("Invalid borrow ID", { status: 400 })
+    }
 
     if (!session?.user || session.user.role !== "LIBRARIAN") {
       return new NextResponse("Unauthorized", { status: 401 })
@@ -19,7 +31,7 @@ export async function POST(
     const borrow = await db
       .select()
       .from(borrows)
-      .where(eq(borrows.id, params.id))
+      .where(eq(borrows.id, id))
       .limit(1)
 
     if (!borrow[0]) {
@@ -36,7 +48,7 @@ export async function POST(
       const [updated] = await tx
         .update(borrows)
         .set({ returnedAt: new Date() })
-        .where(eq(borrows.id, params.id))
+        .where(eq(borrows.id, id))
         .returning()
 
       // Update book availability
