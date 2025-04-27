@@ -147,7 +147,7 @@ export default function CulturePage() {
                   <h3 className="text-2xl font-semibold mb-2">{concert.title}</h3>
                   <p className="text-gray-700 mb-4">{concert.description}</p>
                   <a href={concert.url} className="text-[#9a1c21] font-medium hover:underline">
-                    Plus d'infos
+                    Plus d infos
                   </a>
                 </div>
               </div>
