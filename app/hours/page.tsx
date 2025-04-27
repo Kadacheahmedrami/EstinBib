@@ -205,7 +205,7 @@
 
         {/* Sun */}
         <motion.div
-          className="absolute z-10"
+          className="absolute z-[0]"
           initial={false}
           animate={{
             top: sunPosition.top,

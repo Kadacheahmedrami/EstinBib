@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
       "books.google.com",
       "books.googleusercontent.com",
       "books-google.com",
+      "images.pexels.com",
+      "img.youtube.com",
+      "images.unsplash.com",
     ],
     remotePatterns: [
       {

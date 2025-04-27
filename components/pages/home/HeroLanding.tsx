@@ -13,7 +13,7 @@ const HeroLanding: React.FC = () => {
     <>
     <div className="relative min-h-[85vh] flex flex-col lg:flex-row items-start justify-between bg-[#06293A] px-6 md:px-16 lg:px-32 overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/jpg/back.webp')" }}>
       {/* Left Content */}
-      <div className="relative z-10 max-w-2xl flex flex-col justify-center h-[85vh] w-full items-center text-left">
+      <div className="relative z-10 max-w-2xl flex flex-col justify-center h-[90svh] md:h-[90svh] w-full items-center text-left">
         <div className='flex flex-col items-start'>
           <Image src="/svg/landingLogo.svg" alt="Logo" width={300} height={250} className="mb-6" />
   
@@ -40,7 +40,7 @@ const HeroLanding: React.FC = () => {
       </div>
 
       {/* Right Side Image */}
-      <Image src="/svg/back1.svg" draggable={false} alt="Library Illustration" width={900} height={900} className="absolute right-[-100px] top-[15%] hidden lg:block my-8 mx-12 h-auto" />
+      <Image src="/svg/back1.svg" draggable={false} alt="Library Illustration" width={900} height={900} className="absolute right-[-100px] bottom-[-100px] hidden lg:block mx-12 h-auto" />
     </div>
     </>
   );

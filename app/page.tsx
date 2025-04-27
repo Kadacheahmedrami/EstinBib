@@ -15,12 +15,12 @@ export default async function Home() {
 
         {/* "What's New?" Section */}
         <div className="flex justify-between items-center ml-[4%] mt-20">
-          <h2 className="text-[50px] font-bold text-[#F1413E]">
+          <h2 className="text-[24px] md:text-[50px] font-bold text-[#F1413E]">
             What&apos;s New?
           </h2>
           <Link
             href="/catalog"
-            className="flex items-center font-bold text-3xl text-[#F1413E] m-8 transition-transform hover:scale-105"
+            className="flex items-center  font-bold  text-[20px] md:text-3xl text-[#F1413E] m-8 transition-transform hover:scale-105"
           >
             See All
             <svg
@@ -53,12 +53,12 @@ export default async function Home() {
 
         {/* "Most Borrowed" Section */}
         <div className="flex justify-between items-center ml-[4%] my-4">
-          <h2 className="text-[50px] font-bold text-[#F1413E]">
+          <h2 className="text-[24px] md:text-[50px] font-bold text-[#F1413E]">
             Most Borrowed
           </h2>
           <Link
             href="/catalog"
-            className="flex items-center font-bold text-3xl text-[#F1413E] m-8 transition-transform hover:scale-105"
+            className="flex items-center font-bold  text-[20px] md:text-3xl text-[#F1413E] m-8 transition-transform hover:scale-105"
           >
             See All
             <svg

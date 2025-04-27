@@ -1,12 +1,62 @@
-
 import Footer from '@/components/Footer';
+import Image from 'next/image';
+
+// Données culturelles réelles et visuels avec URLs stables
+const explorations = [
+  {
+    title: "Salle de lecture en plein air",
+    description: "Aménagement de la terrasse de la bibliothèque en espace de lecture ouvert, inauguré le 24 octobre 2024.",
+    url: "/actualites/lecture-plein-air",
+    image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=compress&cs=tinysrgb&w=800",
+  },
+  {
+    title: "Atelier de peinture à la bibliothèque",
+    description: "Création d'un atelier artistique dans la bibliothèque pour encourager la créativité des étudiants (démarré en octobre 2024).",
+    url: "/actualites/atelier-peinture",
+    image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=compress&cs=tinysrgb&w=800",
+  },
+];
+
+const theatreSpaces = [
+  {
+    title: "Salle de théâtre de la bibliothèque",
+    description: "Nouvel espace scénique conçu pour les répétitions et petits spectacles, ouvert depuis janvier 2025.",
+    url: "/culture/theatre-biblio",
+    image: "https://images.unsplash.com/photo-1503095396549-807759245b35?auto=compress&cs=tinysrgb&w=800",
+  },
+];
+
+const concerts = [
+  {
+    title: "Concert de la chorale ESTIN",
+    description: "Première représentation publique de la chorale de l'ESTIN, 16 avril 2025, initiée par le Club RASA.",
+    url: "/events/chorale-estin",
+    image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=compress&cs=tinysrgb&w=800",
+  },
+  {
+    title: "Soirée musicale RASA",
+    description: "Concert instrumental et vocal organisé lors de l'inauguration du Club RASA le 16 avril 2025.",
+    url: "/events/soiree-rasa",
+    image: "https://images.unsplash.com/photo-1470019693664-1d202d2c0907?auto=compress&cs=tinysrgb&w=800",
+  },
+];
+
+const clubs = [
+  {
+    name: "Club Artistique, Culturel et Scientifique RASA",
+    founded: "16 avril 2025",
+    activities: ["Théâtre", "Musique (chorale, instruments)", "Arts plastiques", "Littérature"],
+    social: {
+      instagram: "https://www.instagram.com/rasa.estin/",
+      facebook: "https://www.facebook.com/estin.amizour.bejaia/videos/993238352984790/"
+    },
+    image: "https://images.unsplash.com/photo-1523307730650-594bc63f9d67?auto=compress&cs=tinysrgb&w=800",
+  },
+];
 
 export default function CulturePage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Placeholder */}
-      {/* <- Place your navigation component here -> */}
-
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-[#9a1c21] to-[#c13b42] text-white">
       <div className="absolute inset-0 bg-[url('/jpg/hero.png')] bg-cover bg-center mix-blend-overlay"></div>
@@ -18,96 +68,29 @@ export default function CulturePage() {
         </div>
       </div>
 
+
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-16 space-y-16">
-        {/* Section: Expositions */}
+      <main className="container mx-auto px-6 py-16 space-y-16">
+        {/* Section: Explorations culturelles */}
         <section>
-          <h2 className="text-3xl font-bold mb-6">Expositions à venir</h2>
+          <h2 className="text-3xl font-bold mb-6">Explorations culturelles</h2>
           <div className="space-y-8">
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-2">Histoire du livre</h3>
-                <p className="text-gray-700 mb-4">
-                  Du 5 mai au 30 juin 2025. Plongez dans l’évolution de l’imprimerie depuis Gutenberg jusqu’à l’ère numérique.
-                </p>
-                <p className="text-gray-600">
-                  Cette exposition retrace les grandes étapes de la fabrication du livre et présente
-                  des éditions rares issues de nos collections patrimoniales.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-2">Photographies algériennes</h3>
-                <p className="text-gray-700 mb-4">
-                  Du 10 juillet au 15 septembre 2025. Une sélection d’images capturant la diversité culturelle
-                  et paysagère de l’Algérie.
-                </p>
-                <p className="text-gray-600">
-                  Découvrez des clichés inédits d’archives, prêts à élargir votre regard sur notre patrimoine visuel.
-                </p>
-              </div>
-            </div>
-
-            {/* Additional exposition cards to reach length */}
-            {Array.from({ length: 5 }).map((_, idx) => (
-              <div key={idx} className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+            {explorations.map((item, idx) => (
+              <div
+                key={idx}
+                className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  width={800}
+                  height={400}
+                  className="object-cover w-full h-48"
+                />
                 <div className="p-6">
-                  <h3 className="text-2xl font-semibold mb-2">Exposition Supplémentaire {idx + 1}</h3>
-                  <p className="text-gray-700 mb-4">
-                    Description de l’exposition supplémentaire {idx + 1}. Dates et détails à venir.
-                  </p>
-                  <ul className="list-disc list-inside text-gray-700">
-                    <li>Date : À définir</li>
-                    <li>Lieu : Galerie principale</li>
-                    <li>Entrée libre</li>
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Section: Conférences */}
-        <section>
-          <h2 className="text-3xl font-bold mb-6">Conférences & Rencontres</h2>
-          <div className="space-y-8">
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-2">Conférence : Patrimoine et Numérique</h3>
-                <p className="text-gray-700 mb-2">
-                  20 mai 2025, 10 h 00 – 12 h 00, Amphithéâtre. Un débat sur la numérisation des archives
-                  et l’accessibilité du patrimoine culturel.
-                </p>
-                <a href="/events/patrimoine-numerique" className="text-[#9a1c21] font-medium hover:underline">
-                  En savoir plus
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-2">Rencontre avec l’auteur Driss Chraïbi</h3>
-                <p className="text-gray-700 mb-2">
-                  15 juin 2025, 17 h 00 – 18 h 30, Salle de conférence. Échange autour de l’œuvre de
-                  l’écrivain algérien et de son impact littéraire.
-                </p>
-                <a href="/events/rencontre-chraibi" className="text-[#9a1c21] font-medium hover:underline">
-                  Réservez votre place
-                </a>
-              </div>
-            </div>
-
-            {/* Add filler conference cards */}
-            {Array.from({ length: 4 }).map((_, idx) => (
-              <div key={idx} className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="p-6">
-                  <h3 className="text-2xl font-semibold mb-2">Conférence Supplémentaire {idx + 1}</h3>
-                  <p className="text-gray-700 mb-2">
-                    Détails de la conférence supplémentaire {idx + 1}, date et horaire à confirmer.
-                  </p>
-                  <a href="/events/plus" className="text-[#9a1c21] font-medium hover:underline">
+                  <h3 className="text-2xl font-semibold mb-2">{item.title}</h3>
+                  <p className="text-gray-700 mb-4">{item.description}</p>
+                  <a href={item.url} className="text-[#9a1c21] font-medium hover:underline">
                     En savoir plus
                   </a>
                 </div>
@@ -116,45 +99,27 @@ export default function CulturePage() {
           </div>
         </section>
 
-        {/* Section: Ateliers */}
+        {/* Section: Théâtre & Scène */}
         <section>
-          <h2 className="text-3xl font-bold mb-6">Ateliers & Activités</h2>
+          <h2 className="text-3xl font-bold mb-6">Théâtre & Scène</h2>
           <div className="space-y-8">
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-2">Atelier de calligraphie</h3>
-                <p className="text-gray-700 mb-2">
-                  12 mai 2025, 14 h 00 – 16 h 00, Salle 101. Initiez-vous aux techniques traditionnelles
-                  de calligraphie arabe.
-                </p>
-                <a href="/workshops/calligraphie" className="text-[#9a1c21] font-medium hover:underline">
-                  Inscription
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-2">Atelier photographie</h3>
-                <p className="text-gray-700 mb-2">
-                  28 juin 2025, 10 h 00 – 12 h 00, Studio photo. Techniques de prise de vue et retouche numérique.
-                </p>
-                <a href="/workshops/photographie" className="text-[#9a1c21] font-medium hover:underline">
-                  Inscription
-                </a>
-              </div>
-            </div>
-
-            {/* Filler workshop cards */}
-            {Array.from({ length: 4 }).map((_, idx) => (
-              <div key={idx} className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+            {theatreSpaces.map((space, idx) => (
+              <div
+                key={idx}
+                className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <Image
+                  src={space.image}
+                  alt={space.title}
+                  width={800}
+                  height={400}
+                  className="object-cover w-full h-48"
+                />
                 <div className="p-6">
-                  <h3 className="text-2xl font-semibold mb-2">Atelier Supplémentaire {idx + 1}</h3>
-                  <p className="text-gray-700 mb-2">
-                    Détails de l’atelier supplémentaire {idx + 1}. Horaire et lieu à définir.
-                  </p>
-                  <a href="/workshops/plus" className="text-[#9a1c21] font-medium hover:underline">
-                    Inscription
+                  <h3 className="text-2xl font-semibold mb-2">{space.title}</h3>
+                  <p className="text-gray-700 mb-4">{space.description}</p>
+                  <a href={space.url} className="text-[#9a1c21] font-medium hover:underline">
+                    Découvrir
                   </a>
                 </div>
               </div>
@@ -162,22 +127,82 @@ export default function CulturePage() {
           </div>
         </section>
 
-        {/* Additional dummy sections to reach 250+ lines */}
-        {Array.from({ length: 6 }).map((_, idx) => (
-          <section key={idx}>
-            <h2 className="text-2xl font-bold mb-4">Section Supplémentaire {idx + 1}</h2>
-            <p className="text-gray-700 mb-2">
-              Contenu supplémentaire pour la section {idx + 1}. Lorem ipsum dolor sit amet,
-              consectetur adipiscing elit, sed do eiusmod tempor.
-            </p>
-            <ul className="list-disc list-inside text-gray-700">
-              <li>Point A pour la section {idx + 1}</li>
-              <li>Point B pour la section {idx + 1}</li>
-              <li>Point C pour la section {idx + 1}</li>
-            </ul>
-          </section>
-        ))}
-      </div>
+        {/* Section: Concerts & Musique */}
+        <section>
+          <h2 className="text-3xl font-bold mb-6">Concerts & Musique</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {concerts.map((concert, idx) => (
+              <div
+                key={idx}
+                className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <Image
+                  src={concert.image}
+                  alt={concert.title}
+                  width={800}
+                  height={400}
+                  className="object-cover w-full h-48"
+                />
+                <div className="p-6">
+                  <h3 className="text-2xl font-semibold mb-2">{concert.title}</h3>
+                  <p className="text-gray-700 mb-4">{concert.description}</p>
+                  <a href={concert.url} className="text-[#9a1c21] font-medium hover:underline">
+                    Plus d'infos
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Section: Clubs artistiques */}
+        <section>
+          <h2 className="text-3xl font-bold mb-6">Clubs & Associations</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {clubs.map((club, idx) => (
+              <div
+                key={idx}
+                className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <Image
+                  src={club.image}
+                  alt={club.name}
+                  width={800}
+                  height={400}
+                  className="object-cover w-full h-48"
+                />
+                <div className="p-6">
+                  <h3 className="text-2xl font-semibold mb-2">{club.name}</h3>
+                  <p className="text-gray-700 mb-2">
+                    <strong>Fondé le :</strong> {club.founded}
+                  </p>
+                  <p className="text-gray-700 mb-4">
+                    <strong>Activités :</strong> {club.activities.join(', ')}
+                  </p>
+                  <div className="flex space-x-4">
+                    <a
+                      href={club.social.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#9a1c21] font-medium hover:underline"
+                    >
+                      Instagram
+                    </a>
+                    <a
+                      href={club.social.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#9a1c21] font-medium hover:underline"
+                    >
+                      Facebook
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
 
       <Footer />
     </div>

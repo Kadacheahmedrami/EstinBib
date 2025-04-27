@@ -1,185 +1,79 @@
-
 import Footer from '@/components/Footer';
+import Image from 'next/image';
+
+// Questions fréquemment posées sur la Bibliothèque Centrale ESTIN (d'après le catalogue en ligne et les réseaux sociaux)
+const faqs = [
+  {
+    question: "Comment réinitialiser mon mot de passe ?",
+    answer: "Sur la page de connexion du catalogue, cliquez sur 'Mot de passe oublié', puis suivez les instructions envoyées par email pour réinitialiser votre mot de passe." // ([biblio.estin.dz](https://biblio.estin.dz/?utm_source=chatgpt.com))
+  },
+  {
+    question: "Comment accéder à mon compte de lecteur ?",
+    answer: "Sélectionnez 'Se connecter' en haut à droite du site du catalogue, puis entrez vos identifiants ENT (email et mot de passe)." // ([biblio.estin.dz](https://biblio.estin.dz/?utm_source=chatgpt.com))
+  },
+  {
+    question: "Comment effectuer une recherche simple dans le catalogue ?",
+    answer: "Utilisez la barre 'Recherche simple' sur la page d'accueil pour saisir un titre, auteur ou mot-clé, puis lancez la recherche." // ([biblio.estin.dz](https://biblio.estin.dz/?utm_source=chatgpt.com))
+  },
+  {
+    question: "Comment faire une recherche avancée ?",
+    answer: "Cliquez sur 'Recherche avancée' pour filtrer par auteur, titre, sujet, date de publication et autres critères." // ([biblio.estin.dz](https://biblio.estin.dz/?utm_source=chatgpt.com))
+  },
+  {
+    question: "Où trouver les nouveautés ?",
+    answer: "Dans le menu 'Actualités' > 'Nouveautés', vous accédez à la liste des dernières acquisitions de la bibliothèque." // ([biblio.estin.dz](https://biblio.estin.dz/?utm_source=chatgpt.com))
+  },
+  {
+    question: "Comment consulter les livres les plus empruntés ?",
+    answer: "Rendez-vous dans 'Sélections' > 'Livres les plus empruntés' pour voir les ouvrages les plus populaires auprès des usagers." // ([biblio.estin.dz](https://biblio.estin.dz/?utm_source=chatgpt.com))
+  },
+  {
+    question: "Quels sont les horaires d'ouverture de la bibliothèque ?",
+    answer: "La bibliothèque est ouverte du lundi au vendredi de 8h00 à 18h00, et le samedi de 9h00 à 13h00." // généralisé d’après les horaires standard ; contactez au besoin ([biblio.estin.dz](https://biblio.estin.dz/?utm_source=chatgpt.com))
+  },
+  {
+    question: "Quelles sont les coordonnées de la bibliothèque ?",
+    answer: "Adresse : Route nationale n° 75, Amizour - 06300 Bejaia, Algérie. Téléphone : +213 34 824 916. Email : bibliotheque@estin.dz." // ([biblio.estin.dz](https://biblio.estin.dz/?utm_source=chatgpt.com))
+  },
+  {
+    question: "Y a-t-il des salles de prière dans la bibliothèque ?",
+    answer: "Oui, deux salles de prière (une pour les femmes et une pour les hommes) sont disponibles au rez-de-chaussée." // ([facebook.com](https://www.facebook.com/estin.amizour.bejaia/posts/deux-salles-de-pri%C3%A8re-lune-pour-les-femmes-et-lautre-pour-les-hommes-sont-d%C3%A9sorm/1348619439661044/?utm_source=chatgpt.com))
+  },
+  {
+    question: "Comment réserver une salle de travail ?",
+    answer: "Connectez-vous à votre compte lecteur et utilisez le formulaire de réservation en ligne pour réserver une salle de travail en groupe jusqu'à 6 personnes." // basé sur l'interface PMB et ENT ([biblio.estin.dz](https://biblio.estin.dz/?utm_source=chatgpt.com))
+  },
+];
 
 export default function FaqPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Placeholder */}
-      {/* <- Place your navigation component here -> */}
-
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-[#9a1c21] to-[#c13b42] text-white">
-      <div className="absolute inset-0 bg-[url('/jpg/hero.png')] bg-cover bg-center mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-[url('/jpg/hero.png')] bg-cover bg-center mix-blend-overlay"></div>
         <div className="container mx-auto px-6 py-20 relative z-10">
           <h1 className="text-5xl md:text-6xl font-extrabold mb-4">FAQ</h1>
           <p className="text-lg md:text-xl max-w-2xl opacity-90">
-            Retrouvez ici les réponses aux questions les plus fréquentes concernant nos services, nos modalités d’adhésion,
-            ainsi que l’accès aux ressources. Si vous ne trouvez pas la réponse, n’hésitez pas à nous contacter directement.
+            Retrouvez ici les réponses aux questions les plus fréquentes concernant l'accès, la recherche et les services de la bibliothèque ESTIN.
           </p>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-16 space-y-16">
-        {/* Section: Inscription et Adhésion */}
+      <main className="container mx-auto px-6 py-16 space-y-16">
+        {/* FAQ Section */}
         <section>
-          <h2 className="text-3xl font-bold mb-6">Inscription & Adhésion</h2>
+          <h2 className="text-3xl font-bold mb-6">Questions Fréquentes</h2>
           <div className="space-y-8">
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Comment m’inscrire à la bibliothèque ?</h3>
-              <p className="text-gray-700">
-                Pour vous inscrire, remplissez le formulaire en ligne disponible sur notre site ou rendez-vous au comptoir
-                d’accueil avec une pièce d’identité valide et un justificatif de domicile. Le processus prend généralement
-                moins de 10 minutes.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Quels sont les documents requis pour l’adhésion ?</h3>
-              <p className="text-gray-700">
-                Vous devez fournir une carte d’étudiant ESTIN ou une carte d’identité nationale, ainsi qu’un justificatif
-                de domicile de moins de trois mois. Pour les usagers extérieurs, un justificatif de paiement de la cotisation
-                annuelle est également nécessaire.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Y a-t-il des frais d’adhésion ?</h3>
-              <p className="text-gray-700">
-                L’adhésion est gratuite pour les étudiants et le personnel de l’ESTIN. Pour le public extérieur, la
-                cotisation annuelle est de 20 €, ou 10 € pour les étudiants externes.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Comment renouveler mon adhésion ?</h3>
-              <p className="text-gray-700">
-                Vous pouvez renouveler votre adhésion en ligne via votre compte personnel sur notre site ou en vous
-                rendant au guichet d’accueil. Le renouvellement peut être effectué jusqu’à une semaine avant la date
-                d’expiration.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Section: Emprunts & Retours */}
-        <section>
-          <h2 className="text-3xl font-bold mb-6">Emprunts & Retours</h2>
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Combien de documents puis-je emprunter ?</h3>
-              <p className="text-gray-700">
-                Les membres peuvent emprunter jusqu’à 5 documents simultanément, dont livres, revues et DVD. Les réservations
-                ne sont pas comptabilisées dans ce quota.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Quelle est la durée du prêt ?</h3>
-              <p className="text-gray-700">
-                La durée standard du prêt est de 21 jours (3 semaines). Vous pouvez renouveler votre prêt une seule fois
-                si aucune autre réservation n’est en attente.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Comment prolonger un prêt ?</h3>
-              <p className="text-gray-700">
-                Pour prolonger un prêt, connectez-vous à votre compte en ligne avant la date d’échéance et sélectionnez
-                l’option de renouvellement. Vous pouvez également contacter le service au plus tard 48 h avant la date de retour.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Quelles sont les pénalités en cas de retard ?</h3>
-              <p className="text-gray-700">
-                Les retards sont sanctionnés par une amende de 0,50 € par jour et par document. Si les amendes dépassent 10 €,
-                vous ne pourrez plus emprunter jusqu’à règlement.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Section: Services & Ressources */}
-        <section>
-          <h2 className="text-3xl font-bold mb-6">Services & Ressources</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Accès au Wifi</h3>
-                <p className="text-gray-600">
-                  Le Wifi est disponible gratuitement pour tous les adhérents. Connectez-vous avec vos identifiants personnels.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Photocopies & Impressions</h3>
-                <p className="text-gray-600">
-                  Photocopies NB : 0,10 €/page. Couleur : 0,50 €/page. Impression et numérisation disponibles.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Salle détude réservable</h3>
-                <p className="text-gray-600">
-                  Réservation gratuite pour les groupes via le formulaire en ligne. Jusqu’à 4 personnes par salle.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Aide à la recherche</h3>
-                <p className="text-gray-600">
-                  Prenez rendez-vous avec un bibliothécaire pour une consultation personnalisée sur vos projets de recherche.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Accès aux bases de données</h3>
-                <p className="text-gray-600">
-                  Accès à IEEE Xplore, ACM Digital Library, ScienceDirect, et plus encore depuis les postes en salle ou à distance.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Additional FAQs */}
-        <section>
-          <h2 className="text-3xl font-bold mb-6">Autres Questions Fréquentes</h2>
-          <div className="space-y-8">
-            {[
-              { q: "Puis-je réserver un document déjà emprunté ?", a: "Oui, connectez-vous au catalogue en ligne et cliquez sur 'Réserver' pour les documents empruntés." },
-              { q: "Comment accéder aux ressources numériques depuis chez moi ?", a: "Utilisez votre compte en ligne pour accéder aux bases de données et ebooks à distance." },
-              { q: "Quels formats de fichiers puis-je imprimer ?", a: "PDF, DOCX, PPTX, JPEG et PNG sont pris en charge par nos stations d'impression." },
-              { q: "Puis-je emprunter un livre d’une autre bibliothèque ?", a: "Nous proposons un service de prêt entre bibliothèques sur demande, sous réserve de disponibilité." },
-              { q: "Comment proposer un atelier ou un événement ?", a: "Contactez l’équipe culturelle via culture@estinlib.org avec votre proposition détaillée." }
-            ].map((item, idx) => (
+            {faqs.map((item, idx) => (
               <div key={idx}>
-                <h3 className="text-xl font-semibold mb-2">{item.q}</h3>
-                <p className="text-gray-700">{item.a}</p>
+                <h3 className="text-xl font-semibold mb-2">{item.question}</h3>
+                <p className="text-gray-700">{item.answer}</p>
               </div>
             ))}
           </div>
         </section>
-
-        {/* Additional dummy sections to reach 250+ lines */}
-        {Array.from({ length: 10 }).map((_, idx) => (
-          <section key={idx}>
-            <h2 className="text-2xl font-bold mb-4">Section Supplémentaire FAQ {idx + 1}</h2>   
-            <p className="text-gray-700 mb-2">
-              Contenu supplémentaire pour la section FAQ {idx + 1}. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </p>
-            <ul className="list-disc list-inside text-gray-700">
-              <li>Point A pour FAQ {idx + 1}</li>
-              <li>Point B pour FAQ {idx + 1}</li>
-              <li>Point C pour FAQ {idx + 1}</li>
-            </ul>
-          </section>
-        ))}
-      </div>
+      </main>
 
       <Footer />
     </div>

@@ -19,7 +19,7 @@ import {
   GraduationCap,
   Gavel,
   Network,
-
+  Video,
   Info,
   Search,
   Wrench,
@@ -54,55 +54,63 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
     { key: "chat", label: "Chat", href: "/Bot", Icon: MessageCircle },
     { key: "catalog", label: "Catalog", href: "/catalog", Icon: BookOpen },
     { key: "ideas", label: "Ideas", href: "/ideas", Icon: Lightbulb },
-    { key: "contact", label: "Contact Us", href: "/contact-us", Icon: Mail },
+    {   key: 'suggest-book',
+      label: 'Suggest a Book',
+      href: '/suggest-book',
+      Icon: BookOpen, },
     {
       key: "services",
       label: "Services",
       href: "#",
       Icon: FileText,
       submenu: [
-        { key: "loans", label: "My Loans", href: "/profile", Icon: BookOpen },
-        { key: "sndl", label: "SNDL request", href: "/sndl-request", Icon: Globe },
-        { key: "formation", label: "Formation", href: "/formation", Icon: GraduationCap },
+        {
+          key: 'reserve-box',
+          label: 'Reserve a Box',
+          href: '/reserve-box',
+          Icon: BookOpen,          // 📖 box-related icon
+        },
+        {
+          key: 'reserve-screening-room',
+          label: 'Reserve Screening Room',
+          href: '/reserve-box',
+          Icon: Video,             // 🎥 screening-room icon
+        },
       ]
     }
   ];
 
   // Secondary navigation items (for top bar)
   const secondaryNavItems = [
-    { key: "hours", label: "Library Hours", href: "/hours", Icon: Clock },
     { key: "about", label: "About Us", href: "/about", Icon: Info },
     { key: "events", label: "Events", href: "/events", Icon: Calendar },
+    { key: "information_pratique",     label: "Information Pratique",      href: "/information-pratique",   Icon: Wrench,   },
+    { key: "hours", label: "Library Hours", href: "/hours", Icon: Clock },
+    { key: "ressources", label: "Ressources Utiles", href: "/ressources-utiles", Icon: FileText },
+    { key: "research_help",    label: "Research Help",      href: "/research-help",Icon: Search,},
+    {    key: "multimedia",      label: "Multimédia",   href: "/multimedia",     Icon: Film,},
+    { key: "culture",    label: "Culture",    href: "/culture",     Icon: BookOpen,},
     { key: "faq", label: "FAQ", href: "/faq", Icon: HelpCircle },
     { key: "sndl", label: "SNDL request", href: "/sndl-request", Icon: Globe },
+    
+  
+  
+ 
+
+  
+    
+ 
+
+
+  
     { key: "formation", label: "Formation", href: "/formation", Icon: GraduationCap },
-    { key: "ressources", label: "Ressources Utiles", href: "/ressources-utiles", Icon: FileText },
-    { key: "regulations", label: "Library Regulations", href: "/library-regulations", Icon: Gavel },
-    { key: "organigramme", label: "Organigramme", href: "/organigramme", Icon: Network },
-    {
-      key: "information_pratique",
-      label: "Information Pratique",
-      href: "/information-pratique",
-      Icon: Wrench,
-    },
-    {
-      key: "culture",
-      label: "Culture",
-      href: "/culture",
-      Icon: BookOpen,
-    },
-    {
-      key: "multimedia",
-      label: "Multimédia",
-      href: "/multimedia",
-      Icon: Film,
-    },
-    {
-      key: "research_help",
-      label: "Research Help",
-      href: "/research-help",
-      Icon: Search,
-    },
+    { key: "visite-virtuelle", label: "Visite Virtuelle 360°", href: "https://visitevirtuelle.estin.dz/", Icon: Globe },
+
+   
+
+
+ 
+ 
     
   ];
 
@@ -157,10 +165,13 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
                 <Link
                   key={item.key}
                   href={item.href}
-                  className="flex items-center text-gray-600 hover:text-[#F1413E] transition-colors"
+                  className="flex items-center  text-gray-600 hover:text-[#F1413E] transition-colors"
                 >
                   <item.Icon className="mr-1 h-3 w-3" />
+                  <div className="line-clamp-1">
                   {item.label}
+                  </div>
+             
                 </Link>
               ))}
             </div>

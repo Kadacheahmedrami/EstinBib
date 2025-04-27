@@ -1,31 +1,22 @@
 "use client"
 
-import { Info } from 'lucide-react';
-import dynamic from 'next/dynamic';
+import { Info, Mail } from 'lucide-react';
 import Footer from '@/components/Footer';
 
-// Dynamically import the Map component with no SSR
-const Map = dynamic(() => import('@/components/Map'), { 
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-96 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-      <div className="text-gray-500">Loading map...</div>
-    </div>
-  )
-});
-
 export default function AboutPage() {
-  const position: [number, number] = [36.6636426, 4.9125355]; // ESTIN Library coords
+  const services = [
+    'Service de l’acquisition et du traitement',
+    'Service de la recherche bibliographique',
+    'Service de l’accueil et de l’orientation',
+  ];
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Placeholder */}
-      {/* <- Place your navigation component here -> */}
 
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-[#9a1c21] to-[#c13b42] text-white">
-      <div className="absolute inset-0 bg-[url('/jpg/hero.png')] bg-cover bg-center mix-blend-overlay"></div>
-        <div className="container mx-auto px-6 py-20 relative z-10">
+        <div className="absolute inset-0 bg-[url('/jpg/hero.png')] bg-cover bg-center mix-blend-overlay"></div>
+        <div className="container mx-auto px-6 py-20 relative z-10 text-left">
           <h1 className="text-5xl md:text-6xl font-extrabold mb-4">About Us</h1>
           <p className="text-lg md:text-xl max-w-2xl opacity-90">
             Mission, history, and team of ESTIN Library. Learn how we support education and research through our resources and programs.
@@ -33,41 +24,106 @@ export default function AboutPage() {
         </div>
       </div>
 
+      {/* Director's Note Section */}
+      <section className="bg-gradient-to-r from-[#9a1c21]/10 to-[#c13b42]/10 py-16">
+        <div className="container mx-auto px-6 text-left">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#9a1c21] mb-4">Mot du Directeur</h2>
+          <p className="text-gray-700 max-w-3xl leading-relaxed">
+            Bienvenue à la Bibliothèque ESTIN ! En tant que directeur, je suis fier de vous offrir un espace où le savoir
+            et l'innovation se rencontrent. Notre équipe reste dédiée à enrichir votre expérience académique
+            et à soutenir votre réussite.
+          </p>
+        </div>
+      </section>
+
+      {/* Library in Numbers Section */}
+      <section className="bg-white py-16">
+        <div className="container mx-auto px-6 text-left">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#9a1c21] mb-8">Bibliothèque en Chiffres</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl">
+            {[
+              { number: '70 000+', label: 'Volumes physiques' },
+              { number: '150 000+', label: 'Ressources numériques' },
+              { number: '20+', label: 'Salles d’étude' },
+              { number: '1 200', label: 'Visites/jour en moyenne' }
+            ].map((item, idx) => (
+              <div key={idx} className="p-6 bg-[#c13b42]/5 rounded-lg shadow hover:shadow-lg transition-shadow">
+                <h3 className="text-4xl font-extrabold text-[#9a1c21] mb-2">{item.number}</h3>
+                <p className="text-gray-600">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+   {/* Enhanced Organizational Chart Section */}
+   <section className="bg-gray-50 py-16">
+      <div className=" md:container mx-auto px-4 text-center">
+        <h2 className="text-4xl font-bold text-red-700 mb-12">Organigramme</h2>
+        
+        <div className="relative mx-auto w-full md:max-w-4xl">
+          {/* Director box */}
+          <div className="flex justify-center">
+            <div className="border-2 border-red-700 text-red-700 font-semibold bg-white p-4 rounded-md w-64 shadow-md">
+              Directeur de l'école
+            </div>
+          </div>
+          
+          {/* Vertical line to library director */}
+          <div className="w-1 h-16 bg-red-600 mx-auto"></div>
+          
+          {/* Library Director box */}
+          <div className="flex justify-center">
+            <div className="border-2 border-red-600 text-red-600 font-semibold bg-white p-4 rounded-md w-64 shadow-md">
+              Directeur de la bibliothèque
+            </div>
+          </div>
+          
+          {/* Vertical line to horizontal connector */}
+          <div className="w-1 h-16 bg-red-600 mx-auto"></div>
+
+          {/* Horizontal line connecting all services */}
+          <div className="relative h-1">
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-[69%] h-1 bg-red-600"></div>
+          </div>
+          
+          {/* Services section with connected lines */}
+          <div className="flex justify-center">
+            <div className="grid grid-cols-3 gap-8 w-full max-w-4xl mt-0">
+              {services.map((service, idx) => (
+                <div key={idx} className="flex flex-col items-center">
+                  {/* Vertical line that connects to the box */}
+                  <div className="w-1 h-8 bg-red-600"></div>
+                  
+                  <div className="border-2 border-red-500 text-red-600 bg-white p-3 rounded-md w-full shadow-md">
+                    {service}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-16 space-y-16">
-        {/* Section: Mission */}
+      <div className="container mx-auto px-6 py-16 space-y-24">
         <section>
           <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
-          <p className="text-gray-700 mb-4">
+          <p className="text-gray-700 leading-relaxed">
             To facilitate access to knowledge and promote scientific and technical culture by providing cutting-edge resources,
-            expert guidance, and a welcoming environment for all learners. Our mission drives everything we do, ensuring that
-            our collections, services, and spaces support academic success and lifelong learning.
-          </p>
-          <p className="text-gray-700">
-            We aspire to be a central hub of innovation and collaboration within ESTIN, fostering curiosity,
-            critical thinking, and scholarly excellence among students, faculty, and the greater community.
+            expert guidance, and a welcoming environment for all learners.
           </p>
         </section>
 
-        {/* Section: History */}
         <section>
           <h2 className="text-3xl font-bold mb-6">Our History</h2>
-          <p className="text-gray-700 mb-4">
-            Established in 1960 alongside the founding of ESTIN, our library began with a modest collection of core engineering
-            texts. Over the decades, we have expanded to include state-of-the-art digital resources, specialized research materials,
-            and collaborative learning spaces.
+          <p className="text-gray-700 leading-relaxed">
+            Established in 1960 alongside the founding of ESTIN, our library began with a modest collection of core engineering texts.
           </p>
-          <p className="text-gray-700 mb-4">Key milestones:</p>
-          <ul className="list-disc list-inside text-gray-700 space-y-2">
-            <li>1960: Library opens with 5,000 volumes.</li>
-            <li>1985: Introduction of audiovisual collections.</li>
-            <li>2000: Launch of online catalog (OPAC).</li>
-            <li>2015: Major renovation adds collaborative study rooms.</li>
-            <li>2022: Fully integrated digital access platform launched.</li>
-          </ul>
         </section>
 
-        {/* Section: Team */}
         <section>
           <h2 className="text-3xl font-bold mb-6">Meet the Team</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -87,33 +143,15 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Section: Contact & Location */}
         <section>
           <h2 className="text-3xl font-bold mb-6">Contact & Location</h2>
-          <p className="text-gray-700 mb-2">
-            Email: contact@estinlib.org | Phone: +213 21 23 45 67
+          <p className="text-gray-700 mb-2 flex items-center">
+            <Mail className="h-5 w-5 text-[#9a1c21] mr-2" /> contact@estinlib.org
           </p>
-          <p className="text-gray-700 mb-4">
-            Address: ESTIN Library, 123 University Ave, Algiers, Algeria
+          <p className="text-gray-700 flex items-center">
+            <Info className="h-5 w-5 text-[#9a1c21] mr-2" /> +213 21 23 45 67
           </p>
-          {/* Map Component */}
-          <Map position={position} />
         </section>
-
-        {/* Additional dummy sections to reach length */}
-        {Array.from({ length: 4 }).map((_, idx) => (
-          <section key={idx}>
-            <h2 className="text-2xl font-bold mb-4">Section Supplémentaire {idx + 1}</h2>
-            <p className="text-gray-700 mb-2">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </p>
-            <ul className="list-disc list-inside text-gray-700">
-              <li>Point A {idx + 1}</li>
-              <li>Point B {idx + 1}</li>
-              <li>Point C {idx + 1}</li>
-            </ul>
-          </section>
-        ))}
       </div>
 
       <Footer />
