@@ -92,57 +92,26 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
     { key: "culture",    label: "Culture",    href: "/culture",     Icon: BookOpen,},
     { key: "faq", label: "FAQ", href: "/faq", Icon: HelpCircle },
     { key: "sndl", label: "SNDL request", href: "/sndl-request", Icon: Globe },
-    
-  
-  
- 
-
-  
-    
- 
-
-
-  
     { key: "formation", label: "Formation", href: "/formation", Icon: GraduationCap },
     { key: "visite-virtuelle", label: "Visite Virtuelle 360°", href: "https://visitevirtuelle.estin.dz/", Icon: Globe },
 
-   
-
-
- 
- 
     
   ];
 
   // Additional resources for the mobile menu
   const resourcesItems = [
-    { key: "hours", label: "Library Hours", href: "/hours", Icon: Clock },
-    { key: "about", label: "About Us", href: "/about", Icon: Info },
-    { key: "events", label: "Events", href: "/events", Icon: Calendar },
-    { key: "faq", label: "FAQ", href: "/faq", Icon: HelpCircle },
-    { key: "sndl", label: "SNDL request", href: "/sndl-request", Icon: Globe },
+
     { key: "formation", label: "Formation", href: "/formation", Icon: GraduationCap },
     { key: "ressources", label: "Ressources Utiles", href: "/ressources-utiles", Icon: FileText },
-    { key: "regulations", label: "Library Regulations", href: "/library-regulations", Icon: Gavel },
-    { key: "organigramme", label: "Organigramme", href: "/organigramme", Icon: Network },
+
+
     {
       key: "information_pratique",
       label: "Information Pratique",
       href: "/information-pratique",
       Icon: Wrench,
     },
-    {
-      key: "culture",
-      label: "Culture",
-      href: "/culture",
-      Icon: BookOpen,
-    },
-    {
-      key: "multimedia",
-      label: "Multimédia",
-      href: "/multimedia",
-      Icon: Film,
-    },
+  
     {
       key: "research_help",
       label: "Research Help",

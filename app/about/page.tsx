@@ -84,7 +84,7 @@ export default function AboutPage() {
 
           {/* Horizontal line connecting all services */}
           <div className="relative h-1">
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-[69%] h-1 bg-red-600"></div>
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-[72%] md:w-[69%] h-1 bg-red-600"></div>
           </div>
           
           {/* Services section with connected lines */}
