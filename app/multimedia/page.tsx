@@ -64,7 +64,7 @@ export default function MultimediaPage() {
         <div className="container mx-auto px-6 py-20 relative z-10">
           <h1 className="text-5xl md:text-6xl font-extrabold mb-4">Multimédia</h1>
           <p className="text-lg md:text-xl max-w-2xl opacity-90">
-          Explorez nos vidéos, réseaux sociaux et visite virtuelle pour plonger au cœur de la vie à l'ESTIN.
+          Explorez nos vidéos, réseaux sociaux et visite virtuelle pour plonger au cœur de la vie à l ESTIN.
           </p>
         </div>
       </div>

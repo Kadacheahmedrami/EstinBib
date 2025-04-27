@@ -1,5 +1,5 @@
 import Footer from '@/components/Footer';
-import Image from 'next/image';
+
 
 // Questions fréquemment posées sur la Bibliothèque Centrale ESTIN (d'après le catalogue en ligne et les réseaux sociaux)
 const faqs = [
@@ -54,7 +54,7 @@ export default function FaqPage() {
         <div className="container mx-auto px-6 py-20 relative z-10">
           <h1 className="text-5xl md:text-6xl font-extrabold mb-4">FAQ</h1>
           <p className="text-lg md:text-xl max-w-2xl opacity-90">
-            Retrouvez ici les réponses aux questions les plus fréquentes concernant l'accès, la recherche et les services de la bibliothèque ESTIN.
+            Retrouvez ici les réponses aux questions les plus fréquentes concernant l accès, la recherche et les services de la bibliothèque ESTIN.
           </p>
         </div>
       </div>

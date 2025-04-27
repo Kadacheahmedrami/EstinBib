@@ -1,5 +1,6 @@
 import { Calendar, Users, Globe } from 'lucide-react';
 import Footer from '@/components/Footer';
+import Image from 'next/image';
 
 export default function EventsPage() {
   // Data for clubs and events
@@ -77,31 +78,33 @@ export default function EventsPage() {
           <h2 className="text-3xl font-bold text-[#9a1c21] mb-8">Student Clubs</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {clubs.map((club, idx) => (
-              <div
+                <div
                 key={idx}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow"
-              >
-                <img
+                >
+                <Image
                   src={club.image}
                   alt={club.name}
+                  width={800}
+                  height={400}
                   className="object-cover w-full h-48"
                 />
                 <div className="p-6">
                   <div className="flex items-center mb-3">
-                    <club.icon className="h-6 w-6 text-[#9a1c21] mr-2" />
-                    <h3 className="text-2xl font-semibold">{club.name}</h3>
+                  <club.icon className="h-6 w-6 text-[#9a1c21] mr-2" />
+                  <h3 className="text-2xl font-semibold">{club.name}</h3>
                   </div>
                   <p className="text-gray-700 mb-4">{club.description}</p>
                   <a
-                    href={club.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#c13b42] font-medium hover:underline"
+                  href={club.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#c13b42] font-medium hover:underline"
                   >
-                    Learn More
+                  Learn More
                   </a>
                 </div>
-              </div>
+                </div>
             ))}
           </div>
         </section>
@@ -111,33 +114,35 @@ export default function EventsPage() {
           <h2 className="text-3xl font-bold text-[#9a1c21] mb-8">Conferences & Activities</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {events.map((ev, idx) => (
-              <div
+                <div
                 key={idx}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow"
-              >
-                <img
+                >
+                <Image
                   src={ev.image}
                   alt={ev.name}
+                  width={800}
+                  height={400}
                   className="object-cover w-full h-48"
                 />
                 <div className="p-6">
                   <div className="flex items-center mb-3">
-                    <ev.icon className="h-6 w-6 text-[#c13b42] mr-2" />
-                    <h3 className="text-2xl font-semibold">{ev.name}</h3>
+                  <ev.icon className="h-6 w-6 text-[#c13b42] mr-2" />
+                  <h3 className="text-2xl font-semibold">{ev.name}</h3>
                   </div>
                   <p className="text-gray-700 mb-1"><strong>Date:</strong> {ev.date}</p>
                   <p className="text-gray-700 mb-3"><strong>Venue:</strong> {ev.venue}</p>
                   <p className="text-gray-700 mb-4">{ev.description}</p>
                   <a
-                    href={ev.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#9a1c21] font-medium hover:underline"
+                  href={ev.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#9a1c21] font-medium hover:underline"
                   >
-                    More Details
+                  More Details
                   </a>
                 </div>
-              </div>
+                </div>
             ))}
           </div>
         </section>

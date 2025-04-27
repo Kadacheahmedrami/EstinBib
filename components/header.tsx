@@ -11,7 +11,7 @@ import {
   Home,
   MessageCircle,
   BookOpen,
-  Mail,
+
   Lightbulb,
   Clock,
   FileText,

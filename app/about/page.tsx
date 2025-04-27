@@ -30,7 +30,7 @@ export default function AboutPage() {
           <h2 className="text-3xl md:text-4xl font-bold text-[#9a1c21] mb-4">Mot du Directeur</h2>
           <p className="text-gray-700 max-w-3xl leading-relaxed">
             Bienvenue à la Bibliothèque ESTIN ! En tant que directeur, je suis fier de vous offrir un espace où le savoir
-            et l'innovation se rencontrent. Notre équipe reste dédiée à enrichir votre expérience académique
+            et l innovation se rencontrent. Notre équipe reste dédiée à enrichir votre expérience académique
             et à soutenir votre réussite.
           </p>
         </div>
@@ -65,7 +65,7 @@ export default function AboutPage() {
           {/* Director box */}
           <div className="flex justify-center">
             <div className="border-2 border-red-700 text-red-700 font-semibold bg-white p-4 rounded-md w-64 shadow-md">
-              Directeur de l'école
+              Directeur de l école
             </div>
           </div>
           
