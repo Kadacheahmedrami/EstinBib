@@ -17,8 +17,7 @@ import {
   FileText,
   Globe,
   GraduationCap,
-  Gavel,
-  Network,
+
   Video,
   Info,
   Search,
@@ -105,19 +104,19 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
     { key: "ressources", label: "Ressources Utiles", href: "/ressources-utiles", Icon: FileText },
 
 
-    {
-      key: "information_pratique",
-      label: "Information Pratique",
-      href: "/information-pratique",
-      Icon: Wrench,
-    },
+    { key: "information_pratique",    label: "Information Pratique",   href: "/information-pratique",  Icon: Wrench,  },
+     
+    {     key: "research_help",    label: "Research Help",      href: "/research-help",    Icon: Search,   },
+   
+    
   
-    {
-      key: "research_help",
-      label: "Research Help",
-      href: "/research-help",
-      Icon: Search,
-    },
+  
+
+ 
+  
+
+  
+ 
     
     
   ];

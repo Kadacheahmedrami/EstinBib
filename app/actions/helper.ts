@@ -1,59 +1,80 @@
+"use server";
 
-import API from "@/lib/axios";
-interface Book {
-    id: string;
-    title: string;
-    author: string;
-    isbn: string;
-    description: string;
-    coverImage: string;
-    size: number;
-    available: boolean;
-    publishedAt: string;
-    addedAt: string;
-    language: string;
+import { books } from "@/db/schema";
+import { db } from "@/db";
+import { eq } from "drizzle-orm";
+
+export interface Book {
+  id: string;
+  title: string;
+  author: string;
+  isbn: string | null;
+  description: string;
+  coverImage: string;
+  size: number;
+  available: boolean;
+  publishedAt: Date;
+  addedAt: Date;
+  language: string;
+}
+
+/**
+ * Fetches all books from the database
+ */
+export async function getBooks(): Promise<Book[]> {
+  try {
+    const result = await db.select().from(books);
+    return result;
+  } catch (error) {
+    console.error("Error fetching books:", error);
+    return [];
   }
-  
-// Fetch random books (for the RelatedBooks carousel)
-export async function getRandomBooks(): Promise<Book[]> {
-    try {
-      const response = await API.get("/api/books");
-      const books: Book[] = Array.isArray(response.data.books)
-        ? response.data.books
-        : [];
-      // Get 5 random items
-      const randomBooks = getRandomItems(books, 8);
-      return randomBooks;
-    } catch (error) {
-      console.error("Error fetching random books:", error);
-      return [];
-    }
+}
+
+/**
+ * Fetches a random selection of books
+ * @param count The number of random books to return
+ */
+export async function getRandomBooks(count: number = 8): Promise<Book[]> {
+  try {
+    // Fetch all books first
+    const allBooks = await getBooks();
+    return getRandomItems(allBooks, count);
+  } catch (error) {
+    console.error('Error fetching random books:', error);
+    return [];
   }
-  
-  // Helper function to select random items from an array.
-  function getRandomItems(arr: Book[], count: number): Book[] {
-    if (!Array.isArray(arr) || arr.length === 0) {
-      console.warn("getRandomItems received invalid array:", arr);
-      return [];
-    }
-    const shuffled = [...arr].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
+}
+
+/**
+ * Fetches a specific book by its ID
+ * @param id The book ID to fetch
+ */
+export async function getBookById(id: string): Promise<Book | null> {
+  try {
+    const result = await db.select().from(books).where(eq(books.id, id)).limit(1);
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error(`Error fetching book with id ${id}:`, error);
+    return null;
   }
-  
-  // Optionally, if you are using static generation for dynamic routes, you can add:
-  export async function generateStaticParams() {
-    const books = await getBooks(); // Assumes getBooks exists
-    return books.map((book) => ({ id: book.id }));
+}
+
+/**
+ * Helper function to select random items from an array
+ */
+function getRandomItems<T>(arr: T[], count: number): T[] {
+  if (!Array.isArray(arr) || arr.length === 0) {
+    return [];
   }
-  
-  // Dummy getBooks function – replace with your actual implementation.
-  async function getBooks(): Promise<Book[]> {
-    try {
-      const response = await API.get("/api/books");
-      return response.data.books;
-    } catch (error) {
-      console.error("Error fetching books:", error);
-      return [];
-    }
-  }
-  
+  const shuffled = [...arr].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+/**
+ * Generates static params for books (for use with generateStaticParams)
+ */
+export async function generateBookParams() {
+  const allBooks = await getBooks();
+  return allBooks.map((book) => ({ id: book.id }));
+}
