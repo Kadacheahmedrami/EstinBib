@@ -151,11 +151,12 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
       {/* Main header */}
       <nav className="fixed top-0 lg:top-7  left-0 z-[40] w-full bg-white backdrop-blur-lg shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex h-[70px] items-center justify-between">
+          <div className="flex h-[70px] text-3xl text-[#F1413E] items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="logo" width={60} height={60} priority />
+              <Image src="/logo.png" alt="logo" width={60} height={60} priority />
+              𝕰𝖘𝖙𝖎𝖓 𝖇𝖎𝖇𝖑𝖎𝖔𝖙𝖍è𝖖𝖚𝖊
             </Link>
-
+           
             <div className="hidden z-[4] lg:flex items-center space-x-8">
               {mainNavItems.map(item => (
                 <div key={item.key} className="relative group">

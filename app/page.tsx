@@ -12,7 +12,7 @@ export default async function Home() {
     <>
       <main>
         <HeroLanding />
-
+        
         {/* "What's New?" Section */}
         <div className="flex justify-between items-center ml-[4%] mt-20">
           <h2 className="text-[24px] md:text-[50px] font-bold text-[#F1413E]">
