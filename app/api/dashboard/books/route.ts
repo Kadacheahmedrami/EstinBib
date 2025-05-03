@@ -2,24 +2,24 @@ import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { books, bookCategories } from "@/db/schema"
 import { getServerSession } from "next-auth"
-import { eq, like, or, desc, sql, and } from "drizzle-orm"
+import { eq, like, or, desc, sql, and, inArray } from "drizzle-orm"
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession()
-
+  
   if (!session?.user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   }
-
+  
   try {
     const { searchParams } = new URL(req.url)
     const page = Number.parseInt(searchParams.get("page") || "1")
     const limit = Number.parseInt(searchParams.get("limit") || "10")
     const search = searchParams.get("search") || ""
     const category = searchParams.get("category")
-
+    
     const offset = (page - 1) * limit
-
+    
     // Build base conditions
     const conditions = []
     if (search) {
@@ -30,34 +30,53 @@ export async function GET(req: NextRequest) {
         )
       )
     }
-
-    // Get total count first
+    
+    let filteredBookIds: string[] = [];
+    
+    // If category filter is applied, get the book IDs first
+    if (category) {
+      const bookIdsWithCategory = await db
+        .select({ bookId: bookCategories.bookId })
+        .from(bookCategories)
+        .where(eq(bookCategories.categoryId, category))
+        .execute();
+      
+      filteredBookIds = bookIdsWithCategory.map(row => row.bookId);
+      
+      // If no books with this category, return empty result
+      if (filteredBookIds.length === 0) {
+        return NextResponse.json({
+          books: [],
+          pagination: {
+            total: 0,
+            page,
+            limit,
+            pages: 0,
+          },
+        });
+      }
+      
+      // Add category condition
+      conditions.push(inArray(books.id, filteredBookIds));
+    }
+    
+    // Get total count with applied conditions
     const [{ count: total }] = await db
-      .select({ count: sql<number>`count(*)` })
+      .select({ count: sql`count(*)` })
       .from(books)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .execute()
-
-    // Build and execute main query
-    const baseQuery = db.select().from(books)
-
-    const finalQuery = category
-      ? baseQuery
-          .innerJoin(bookCategories, eq(books.id, bookCategories.bookId))
-          .where(and(
-            eq(bookCategories.categoryId, category),
-            ...(conditions.length > 0 ? [and(...conditions)] : [])
-          ))
-      : conditions.length > 0
-      ? baseQuery.where(and(...conditions))
-      : baseQuery
-
-    const results = await finalQuery
+      .execute();
+    
+    // Fetch the books with all conditions
+    const results = await db
+      .select()
+      .from(books)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(books.addedAt))
       .limit(limit)
       .offset(offset)
-      .execute()
-
+      .execute();
+    
     return NextResponse.json({
       books: results,
       pagination: {
@@ -66,59 +85,9 @@ export async function GET(req: NextRequest) {
         limit,
         pages: Math.ceil(Number(total) / limit),
       },
-    })
+    });
   } catch (error) {
-    console.error("Error fetching books:", error)
-    return NextResponse.json({ error: "Failed to fetch books" }, { status: 500 })
-  }
-}
-
-export async function POST(req: NextRequest) {
-  // const session = await getServerSession()
-
-  // if (session?.user?.role !== "LIBRARIAN") {
-  //   return NextResponse.json({ error: "Not authorized" }, { status: 403 })
-  // }
-
-  try {
-    const body = await req.json()
-
-    // Validate required fields
-    const { title, author, description, coverImage, size, language, publishedAt, categories } = body
-
-    if (!title || !author || !description || !coverImage || !size || !language || !publishedAt) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    // Create book
-    const [newBook] = await db
-      .insert(books)
-      .values({
-        title,
-        author,
-        isbn: body.isbn || null,
-        description,
-        coverImage,
-        size,
-        language,
-        publishedAt: new Date(publishedAt),
-        available: body.available !== false,
-      })
-      .returning()
-
-    // Add categories if provided
-    if (categories && Array.isArray(categories) && categories.length > 0) {
-      await db.insert(bookCategories).values(
-        categories.map((categoryId) => ({
-          bookId: newBook.id,
-          categoryId,
-        })),
-      )
-    }
-
-    return NextResponse.json(newBook, { status: 201 })
-  } catch (error) {
-    console.error("Error creating book:", error)
-    return NextResponse.json({ error: "Failed to create book" }, { status: 500 })
+    console.error("Error fetching books:", error);
+    return NextResponse.json({ error: "Failed to fetch books" }, { status: 500 });
   }
 }

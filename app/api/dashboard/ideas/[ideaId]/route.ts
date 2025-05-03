@@ -16,6 +16,9 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerAuthSession()
+        if (!session?.user) {
+          return new NextResponse("Unauthorized", { status: 401 })
+        }
     const params = await context.params
     const ideaId = Array.isArray(params.ideaId) ? params.ideaId[0] : params.ideaId
 
@@ -23,9 +26,6 @@ export async function DELETE(
       return new NextResponse("Invalid idea ID", { status: 400 })
     }
 
-    if (!session?.user || session.user.role !== "LIBRARIAN") {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
 
     // Delete idea
     const [deleted] = await db

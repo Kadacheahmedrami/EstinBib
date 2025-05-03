@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { sndlDemands, users } from "@/db/schema"
-import { desc, eq, and } from "drizzle-orm"
+import { desc, eq } from "drizzle-orm"
 import { getServerAuthSession } from "@/lib/auth"
 
-// Valid status values
-const validStatuses = ["PENDING", "APPROVED", "REJECTED"] as const
-type Status = typeof validStatuses[number]
-
-function isValidStatus(status: string | null): status is Status {
-  return status !== null && validStatuses.includes(status as Status)
-}
-
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerAuthSession()
 
@@ -20,24 +12,8 @@ export async function GET(request: Request) {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    // Get status from query params
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get("status")
-
-    // Build where conditions
-    const whereConditions = []
-
-    // If status is provided and valid, add it to where conditions
-    if (status && isValidStatus(status)) {
-      whereConditions.push(eq(sndlDemands.status, status))
-    }
-
-    // If user is not a librarian, only show their own demands
-    if (session.user.role !== "LIBRARIAN") {
-      whereConditions.push(eq(sndlDemands.userId, session.user.id))
-    }
-
-    // Fetch SNDL demands with user information
+    // Fetch all SNDL demands with user information
+    // No filtering by status or user, just get everything
     const demands = await db
       .select({
         id: sndlDemands.id,
@@ -59,7 +35,6 @@ export async function GET(request: Request) {
       })
       .from(sndlDemands)
       .leftJoin(users, eq(sndlDemands.userId, users.id))
-      .where(and(...whereConditions))
       .orderBy(desc(sndlDemands.requestedAt))
 
     return NextResponse.json(demands)
@@ -67,4 +42,4 @@ export async function GET(request: Request) {
     console.error("[SNDL_DEMANDS_GET]", error)
     return new NextResponse("Internal error", { status: 500 })
   }
-} 
+}

@@ -14,7 +14,8 @@ export async function GET() {
 
     // Get current timestamp for calculations
     const now = new Date()
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    const sixMonthsAgo = new Date(now);
+    sixMonthsAgo.setMonth(now.getMonth() - 6);
 
     // Get active borrowers (users with current borrows)
     const activeBorrowers = await db
@@ -25,7 +26,7 @@ export async function GET() {
       .where(
         and(
           sql`${borrows.returnedAt} IS NULL`,
-          sql`${borrows.borrowedAt} > ${thirtyDaysAgo}`
+          sql`${borrows.borrowedAt} > ${new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)}`
         )
       )
 
@@ -36,11 +37,10 @@ export async function GET() {
         name: users.name,
         email: users.email,
         image: users.image,
-        borrowCount: count(borrows.id),
+        borrowCount: count(borrows.id).as("borrowCount"),
       })
       .from(users)
       .leftJoin(borrows, eq(users.id, borrows.userId))
-      .where(sql`${borrows.borrowedAt} > ${thirtyDaysAgo}`)
       .groupBy(users.id, users.name, users.email, users.image)
       .orderBy(sql`count(${borrows.id}) desc`)
       .limit(5)
@@ -58,13 +58,68 @@ export async function GET() {
         )
       )
 
+    // Get monthly activity data (borrows and returns per month)
+    const months = [];
+    for (let i = 0; i < 6; i++) {
+      const date = new Date(now);
+      date.setMonth(now.getMonth() - i);
+      months.unshift({
+        month: date.getMonth(),
+        year: date.getFullYear(),
+        monthName: new Intl.DateTimeFormat('en', { month: 'short' }).format(date)
+      });
+    }
+
+    // Query to get borrow counts by month
+    const borrowsByMonth = await db
+      .select({
+        month: sql`EXTRACT(MONTH FROM ${borrows.borrowedAt})::int`,
+        year: sql`EXTRACT(YEAR FROM ${borrows.borrowedAt})::int`,
+        count: count().as("count")
+      })
+      .from(borrows)
+      .where(sql`${borrows.borrowedAt} >= ${sixMonthsAgo}`)
+      .groupBy(sql`EXTRACT(MONTH FROM ${borrows.borrowedAt})`, sql`EXTRACT(YEAR FROM ${borrows.borrowedAt})`)
+
+    // Query to get return counts by month
+    const returnsByMonth = await db
+      .select({
+        month: sql`EXTRACT(MONTH FROM ${borrows.returnedAt})::int`,
+        year: sql`EXTRACT(YEAR FROM ${borrows.returnedAt})::int`,
+        count: count().as("count")
+      })
+      .from(borrows)
+      .where(and(
+        sql`${borrows.returnedAt} IS NOT NULL`,
+        sql`${borrows.returnedAt} >= ${sixMonthsAgo}`
+      ))
+      .groupBy(sql`EXTRACT(MONTH FROM ${borrows.returnedAt})`, sql`EXTRACT(YEAR FROM ${borrows.returnedAt})`)
+
+    // Combine the data into the expected format
+    const activityData = months.map(monthData => {
+      const borrowData = borrowsByMonth.find(
+        b => b.month === monthData.month && b.year === monthData.year
+      );
+      
+      const returnData = returnsByMonth.find(
+        r => r.month === monthData.month && r.year === monthData.year
+      );
+      
+      return {
+        date: monthData.monthName,
+        borrows: Number(borrowData?.count || 0),
+        returns: Number(returnData?.count || 0)
+      };
+    });
+
     return NextResponse.json({
       activeBorrowers: activeBorrowers[0]?.count ?? 0,
       overdueBorrows: overdueBorrows[0]?.count ?? 0,
       topBorrowers,
+      activity: activityData
     })
   } catch (error) {
     console.error("[USERS_ACTIVITY_GET]", error)
     return new NextResponse("Internal error", { status: 500 })
   }
-} 
+}

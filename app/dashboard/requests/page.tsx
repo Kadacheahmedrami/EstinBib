@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -32,6 +34,7 @@ export default function RequestsPage() {
   const { toast } = useToast()
 
   const loadRequests = useCallback(async () => {
+    setIsLoading(true)
     try {
       const response = await fetch(`/api/dashboard/requests`)
       if (!response.ok) {
@@ -42,7 +45,10 @@ export default function RequestsPage() {
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load book requests",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to load book requests",
         variant: "destructive",
       })
     } finally {
@@ -53,6 +59,32 @@ export default function RequestsPage() {
   useEffect(() => {
     loadRequests()
   }, [loadRequests])
+
+  const handleDeleteRequest = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this request?")) return
+    try {
+      const response = await fetch(`/api/dashboard/requests/${id}`, {
+        method: "DELETE",
+      })
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
+      setRequests((prev) => prev.filter((req) => req.id !== id))
+      toast({
+        title: "Success",
+        description: "Book request deleted successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to delete book request",
+        variant: "destructive",
+      })
+    }
+  }
 
   if (isLoading) {
     return (
@@ -76,36 +108,48 @@ export default function RequestsPage() {
             <TableHead>ISBN</TableHead>
             <TableHead>Requested By</TableHead>
             <TableHead>Date</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {requests.map((request) => (
-            <TableRow key={request.id}>
-              <TableCell>{request.title}</TableCell>
-              <TableCell>{request.author}</TableCell>
-              <TableCell>{request.isbn || "N/A"}</TableCell>
-              <TableCell>
-                <div className="flex flex-col">
-                  <span>{request.user.name}</span>
-                  <span className="text-sm text-gray-500">
-                    {request.user.email}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
-                {new Date(request.requestedAt).toLocaleDateString()}
-              </TableCell>
-            </TableRow>
-          ))}
-          {requests.length === 0 && (
+          {requests.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground">
+              <TableCell colSpan={6} className="text-center text-muted-foreground">
                 No book requests found
               </TableCell>
             </TableRow>
+          ) : (
+            requests.map((request) => (
+              <TableRow key={request.id}>
+                <TableCell>{request.title}</TableCell>
+                <TableCell>{request.author}</TableCell>
+                <TableCell>{request.isbn || "N/A"}</TableCell>
+                <TableCell>
+                  <div className="flex flex-col">
+                    <span>{request.user.name}</span>
+                    <span className="text-sm text-gray-500">
+                      {request.user.email}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {new Date(request.requestedAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-600 hover:text-red-700"
+                    onClick={() => handleDeleteRequest(request.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
           )}
         </TableBody>
       </Table>
     </div>
   )
-} 
+}

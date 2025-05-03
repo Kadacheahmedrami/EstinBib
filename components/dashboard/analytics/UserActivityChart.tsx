@@ -18,8 +18,16 @@ export default function UserActivityChart() {
       try {
         const response = await fetch("/api/dashboard/analytics/users/activity")
         if (response.ok) {
-          const data = await response.json()
-          setData(data)
+          const responseData = await response.json()
+          
+          // Check if the activity data is available in the response
+          if (responseData.activity && Array.isArray(responseData.activity)) {
+            setData(responseData.activity)
+          } else {
+            // Handle legacy API response or fallback
+            console.warn("Activity data not found in API response")
+            setData([])
+          }
         }
       } catch (error) {
         console.error("Error fetching user activity:", error)
@@ -62,10 +70,10 @@ export default function UserActivityChart() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date" />
           <YAxis />
-          <Tooltip />
+          <Tooltip formatter={(value) => [`${value} books`, undefined]} />
           <Legend />
-          <Line type="monotone" dataKey="borrows" stroke="#3b82f6" activeDot={{ r: 8 }} />
-          <Line type="monotone" dataKey="returns" stroke="#10b981" />
+          <Line type="monotone" dataKey="borrows" stroke="#3b82f6" activeDot={{ r: 8 }} name="Borrows" />
+          <Line type="monotone" dataKey="returns" stroke="#10b981" name="Returns" />
         </LineChart>
       </ResponsiveContainer>
     </div>

@@ -16,53 +16,48 @@ export async function POST(
 ) {
   try {
     const session = await getServerAuthSession()
-    const params = await context.params
-    const id = Array.isArray(params.id) ? params.id[0] : params.id
+
+    // 1) pull out and normalize the `id`
+    const { id: rawId } = await context.params
+    const id = Array.isArray(rawId) ? rawId[0] : rawId
 
     if (!id) {
       return new NextResponse("Invalid borrow ID", { status: 400 })
     }
-
     if (!session?.user || session.user.role !== "LIBRARIAN") {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    // Check if borrow exists and is not returned
-    const borrow = await db
+    // 2) fetch the borrow record
+    const [borrow] = await db
       .select()
       .from(borrows)
       .where(eq(borrows.id, id))
       .limit(1)
 
-    if (!borrow[0]) {
+    if (!borrow) {
       return new NextResponse("Borrow record not found", { status: 404 })
     }
-
-    if (borrow[0].returnedAt) {
+    if (borrow.returnedAt) {
       return new NextResponse("Book already returned", { status: 400 })
     }
 
-    // Start transaction
-    const result = await db.transaction(async (tx) => {
-      // Update borrow record
-      const [updated] = await tx
-        .update(borrows)
-        .set({ returnedAt: new Date() })
-        .where(eq(borrows.id, id))
-        .returning()
+    // 3) mark as returned
+    const [updatedBorrow] = await db
+      .update(borrows)
+      .set({ returnedAt: new Date() })
+      .where(eq(borrows.id, id))
+      .returning()
 
-      // Update book availability
-      await tx
-        .update(books)
-        .set({ available: true })
-        .where(eq(books.id, borrow[0].bookId))
+    // 4) update book availability
+    await db
+      .update(books)
+      .set({ available: true })
+      .where(eq(books.id, borrow.bookId))
 
-      return updated
-    })
-
-    return NextResponse.json(result)
+    return NextResponse.json(updatedBorrow)
   } catch (error) {
     console.error("[BORROW_RETURN]", error)
     return new NextResponse("Internal error", { status: 500 })
   }
-} 
+}

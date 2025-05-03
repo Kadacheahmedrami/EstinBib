@@ -10,7 +10,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-type UserRole = "STUDENT" | "LIBRARIAN";
+
+export type UserRole = "STUDENT" | "LIBRARIAN" | "USER";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -22,14 +23,22 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
       role: UserRole;
     } & DefaultSession["user"];
   }
 
   interface User {
     id: string;
-    role: UserRole;
+    role?: UserRole;
+    // ...other properties
+  }
+}
+
+// Add custom JWT type
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    role?: UserRole;
   }
 }
 
@@ -40,18 +49,54 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, token }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: token.id,
-        role: token.role,
-      },
-    }),
-    jwt: ({ token, user }) => {
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        
+        // If token doesn't have role, fetch it from database
+        if (!token.role) {
+          try {
+            const userFromDb = await db.query.users.findFirst({
+              where: eq(users.id, token.id as string),
+            });
+            
+            if (userFromDb && userFromDb.role) {
+              token.role = userFromDb.role as UserRole;
+            } else {
+              // Default role if not found in DB
+              token.role = "STUDENT";
+            }
+          } catch (error) {
+            console.error("Error fetching user role:", error);
+            token.role = "STUDENT"; // Default fallback
+          }
+        }
+        
+        // Set role from token to session
+        session.user.role = token.role as UserRole;
+      }
+      return session;
+    },
+    
+    async jwt({ token, user }) {
+      // Initial sign in
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        
+        // Use user.role if available, otherwise fetch from DB
+        if (user.role) {
+          token.role = user.role;
+        } else {
+          try {
+            const userFromDb = await db.query.users.findFirst({
+              where: eq(users.id, user.id),
+            });
+            token.role = (userFromDb?.role || "STUDENT") as UserRole;
+          } catch (error) {
+            console.error("Error in JWT callback:", error);
+            token.role = "STUDENT"; // Default fallback
+          }
+        }
       }
       return token;
     },
@@ -65,6 +110,15 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          role: "STUDENT", // Default role for Google sign-ins
+        };
+      },
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -81,7 +135,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Missing email or password");
         }
 
-        // Example: Find the user in the database based on email.
+        // Find the user in the database based on email.
         const [user] = await db
           .select()
           .from(users)
@@ -91,6 +145,7 @@ export const authOptions: NextAuthOptions = {
               eq(users.password, credentials.password)
             )
           );
+        
         if (!user) {
           throw new Error("No user found with the given email");
         }
@@ -99,11 +154,18 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user.id,
           email: user.email,
-          role: user.role,
+          name: user.name || null,
+          image: user.image || null,
+          role: user.role as UserRole || "STUDENT",
         };
       },
     }),
   ],
+  debug: process.env.NODE_ENV === "development",
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/error",
+  },
 };
 
 /**

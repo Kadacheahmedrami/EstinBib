@@ -35,10 +35,9 @@ export async function POST(request: Request) {
   try {
     const session = await getServerAuthSession()
 
-    if (!session?.user || session.user.role !== "LIBRARIAN") {
+    if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 })
     }
-
     const { name } = await request.json()
 
     if (!name || typeof name !== "string") {

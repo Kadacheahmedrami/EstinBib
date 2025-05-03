@@ -159,10 +159,11 @@ export default function BooksPage() {
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem key="all" value="all">All Categories</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}
+                
                   </SelectItem>
                 ))}
               </SelectContent>

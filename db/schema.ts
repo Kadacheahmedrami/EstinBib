@@ -6,7 +6,7 @@ import {
   boolean,
   integer,
   index,
-  primaryKey,
+    primaryKey,
   pgEnum,
 } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";

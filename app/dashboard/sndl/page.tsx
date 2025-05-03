@@ -26,45 +26,54 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import {
+  processSndlDemand,
+
+} from "@/app/actions/sndl"
 
 interface User {
   id: string
   name: string
   email: string
+  image?: string
 }
 
 interface SNDLDemand {
   id: string
   user: User
-  title: string
-  description: string
+  requestReason: string
   status: "PENDING" | "APPROVED" | "REJECTED"
-  createdAt: string
-  responseMessage?: string
+  requestedAt: string
+  processedAt?: string
+  sndlEmail?: string
+  sndlPassword?: string
+  adminNotes?: string
+  emailSent: boolean
+  emailSentAt?: string
 }
 
 export default function SNDLDemandsPage() {
   const [demands, setDemands] = useState<SNDLDemand[]>([])
   const [filter, setFilter] = useState("PENDING")
   const [selectedDemand, setSelectedDemand] = useState<SNDLDemand | null>(null)
-  const [responseMessage, setResponseMessage] = useState("")
+  const [adminNotes, setAdminNotes] = useState("")
+  const [sndlEmail, setSndlEmail] = useState("")
+  const [sndlPassword, setSndlPassword] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
+  const router = useRouter()
 
   const loadDemands = useCallback(async () => {
+    setIsLoading(true)
     try {
-      const response = await fetch(`/api/dashboard/sndl?status=${filter}`)
-      if (!response.ok) {
-        throw new Error(await response.text())
-      }
-      const data = await response.json()
-      setDemands(data)
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load SNDL demands",
-        variant: "destructive",
-      })
+      const res = await fetch(`/api/dashboard/sndl?status=${filter}`)
+      if (!res.ok) throw new Error(await res.text())
+      setDemands(await res.json())
+    } catch (err) {
+      toast({ title: "Error", description: (err as Error).message, variant: "destructive" })
     } finally {
       setIsLoading(false)
     }
@@ -74,45 +83,47 @@ export default function SNDLDemandsPage() {
     loadDemands()
   }, [loadDemands])
 
-  const handleUpdateStatus = async (
-    id: string,
-    status: "APPROVED" | "REJECTED"
-  ) => {
-    try {
-      const response = await fetch(`/api/sndl/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status, responseMessage }),
-      })
+  const handleReview = (d: SNDLDemand) => {
+    setSelectedDemand(d)
+    setAdminNotes(d.adminNotes || "")
+    setSndlEmail(d.sndlEmail || "")
+    setSndlPassword(d.sndlPassword || "")
+  }
 
-      if (!response.ok) {
-        throw new Error(await response.text())
+  const handleUpdateAction = async (id: string, approved: boolean) => {
+    try {
+      if (approved && (!sndlEmail || !sndlPassword)) {
+        toast({ title: "Missing Credentials", description: "Please fill in email and password", variant: "destructive" })
+        return
       }
 
+      // call signature: processSndlDemand(demandId, approved, adminNotes?, sndlEmail?, sndlPassword?)
+      await processSndlDemand(
+        id,
+        approved,
+        adminNotes,
+        approved ? sndlEmail : undefined,
+        approved ? sndlPassword : undefined
+      )
+
       setSelectedDemand(null)
-      setResponseMessage("")
-      await loadDemands()
-      toast({
-        title: "Success",
-        description: `Demand ${status.toLowerCase()} successfully`,
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update demand status",
-        variant: "destructive",
-      })
+      setAdminNotes("")
+      setSndlEmail("")
+      setSndlPassword("")
+      router.refresh()
+      toast({ title: "Success", description: `Demand ${approved ? "approved" : "rejected"} successfully` })
+    } catch (err) {
+      toast({ title: "Error", description: (err as Error).message, variant: "destructive" })
     }
   }
 
+
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "APPROVED":
-        return "text-green-600"
-      case "REJECTED":
-        return "text-red-600"
-      default:
-        return "text-yellow-600"
+      case "APPROVED": return "text-green-600"
+      case "REJECTED": return "text-red-600"
+      default: return "text-yellow-600"
     }
   }
 
@@ -126,6 +137,7 @@ export default function SNDLDemandsPage() {
 
   return (
     <div className="p-6">
+      {/* Header + Filter */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">SNDL Demands</h1>
         <Select value={filter} onValueChange={setFilter}>
@@ -140,61 +152,50 @@ export default function SNDLDemandsPage() {
         </Select>
       </div>
 
+      {/* Table */}
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Description</TableHead>
+            <TableHead>Request Reason</TableHead>
             <TableHead>Requested By</TableHead>
-            <TableHead>Date</TableHead>
+            <TableHead>Requested At</TableHead>
+            <TableHead>Processed At</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {demands.map((demand) => (
-            <TableRow key={demand.id}>
-              <TableCell>{demand.title}</TableCell>
-              <TableCell className="max-w-md">
-                <p className="truncate">{demand.description}</p>
-              </TableCell>
+          {demands.map(d => (
+            <TableRow key={d.id}>
+              <TableCell>{d.requestReason}</TableCell>
               <TableCell>
-                <div className="flex flex-col">
-                  <span>{demand.user.name}</span>
-                  <span className="text-sm text-gray-500">
-                    {demand.user.email}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
-                {new Date(demand.createdAt).toLocaleDateString()}
-              </TableCell>
-              <TableCell className={getStatusColor(demand.status)}>
-                <div className="flex items-center">
-                  {demand.status === "APPROVED" && (
-                    <Check className="h-4 w-4 mr-2" />
-                  )}
-                  {demand.status === "REJECTED" && (
-                    <X className="h-4 w-4 mr-2" />
-                  )}
-                  {demand.status === "PENDING" && (
-                    <Clock className="h-4 w-4 mr-2" />
-                  )}
-                  {demand.status.charAt(0) + demand.status.slice(1).toLowerCase()}
-                </div>
-              </TableCell>
-              <TableCell>
-                {demand.status === "PENDING" && (
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-green-600 hover:text-green-700"
-                      onClick={() => setSelectedDemand(demand)}
-                    >
-                      Review
-                    </Button>
+                <div className="flex items-center space-x-2">
+                    {d.user.image && <Image src={d.user.image} alt="avatar" width={24} height={24} className="rounded-full" />}
+                  <div className="flex flex-col">
+                    <span>{d.user.name}</span>
+                    <span className="text-sm text-gray-500">{d.user.email}</span>
                   </div>
+                </div>
+              </TableCell>
+              <TableCell>{new Date(d.requestedAt).toLocaleString()}</TableCell>
+              <TableCell>{d.processedAt ? new Date(d.processedAt).toLocaleString() : '-'}</TableCell>
+              <TableCell className={getStatusColor(d.status)}>
+                <div className="flex items-center">
+                  {d.status === "APPROVED" && <Check className="h-4 w-4 mr-2" />} 
+                  {d.status === "REJECTED" && <X className="h-4 w-4 mr-2" />} 
+                  {d.status === "PENDING" && <Clock className="h-4 w-4 mr-2" />}
+                  {d.status.charAt(0) + d.status.slice(1).toLowerCase()}
+                </div>
+              </TableCell>
+              <TableCell className="space-x-1">
+                {d.status === "PENDING" && (
+                  <Button variant="outline" size="sm" onClick={() => handleReview(d)}>Review</Button>
+                )}
+      
+                {d.emailSent && (
+                  <span className="text-sm text-gray-500">
+                    Sent at {new Date(d.emailSentAt!).toLocaleString()}
+                  </span>
                 )}
               </TableCell>
             </TableRow>
@@ -209,53 +210,65 @@ export default function SNDLDemandsPage() {
         </TableBody>
       </Table>
 
+      {/* Review Dialog */}
       {selectedDemand && (
-        <Dialog open={true} onOpenChange={() => setSelectedDemand(null)}>
-          <DialogContent className="max-w-2xl">
+        <Dialog open onOpenChange={() => setSelectedDemand(null)}>
+          <DialogContent className="max-w-2xl space-y-4">
             <DialogHeader>
               <DialogTitle>Review SNDL Demand</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-medium mb-2">Title</h3>
-                <p>{selectedDemand.title}</p>
-              </div>
-              <div>
-                <h3 className="font-medium mb-2">Description</h3>
-                <p className="whitespace-pre-wrap">{selectedDemand.description}</p>
-              </div>
-              <div>
-                <h3 className="font-medium mb-2">Response Message</h3>
-                <Textarea
-                  placeholder="Enter your response message..."
-                  value={responseMessage}
-                  onChange={(e) => setResponseMessage(e.target.value)}
-                  rows={4}
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    handleUpdateStatus(selectedDemand.id, "REJECTED")
-                  }
-                  className="text-red-600 hover:text-red-700"
-                >
-                  Reject
-                </Button>
-                <Button
-                  onClick={() =>
-                    handleUpdateStatus(selectedDemand.id, "APPROVED")
-                  }
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  Approve
-                </Button>
-              </div>
+
+            {/* Request Reason */}
+            <div>
+              <h3 className="font-medium mb-2">Request Reason</h3>
+              <p>{selectedDemand.requestReason}</p>
+            </div>
+
+            {/* Admin Notes */}
+            <div>
+              <h3 className="font-medium mb-2">Admin Notes</h3>
+              <Textarea
+                placeholder="Add any notes..."
+                value={adminNotes}
+                onChange={e => setAdminNotes(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            {/* Credentials (editable when approving) */}
+            <div>
+              <h3 className="font-medium mb-2">SNDL Credentials</h3>
+              <Input
+                placeholder="SNDL Email"
+                value={sndlEmail}
+                onChange={e => setSndlEmail(e.target.value)}
+                className="mb-2"
+              />
+              <Input
+                placeholder="SNDL Password"
+                type="password"
+                value={sndlPassword}
+                onChange={e => setSndlPassword(e.target.value)}
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => handleUpdateAction(selectedDemand.id, false)}
+              >
+                <X className="h-4 w-4 mr-1" /> Reject
+              </Button>
+              <Button
+                onClick={() => handleUpdateAction(selectedDemand.id, true)}
+              >
+                <Check className="h-4 w-4 mr-1" /> Approve
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
       )}
     </div>
   )
-} 
+}

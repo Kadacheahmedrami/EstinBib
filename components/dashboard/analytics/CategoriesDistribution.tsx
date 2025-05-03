@@ -6,6 +6,14 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 interface CategoryData {
   name: string
   value: number
+  percentage: string
+}
+
+interface RawCategoryData {
+  name: string
+  value?: number
+  bookCount?: number
+  percentage?: string
 }
 
 export default function CategoriesDistribution() {
@@ -15,28 +23,35 @@ export default function CategoriesDistribution() {
   useEffect(() => {
     const fetchCategoriesData = async () => {
       try {
-        const response = await fetch("/api/dashboard/analytics/categories")
-        if (response.ok) {
-          const data = await response.json()
-          setData(data)
-        }
-      } catch (error) {
-        console.error("Error fetching categories data:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
+        // TODO: Replace with actual API call
+        const response = await fetch('/api/categories');
+        const rawData: RawCategoryData[] = await response.json();
 
-    fetchCategoriesData()
-  }, [])
+        const transformedData = rawData.map((item: RawCategoryData) => ({
+          name: item.name,
+          value: item.value || item.bookCount || 0,
+          percentage: item.percentage || ((item.bookCount || 0) / rawData.reduce((sum: number, cat: RawCategoryData) => 
+            sum + (cat.bookCount || cat.value || 0), 0) * 100).toFixed(1)
+        }));
+        
+        setData(transformedData);
+      } catch (error) {
+        console.error("Error fetching categories data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategoriesData();
+  }, []);
 
   // Placeholder data for preview
   const placeholderData: CategoryData[] = [
-    { name: "Computer Science", value: 35 },
-    { name: "Mathematics", value: 25 },
-    { name: "Physics", value: 20 },
-    { name: "Engineering", value: 15 },
-    { name: "Other", value: 5 },
+    { name: "Computer Science", value: 35, percentage: "35.0" },
+    { name: "Mathematics", value: 25, percentage: "25.0" },
+    { name: "Physics", value: 20, percentage: "20.0" },
+    { name: "Engineering", value: 15, percentage: "15.0" },
+    { name: "Other", value: 5, percentage: "5.0" },
   ]
 
   const displayData = data.length > 0 ? data : placeholderData
@@ -59,14 +74,16 @@ export default function CategoriesDistribution() {
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"
-            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            label={({ name, value, percent }) => 
+              `${name}: ${value} (${(percent * 100).toFixed(1)}%)`
+            }
           >
-            {displayData.map((entry, index) => (
+            {displayData.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip />
           <Legend />
+          <Tooltip />
         </PieChart>
       </ResponsiveContainer>
     </div>

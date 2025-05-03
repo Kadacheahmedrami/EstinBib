@@ -1,12 +1,11 @@
 import Link from "next/link";
 import HeroLanding from "@/components/pages/home/HeroLanding";
-import RelatedBooks from "@/components/RelatedBooks";
-import { getMostBorrowedBooks, getRecentBooks } from "@/app/actions/books";
+
 import Footer from '@/components/Footer';
 
 export default async function Home() {
-  const newBooks = await getRecentBooks();
-  const mostBorrowedBooks = await getMostBorrowedBooks();
+  // const newBooks = await getRecentBooks();
+  // const mostBorrowedBooks = await getMostBorrowedBooks();
 
   return (
     <>
@@ -44,11 +43,11 @@ export default async function Home() {
           </Link>
         </div>
         <div className="bg-[#EAF2EF] py-8 mb-20">
-          <RelatedBooks
+          {/* <RelatedBooks
             containerId="book-container-1"
             books={newBooks}
             scrollButtonType={2}
-          />
+          /> */}
         </div>
 
         {/* "Most Borrowed" Section */}
@@ -82,11 +81,11 @@ export default async function Home() {
           </Link>
         </div>
         <div className="bg-[#EAF2EF] py-8">
-          <RelatedBooks
+          {/* <RelatedBooks
             containerId="book-container-2"
             books={mostBorrowedBooks}
             scrollButtonType={2}
-          />
+          /> */}
         </div>
       </main>
       <Footer />
