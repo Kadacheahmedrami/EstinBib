@@ -8,14 +8,12 @@ export default withAuth(
   (req: NextRequest) => {
     // You can inspect the decoded token here via req.nextauth.token
     const token = (req as any).nextauth?.token
-    console.log('Decoded JWT in middleware:', token)
-    return NextResponse.next()
+      return NextResponse.next()
   },
   {
     callbacks: {
       // role-based authorization
       authorized: ({ token }) => {
-        console.log('Authorized callback token:', token)
         return token?.role === "LIBRARIAN"
       },
     },

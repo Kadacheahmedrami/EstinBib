@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server"
+import {  NextResponse } from "next/server"
 import { db } from "@/db"
-import { categories } from "@/db/schema"
+import { categories, bookCategories } from "@/db/schema"
 import { eq } from "drizzle-orm"
-import { getServerAuthSession } from "@/lib/auth"
 
 type Context = {
   params: Promise<{
@@ -10,54 +9,83 @@ type Context = {
   }>
 }
 
+export async function GET(
+  request: Request,
+  context: Context
+) {
+  try {
+    const { id } = await context.params
+    
+    if (!id || Array.isArray(id)) {
+      return new NextResponse("Invalid category ID", { status: 400 })
+    }
+
+    const categoryId: string = id
+    const category = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.id, categoryId))
+      .limit(1)
+
+    if (category.length === 0) {
+      return new NextResponse("Category not found", { status: 404 })
+    }
+
+    return NextResponse.json(category[0])
+  } catch (error) {
+    console.error("[CATEGORY_GET]", error)
+    return new NextResponse("Internal error", { status: 500 })
+  }
+}
+
 export async function PUT(
   request: Request,
   context: Context
 ) {
   try {
-    const session = await getServerAuthSession()
-    const params = await context.params
-    const id = Array.isArray(params.id) ? params.id[0] : params.id
-
-    if (!id) {
+    const { id } = await context.params
+    if (!id || Array.isArray(id)) {
       return new NextResponse("Invalid category ID", { status: 400 })
     }
-
-    if (!session?.user || session.user.role !== "LIBRARIAN") {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
-
+    const categoryId = id
     const { name } = await request.json()
 
-    if (!name) {
-      return new NextResponse("Name is required", { status: 400 })
+    if (!name || typeof name !== "string") {
+      return new NextResponse("Invalid category name", { status: 400 })
     }
 
     // Check if category exists
     const existing = await db
       .select()
       .from(categories)
+      .where(eq(categories.id, categoryId))
+      .limit(1)
+
+    if (existing.length === 0) {
+      return new NextResponse("Category not found", { status: 404 })
+    }
+
+    // Check for name conflict
+    const nameConflict = await db
+      .select()
+      .from(categories)
       .where(eq(categories.name, name))
       .limit(1)
 
-    if (existing.length > 0 && existing[0].id !== id) {
+    if (nameConflict.length > 0 && nameConflict[0].id !== categoryId) {
       return new NextResponse("Category name already exists", { status: 400 })
     }
 
     // Update category
-    const [updated] = await db
+    const [updatedCategory] = await db
       .update(categories)
       .set({ name })
-      .where(eq(categories.id, id))
+      .where(eq(categories.id, categoryId))
       .returning()
 
-    if (!updated) {
-      return new NextResponse("Category not found", { status: 404 })
-    }
-
-    return NextResponse.json(updated)
+    return NextResponse.json(updatedCategory)
   } catch (error) {
-    console.error("[CATEGORY_UPDATE]", error)
+    console.error("[CATEGORY_PUT]", error)
     return new NextResponse("Internal error", { status: 500 })
   }
 }
@@ -67,34 +95,36 @@ export async function DELETE(
   context: Context
 ) {
   try {
-    const session = await getServerAuthSession()
-
-    if (!session?.user ) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
-
-    const params = await context.params
-    const id = Array.isArray(params.id) ? params.id[0] : params.id
-
-    if (!id) {
+    const { id } = await context.params
+    if (!id || Array.isArray(id)) {
       return new NextResponse("Invalid category ID", { status: 400 })
     }
+    const categoryId = id
 
+    // Check if category exists
+    const existing = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.id, categoryId))
+      .limit(1)
 
-
-    // Delete category
-    const [deleted] = await db
-      .delete(categories)
-      .where(eq(categories.id, id))
-      .returning()
-
-    if (!deleted) {
+    if (existing.length === 0) {
       return new NextResponse("Category not found", { status: 404 })
     }
 
-    return NextResponse.json(deleted)
+    // First delete all book-category associations
+    await db
+      .delete(bookCategories)
+      .where(eq(bookCategories.categoryId, categoryId))
+
+    // Then delete the category
+    await db
+      .delete(categories)
+      .where(eq(categories.id, categoryId))
+
+    return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error("[CATEGORY_DELETE]", error)
     return new NextResponse("Internal error", { status: 500 })
   }
-} 
+}

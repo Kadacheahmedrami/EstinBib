@@ -130,7 +130,8 @@ export default function BookDetails({ book }: BookDetailsProps) {
 
             {/* Action Button */}
             <div className="mt-6">
-              <Link href="/pdf" passHref>
+        
+              <Link href={`/catalog/${book.id}/pdf`} passHref>
                 <div
                   rel="noopener noreferrer"
                   className="flex items-center justify-center w-full px-6 py-3 border border-red-500 text-red-500 font-bold rounded-xl transition-colors hover:bg-red-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300"
@@ -157,3 +158,4 @@ export default function BookDetails({ book }: BookDetailsProps) {
     </main>
   );
 }
+  

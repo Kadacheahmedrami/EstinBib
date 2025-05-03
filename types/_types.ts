@@ -17,6 +17,7 @@ export interface BaseBook {
 // Extended Book Types
 export interface Book extends BaseBook {
   id: string; // Book ID as string (matching the format in the data)
+  pdfUrl:string | null; // URL to the PDF file (if available)
 }
 
 export interface BorrowedBook {

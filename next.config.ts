@@ -2,41 +2,57 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: [
-      "loremflickr.com",
-      "res.cloudinary.com",
-      "lh3.googleusercontent.com",
-      "covers.openlibrary.org",
-      "books.google.com",
-      "books.googleusercontent.com",
-      "books-google.com",
-      "images.pexels.com",
-      "img.youtube.com",
-      "images.unsplash.com",
-    ],
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**.googleusercontent.com',
+        protocol: "https",
+        hostname: "loremflickr.com",
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "covers.openlibrary.org",
+      },
+      {
+        protocol: "https",
+        hostname: "books.google.com",
+      },
+      {
+        protocol: "https",
+        hostname: "books.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "books-google.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.pexels.com",
+      },
+      {
+        protocol: "https",
+        hostname: "img.youtube.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.w3.org",
+      },
+      {
+        protocol: "https",
+        hostname: "**.googleusercontent.com", // your wildcard pattern
       },
     ],
   },
-  /* config options here */
 };
 
 export default nextConfig;
-
-// import type { NextConfig } from "next";
-
-// const nextConfig: NextConfig = {
-//   async rewrites() {
-//     return [
-//       {
-//         source: "/api/:path*", // Proxy path
-//         destination: "https://dztabib.onrender.com/:path*", // Backend API
-//       },
-//     ];
-//   },
-// };
-
-// export default nextConfig;

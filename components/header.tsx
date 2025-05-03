@@ -46,7 +46,6 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
   if (pathname?.startsWith('/dashboard')) {
     return null;
   }
-
   // Main navigation items
   const mainNavItems = [
     { key: "home", label: "Home", href: "/", Icon: Home },
