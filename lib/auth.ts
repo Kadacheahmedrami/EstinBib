@@ -79,27 +79,27 @@ export const authOptions: NextAuthOptions = {
     },
     
     async jwt({ token, user }) {
-      // Initial sign in
+      // Set token.id if user exists (first sign in)
       if (user) {
         token.id = user.id;
-        
-        // Use user.role if available, otherwise fetch from DB
-        if (user.role) {
-          token.role = user.role;
-        } else {
-          try {
-            const userFromDb = await db.query.users.findFirst({
-              where: eq(users.id, user.id),
-            });
-            token.role = (userFromDb?.role || "STUDENT") as UserRole;
-          } catch (error) {
-            console.error("Error in JWT callback:", error);
-            token.role = "STUDENT"; // Default fallback
-          }
+      }
+    
+      // If role is not yet set, fetch it from DB
+      if (!token.role && token.id) {
+        try {
+          const userFromDb = await db.query.users.findFirst({
+            where: eq(users.id, token.id),
+          });
+          token.role = (userFromDb?.role || "STUDENT") as UserRole;
+        } catch (err) {
+          console.error("JWT callback: Failed to fetch user role", err);
+          token.role = "STUDENT";
         }
       }
+    
       return token;
-    },
+    }
+    
   },
   secret: process.env.NEXTAUTH_SECRET!,
   session: {

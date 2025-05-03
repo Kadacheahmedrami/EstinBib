@@ -2,15 +2,9 @@ import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { categories, bookCategories } from "@/db/schema"
 import { desc, eq, sql } from "drizzle-orm"
-import { getServerAuthSession } from "@/lib/auth"
 
 export async function GET() {
   try {
-    const session = await getServerAuthSession()
-
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
 
     // Get categories with book count
     const result = await db
@@ -33,11 +27,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerAuthSession()
 
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
     const { name } = await request.json()
 
     if (!name || typeof name !== "string") {

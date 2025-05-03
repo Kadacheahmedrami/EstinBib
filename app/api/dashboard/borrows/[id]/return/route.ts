@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { borrows, books } from "@/db/schema"
 import { eq } from "drizzle-orm"
-import { getServerAuthSession } from "@/lib/auth"
 
 type Context = {
   params: Promise<{
@@ -15,8 +14,8 @@ export async function POST(
   context: Context
 ) {
   try {
-    const session = await getServerAuthSession()
-
+    
+    
     // 1) pull out and normalize the `id`
     const { id: rawId } = await context.params
     const id = Array.isArray(rawId) ? rawId[0] : rawId
@@ -24,9 +23,7 @@ export async function POST(
     if (!id) {
       return new NextResponse("Invalid borrow ID", { status: 400 })
     }
-    if (!session?.user || session.user.role !== "LIBRARIAN") {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
+   
 
     // 2) fetch the borrow record
     const [borrow] = await db
@@ -57,6 +54,7 @@ export async function POST(
 
     return NextResponse.json(updatedBorrow)
   } catch (error) {
+    console.log(request)
     console.error("[BORROW_RETURN]", error)
     return new NextResponse("Internal error", { status: 500 })
   }

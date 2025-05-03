@@ -3,17 +3,18 @@
 import { useEffect, useState } from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
 
+// Adjusted interfaces to match API response
 interface CategoryData {
+  id: string
   name: string
   value: number
   percentage: string
 }
 
 interface RawCategoryData {
+  id: string
   name: string
-  value?: number
-  bookCount?: number
-  percentage?: string
+  bookCount: string
 }
 
 export default function CategoriesDistribution() {
@@ -23,35 +24,42 @@ export default function CategoriesDistribution() {
   useEffect(() => {
     const fetchCategoriesData = async () => {
       try {
-        // TODO: Replace with actual API call
-        const response = await fetch('/api/categories');
-        const rawData: RawCategoryData[] = await response.json();
+        const response = await fetch('/api/dashboard/categories')
+        const rawData: RawCategoryData[] = await response.json()
+        console.log("Raw categories data:", rawData)
 
-        const transformedData = rawData.map((item: RawCategoryData) => ({
-          name: item.name,
-          value: item.value || item.bookCount || 0,
-          percentage: item.percentage || ((item.bookCount || 0) / rawData.reduce((sum: number, cat: RawCategoryData) => 
-            sum + (cat.bookCount || cat.value || 0), 0) * 100).toFixed(1)
-        }));
-        
-        setData(transformedData);
+        // Calculate total books count
+        const totalBooks = rawData.reduce((sum, cat) => sum + parseInt(cat.bookCount, 10), 0)
+
+        const transformedData: CategoryData[] = rawData.map(cat => {
+          const count = parseInt(cat.bookCount, 10)
+          const percent = totalBooks > 0 ? ((count / totalBooks) * 100).toFixed(1) : '0.0'
+          return {
+            id: cat.id,
+            name: cat.name,
+            value: count,
+            percentage: percent,
+          }
+        })
+
+        setData(transformedData)
       } catch (error) {
-        console.error("Error fetching categories data:", error);
+        console.error("Error fetching categories data:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchCategoriesData();
-  }, []);
+    fetchCategoriesData()
+  }, [])
 
-  // Placeholder data for preview
+  // Placeholder for when data is empty
   const placeholderData: CategoryData[] = [
-    { name: "Computer Science", value: 35, percentage: "35.0" },
-    { name: "Mathematics", value: 25, percentage: "25.0" },
-    { name: "Physics", value: 20, percentage: "20.0" },
-    { name: "Engineering", value: 15, percentage: "15.0" },
-    { name: "Other", value: 5, percentage: "5.0" },
+    { id: '1', name: "Computer Science", value: 35, percentage: "35.0" },
+    { id: '2', name: "Mathematics", value: 25, percentage: "25.0" },
+    { id: '3', name: "Physics", value: 20, percentage: "20.0" },
+    { id: '4', name: "Engineering", value: 15, percentage: "15.0" },
+    { id: '5', name: "Other", value: 5, percentage: "5.0" },
   ]
 
   const displayData = data.length > 0 ? data : placeholderData
@@ -72,9 +80,9 @@ export default function CategoriesDistribution() {
             cy="50%"
             labelLine={false}
             outerRadius={80}
-            fill="#8884d8"
             dataKey="value"
-            label={({ name, value, percent }) => 
+            nameKey="name"
+            label={({ name, value, percent }) =>
               `${name}: ${value} (${(percent * 100).toFixed(1)}%)`
             }
           >
@@ -83,7 +91,7 @@ export default function CategoriesDistribution() {
             ))}
           </Pie>
           <Legend />
-          <Tooltip />
+          <Tooltip formatter={(value: number, name: string) => [value, name]} />
         </PieChart>
       </ResponsiveContainer>
     </div>

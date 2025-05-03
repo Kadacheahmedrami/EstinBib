@@ -1,30 +1,36 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+// middleware.ts
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { withAuth } from "next-auth/middleware"
 
+export default withAuth(
+  // Handler runs after authentication & authorization
+  (req: NextRequest) => {
+    // You can inspect the decoded token here via req.nextauth.token
+    const token = (req as any).nextauth?.token
+    console.log('Decoded JWT in middleware:', token)
+    return NextResponse.next()
+  },
+  {
+    callbacks: {
+      // role-based authorization
+      authorized: ({ token }) => {
+        console.log('Authorized callback token:', token)
+        return token?.role === "LIBRARIAN"
+      },
+    },
+    pages: {
+      // Redirect unauthenticated users
+      signIn: "/auth/login",
+      // Redirect unauthorized users
+      error: "/",
+    },
+  }
+)
 
-
-
-export async function middleware(request: NextRequest) {
-  // const { pathname } = request.nextUrl;
-  // const url = request.nextUrl.clone();
-
-
-
-
-  return NextResponse.next();
-}
-
-// Configure the routes to which the middleware applies
 export const config = {
   matcher: [
-    '/login',
-    '/',
-    '/catalog',
-    '/contact-us',
-    '/profile',
-    '/auth/login',  // You can add more auth routes if necessary
-    '/auth/register', // Add other auth routes if necessary
+    "/dashboard/:path*",
+    "/api/dashboard/:path*",
   ],
-};
-
-
+}

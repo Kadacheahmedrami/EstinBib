@@ -1,16 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { books, bookCategories } from "@/db/schema"
-import { getServerSession } from "next-auth"
+
 import { eq, like, or, desc, sql, and, inArray } from "drizzle-orm"
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession()
-  
-  if (!session?.user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
-  }
-  
+
+
   try {
     const { searchParams } = new URL(req.url)
     const page = Number.parseInt(searchParams.get("page") || "1")
@@ -26,7 +22,8 @@ export async function GET(req: NextRequest) {
       conditions.push(
         or(
           like(books.title, `%${search}%`),
-          like(books.author, `%${search}%`)
+          like(books.author, `%${search}%`),
+          like(books.isbn, `%${search}%`)   
         )
       )
     }

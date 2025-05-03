@@ -2,15 +2,10 @@ import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { books, borrows } from "@/db/schema"
 import { count, eq, sql } from "drizzle-orm"
-import { getServerAuthSession } from "@/lib/auth"
+
 
 export async function GET() {
   try {
-    const session = await getServerAuthSession()
-
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
 
     // Get most borrowed books (all time)
     const popularBooks = await db

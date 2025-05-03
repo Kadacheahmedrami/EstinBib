@@ -2,16 +2,10 @@ import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { borrows, users } from "@/db/schema"
 import { count, eq, and, sql } from "drizzle-orm"
-import { getServerAuthSession } from "@/lib/auth"
 
 export async function GET() {
   try {
-    const session = await getServerAuthSession()
-
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
-
+ 
     // Get current timestamp for calculations
     const now = new Date()
     const sixMonthsAgo = new Date(now);

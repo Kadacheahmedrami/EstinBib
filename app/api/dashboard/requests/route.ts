@@ -2,15 +2,11 @@ import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { bookRequests, users } from "@/db/schema"
 import { desc, eq } from "drizzle-orm"
-import { getServerAuthSession } from "@/lib/auth"
+
 
 export async function GET() {
   try {
-    const session = await getServerAuthSession()
 
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
 
     // Get requests with user details
     const requests = await db

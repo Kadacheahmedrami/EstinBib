@@ -2,15 +2,9 @@ import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { sndlDemands, users } from "@/db/schema"
 import { desc, eq } from "drizzle-orm"
-import { getServerAuthSession } from "@/lib/auth"
 
 export async function GET() {
   try {
-    const session = await getServerAuthSession()
-
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
 
     // Fetch all SNDL demands with user information
     // No filtering by status or user, just get everything

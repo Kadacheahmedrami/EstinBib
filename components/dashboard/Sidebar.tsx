@@ -38,7 +38,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
 
   return (
     <div className='flex flex-col h-full'>
-      <div className='flex items-center justify-center h-14 border-b dark:border-gray-700'>
+      <div className='flex items-center justify-center h-16 border-b dark:border-gray-700'>
         <Link href='/dashboard' onClick={onNavigate} className='flex items-center space-x-2'>
           <BookOpen className='h-6 w-6 text-primary' />
           <span className='text-xl font-bold'>Admin Panel</span>

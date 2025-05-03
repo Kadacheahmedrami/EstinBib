@@ -3,7 +3,6 @@ import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { users } from "@/db/schema"
 import { eq } from "drizzle-orm"
-import { getServerAuthSession } from "@/lib/auth"
 
 type Context = {
   params: Promise<{
@@ -16,10 +15,7 @@ export async function PUT(
   context: Context
 ) {
   try {
-    const session = await getServerAuthSession()
-        if (!session?.user) {
-          return new NextResponse("Unauthorized", { status: 401 })
-        }
+
     const params = await context.params
     const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId
 

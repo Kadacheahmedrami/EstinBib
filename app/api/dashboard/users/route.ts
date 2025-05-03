@@ -7,9 +7,6 @@ import { eq, sql } from "drizzle-orm"
 export async function GET(req: NextRequest) {
 
 
-//   if (session?.user?.role !== "LIBRARIAN") {
-//     return NextResponse.json({ error: "Not authorized" }, { status: 403 })
-//   }
 
   try {
     const { searchParams } = new URL(req.url)
@@ -70,9 +67,6 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession()
 
-  if (session?.user?.role !== "LIBRARIAN") {
-    return NextResponse.json({ error: "Not authorized" }, { status: 403 })
-  }
 
   try {
     const { userId, role } = await req.json()
@@ -87,7 +81,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Don't allow changing own role
-    if (userId === session.user.id) {
+    if (userId === session!.user.id) {
       return NextResponse.json(
         { error: "Cannot change your own role" },
         { status: 400 }
