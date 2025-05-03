@@ -16,7 +16,9 @@ const Footer: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-8 gap-8">
                 {/* Left Section: Logo and Address */}
                 <div className="col-span-1 md:col-span-2 flex flex-col items-start space-y-3">
-                    <Image src="/svg/estin.svg" alt="ESTIN Logo" width={200} height={200} className="mr-auto cursor-pointer" />
+                  
+                    <Image src="/svg/estin.svg" alt="ESTIN Logo" width={200} height={200} className="mx-auto md:mr-auto md:ml-0 cursor-pointer" />
+                    <div className='h-[1px] mx-auto opacity-20 flex md:hidden rounded-3xl w-full  bg-white'></div>
                     <p className="text-[24px]">
                         <a href="tel:+21334824916" className="text-[24px] underline">
                             +213-34-824-916
@@ -31,6 +33,7 @@ const Footer: React.FC = () => {
                     </ul>
              
                 </div>
+                <div className='h-[1px] mx-auto opacity-20 flex md:hidden rounded-3xl w-full  bg-white'></div>
 
                 {/* Middle Section: Address and Map */}
                 <div className="col-span-1 md:col-span-3 flex flex-col items-start ">
@@ -40,7 +43,7 @@ const Footer: React.FC = () => {
                         National road n° 75, Amizour 06300 Bejaia, Algeria
                     </p>
                    
-                    <div className='w-[80%]  z-[1] bottom-4 relative md:left-7 '>
+                    <div className='w-[100%] md:w-[80%]  z-[1] bottom-4 relative md:left-7 '>
                     <LocationMapClient 
                         latitude={estinLatitude} 
                         longitude={estinLongitude} 
@@ -49,6 +52,7 @@ const Footer: React.FC = () => {
                     </div>
              
                 </div>
+                <div className='h-[1px] mx-auto opacity-20 flex md:hidden rounded-3xl w-full  bg-white'></div>
 
                 {/* Right Section: Contact Form */}
                 <div className="col-span-1 md:col-span-3 flex flex-col">
