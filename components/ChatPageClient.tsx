@@ -270,7 +270,7 @@ export default function ChatPageClient() {
                 <button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="p-2.5 sm:p-3 bg-[#e63946] hover:bg-[#c1121f] text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-4 sm:p-6 bg-[#e63946] text-[24px] hover:bg-[#c1121f] text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label="Send message"
                 >
                   <svg

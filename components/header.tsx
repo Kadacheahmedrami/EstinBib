@@ -152,7 +152,7 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
         <div className="container mx-auto px-4">
           <div className="flex h-[70px] text-3xl text-[#F1413E] items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/logo.png" alt="logo" width={60} height={60}  />
+              <Image src="/logo.png" alt="logo" width={160} height={160} className="w-[65px]"  />
               𝕰𝖘𝖙𝖎𝖓 𝖇𝖎𝖇𝖑𝖎𝖔𝖙𝖍è𝖖𝖚𝖊
             </Link>
            
