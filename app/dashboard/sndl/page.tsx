@@ -1,17 +1,24 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Check, X, Clock } from "lucide-react"
+import { Trash2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -20,19 +27,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-// import {
-//   processSndlDemand,
-
-// } from "@/app/actions/sndl"
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 
 interface User {
   id: string
@@ -45,89 +46,219 @@ interface SNDLDemand {
   id: string
   user: User
   requestReason: string
-  status: "PENDING" | "APPROVED" | "REJECTED"
+  status: string
+  sndlEmail: string | null
+  sndlPassword: string | null
+  adminNotes: string | null
   requestedAt: string
-  processedAt?: string
-  sndlEmail?: string
-  sndlPassword?: string
-  adminNotes?: string
+  processedAt: string | null
   emailSent: boolean
-  emailSentAt?: string
+  emailSentAt: string | null
+}
+
+interface PaginationInfo {
+  page: number
+  limit: number
+  totalItems: number
+  totalPages: number
 }
 
 export default function SNDLDemandsPage() {
   const [demands, setDemands] = useState<SNDLDemand[]>([])
-  const [filter, setFilter] = useState("PENDING")
   const [selectedDemand, setSelectedDemand] = useState<SNDLDemand | null>(null)
-  const [adminNotes, setAdminNotes] = useState("")
-  const [sndlEmail, setSndlEmail] = useState("")
-  const [sndlPassword, setSndlPassword] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchType, setSearchType] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("")
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    page: 1,
+    limit: 10,
+    totalItems: 0,
+    totalPages: 0
+  })
   const { toast } = useToast()
-  const router = useRouter()
-
+  
   const loadDemands = useCallback(async () => {
     setIsLoading(true)
     try {
-      const res = await fetch(`/api/dashboard/sndl?status=${filter}`)
-      if (!res.ok) throw new Error(await res.text())
-      setDemands(await res.json())
-    } catch (err) {
-      toast({ title: "Error", description: (err as Error).message, variant: "destructive" })
+      const queryParams = new URLSearchParams()
+      
+      // Pagination parameters
+      queryParams.append('page', pagination.page.toString())
+      queryParams.append('limit', pagination.limit.toString())
+      
+      // Search parameters
+      if (searchQuery) {
+        queryParams.append('query', searchQuery)
+        queryParams.append('type', searchType)
+      }
+      
+      // Status filter
+      if (statusFilter) {
+        queryParams.append('status', statusFilter)
+      }
+      
+      const url = `/api/dashboard/sndl?${queryParams.toString()}`
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
+      
+      const data = await response.json()
+      setDemands(data.demands)
+      setPagination(data.pagination)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load demands",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
-  }, [filter, toast])
+  }, [pagination.page, pagination.limit, searchQuery, searchType, statusFilter, toast])
 
   useEffect(() => {
     loadDemands()
   }, [loadDemands])
 
-  const handleReview = (d: SNDLDemand) => {
-    setSelectedDemand(d)
-    setAdminNotes(d.adminNotes || "")
-    setSndlEmail(d.sndlEmail || "")
-    setSndlPassword(d.sndlPassword || "")
+  const handleSearch = () => {
+    // Reset to first page when searching
+    setPagination(prev => ({ ...prev, page: 1 }))
   }
 
-  const handleUpdateAction = async (id: string, approved: boolean) => {
+  const handlePageChange = (newPage: number) => {
+    setPagination(prev => ({ ...prev, page: newPage }))
+  }
+
+  const handleDeleteDemand = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this demand?")) return
+
     try {
-      if (approved && (!sndlEmail || !sndlPassword)) {
-        toast({ title: "Missing Credentials", description: "Please fill in email and password", variant: "destructive" })
-        return
+      const response = await fetch(`/api/dashboard/sndl/${id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error(await response.text())
       }
 
-      // call signature: processSndlDemand(demandId, approved, adminNotes?, sndlEmail?, sndlPassword?)
-      // await processSndlDemand(
-      //   id,
-      //   approved,
-      //   adminNotes,
-      //   approved ? sndlEmail : undefined,
-      //   approved ? sndlPassword : undefined
-      // )
-
-      setSelectedDemand(null)
-      setAdminNotes("")
-      setSndlEmail("")
-      setSndlPassword("")
-      router.refresh()
-      toast({ title: "Success", description: `Demand ${approved ? "approved" : "rejected"} successfully` })
-    } catch (err) {
-      toast({ title: "Error", description: (err as Error).message, variant: "destructive" })
+      await loadDemands()
+      toast({
+        title: "Success",
+        description: "Demand deleted successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete demand",
+        variant: "destructive",
+      })
     }
   }
 
-
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "APPROVED": return "text-green-600"
-      case "REJECTED": return "text-red-600"
-      default: return "text-yellow-600"
+  const getStatusBadgeClass = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'approved':
+        return 'bg-green-100 text-green-800'
+      case 'rejected':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
-  if (isLoading) {
+  const renderPagination = () => {
+    const { page, totalPages } = pagination
+    
+    return (
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious 
+              onClick={() => page > 1 && handlePageChange(page - 1)}
+              className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+            />
+          </PaginationItem>
+          
+          {/* Show first page */}
+          {totalPages > 0 && (
+            <PaginationItem>
+              <PaginationLink 
+                isActive={page === 1}
+                onClick={() => handlePageChange(1)}
+              >
+                1
+              </PaginationLink>
+            </PaginationItem>
+          )}
+          
+          {/* Ellipsis for many pages */}
+          {page > 3 && (
+            <PaginationItem>
+              <PaginationLink>...</PaginationLink>
+            </PaginationItem>
+          )}
+          
+          {/* Show current page and surrounding pages */}
+          {page > 2 && (
+            <PaginationItem>
+              <PaginationLink onClick={() => handlePageChange(page - 1)}>
+                {page - 1}
+              </PaginationLink>
+            </PaginationItem>
+          )}
+          
+          {page !== 1 && page !== totalPages && (
+            <PaginationItem>
+              <PaginationLink isActive onClick={() => handlePageChange(page)}>
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+          )}
+          
+          {page < totalPages - 1 && (
+            <PaginationItem>
+              <PaginationLink onClick={() => handlePageChange(page + 1)}>
+                {page + 1}
+              </PaginationLink>
+            </PaginationItem>
+          )}
+          
+          {/* Ellipsis for many pages */}
+          {page < totalPages - 2 && (
+            <PaginationItem>
+              <PaginationLink>...</PaginationLink>
+            </PaginationItem>
+          )}
+          
+          {/* Show last page */}
+          {totalPages > 1 && (
+            <PaginationItem>
+              <PaginationLink 
+                isActive={page === totalPages}
+                onClick={() => handlePageChange(totalPages)}
+              >
+                {totalPages}
+              </PaginationLink>
+            </PaginationItem>
+          )}
+          
+          <PaginationItem>
+            <PaginationNext 
+              onClick={() => page < totalPages && handlePageChange(page + 1)}
+              className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    )
+  }
+
+  if (isLoading && demands.length === 0) {
     return (
       <div className="flex h-[200px] w-full items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -137,134 +268,192 @@ export default function SNDLDemandsPage() {
 
   return (
     <div className="p-6">
-      {/* Header + Filter */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">SNDL Demands</h1>
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="PENDING">Pending</SelectItem>
-            <SelectItem value="APPROVED">Approved</SelectItem>
-            <SelectItem value="REJECTED">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
-      {/* Table */}
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Request Reason</TableHead>
-            <TableHead>Requested By</TableHead>
-            <TableHead>Requested At</TableHead>
-            <TableHead>Processed At</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {demands.map(d => (
-            <TableRow key={d.id}>
-              <TableCell>{d.requestReason}</TableCell>
-              <TableCell>
-                <div className="flex items-center space-x-2">
-                    {d.user.image && <Image src={d.user.image} alt="avatar" width={24} height={24} className="rounded-full" />}
-                  <div className="flex flex-col">
-                    <span>{d.user.name}</span>
-                    <span className="text-sm text-gray-500">{d.user.email}</span>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell>{new Date(d.requestedAt).toLocaleString()}</TableCell>
-              <TableCell>{d.processedAt ? new Date(d.processedAt).toLocaleString() : '-'}</TableCell>
-              <TableCell className={getStatusColor(d.status)}>
-                <div className="flex items-center">
-                  {d.status === "APPROVED" && <Check className="h-4 w-4 mr-2" />} 
-                  {d.status === "REJECTED" && <X className="h-4 w-4 mr-2" />} 
-                  {d.status === "PENDING" && <Clock className="h-4 w-4 mr-2" />}
-                  {d.status.charAt(0) + d.status.slice(1).toLowerCase()}
-                </div>
-              </TableCell>
-              <TableCell className="space-x-1">
-                {d.status === "PENDING" && (
-                  <Button variant="outline" size="sm" onClick={() => handleReview(d)}>Review</Button>
-                )}
-      
-                {d.emailSent && (
-                  <span className="text-sm text-gray-500">
-                    Sent at {new Date(d.emailSentAt!).toLocaleString()}
-                  </span>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-          {demands.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground">
-                No demands found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      {/* Search functionality */}
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex-1">
+          <Input
+            placeholder="Search demands..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full"
+          />
+        </div>
+        <div className="w-full md:w-48">
+          <Select value={searchType} onValueChange={setSearchType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Search in..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Fields</SelectItem>
+              <SelectItem value="name">Student Name</SelectItem>
+              <SelectItem value="email">Student Email</SelectItem>
+              <SelectItem value="reason">Request Reason</SelectItem>
+              <SelectItem value="sndlEmail">SNDL Email</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="w-full md:w-48">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button onClick={handleSearch} className="flex items-center gap-2">
+          <Search className="h-4 w-4" />
+          Search
+        </Button>
+        <Button 
+          variant="outline" 
+          onClick={() => {
+            setSearchQuery("")
+            setSearchType("all")
+            setStatusFilter("")
+            setPagination(prev => ({ ...prev, page: 1 }))
+          }}
+        >
+          Reset
+        </Button>
+      </div>
 
-      {/* Review Dialog */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {demands.map((demand) => (
+          <Card key={demand.id} className="overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex justify-between items-start">
+                <div className="flex flex-col">
+                  <span className="truncate">{demand.user.name}</span>
+                  <CardDescription className="truncate">{demand.user.email}</CardDescription>
+                </div>
+                <span 
+                  className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(demand.status)}`}
+                >
+                  {demand.status}
+                </span>
+              </CardTitle>
+              <CardDescription>
+                Requested: {new Date(demand.requestedAt).toLocaleDateString()}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="line-clamp-3 text-sm">{demand.requestReason}</p>
+              {demand.sndlEmail && (
+                <div className="mt-2">
+                  <p className="text-sm font-medium">SNDL Email: {demand.sndlEmail}</p>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="flex justify-between pt-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setSelectedDemand(demand)}
+              >
+                View Details
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-red-600 hover:text-red-700"
+                onClick={() => handleDeleteDemand(demand.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+        {demands.length === 0 && (
+          <div className="col-span-full text-center text-muted-foreground py-8">
+            No demands found
+          </div>
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="mt-6 flex justify-center">
+        {pagination.totalPages > 0 && renderPagination()}
+      </div>
+
+      {/* Results summary */}
+      <div className="mt-2 text-center text-sm text-muted-foreground">
+        Showing {demands.length} of {pagination.totalItems} results
+      </div>
+
       {selectedDemand && (
-        <Dialog open onOpenChange={() => setSelectedDemand(null)}>
-          <DialogContent className="max-w-2xl space-y-4">
+        <Dialog open={true} onOpenChange={() => setSelectedDemand(null)}>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Review SNDL Demand</DialogTitle>
+              <DialogTitle>Demand Details</DialogTitle>
             </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Student</h3>
+                  <p>{selectedDemand.user.name}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Email</h3>
+                  <p>{selectedDemand.user.email}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Status</h3>
+                  <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(selectedDemand.status)}`}>
+                    {selectedDemand.status}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Requested At</h3>
+                  <p>{new Date(selectedDemand.requestedAt).toLocaleString()}</p>
+                </div>
+                {selectedDemand.processedAt && (
+                  <div>
+                    <h3 className="font-medium text-sm text-muted-foreground">Processed At</h3>
+                    <p>{new Date(selectedDemand.processedAt).toLocaleString()}</p>
+                  </div>
+                )}
+                {selectedDemand.emailSent && (
+                  <div>
+                    <h3 className="font-medium text-sm text-muted-foreground">Email Sent At</h3>
+                    <p>{selectedDemand.emailSentAt ? new Date(selectedDemand.emailSentAt).toLocaleString() : 'N/A'}</p>
+                  </div>
+                )}
+              </div>
 
-            {/* Request Reason */}
-            <div>
-              <h3 className="font-medium mb-2">Request Reason</h3>
-              <p>{selectedDemand.requestReason}</p>
-            </div>
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground">Request Reason</h3>
+                <p className="whitespace-pre-wrap mt-1 p-3 bg-muted rounded-md">{selectedDemand.requestReason}</p>
+              </div>
 
-            {/* Admin Notes */}
-            <div>
-              <h3 className="font-medium mb-2">Admin Notes</h3>
-              <Textarea
-                placeholder="Add any notes..."
-                value={adminNotes}
-                onChange={e => setAdminNotes(e.target.value)}
-                rows={3}
-              />
-            </div>
+              {selectedDemand.sndlEmail && (
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">SNDL Email</h3>
+                  <p className="mt-1 p-3 bg-muted rounded-md">{selectedDemand.sndlEmail}</p>
+                </div>
+              )}
 
-            {/* Credentials (editable when approving) */}
-            <div>
-              <h3 className="font-medium mb-2">SNDL Credentials</h3>
-              <Input
-                placeholder="SNDL Email"
-                value={sndlEmail}
-                onChange={e => setSndlEmail(e.target.value)}
-                className="mb-2"
-              />
-              <Input
-                placeholder="SNDL Password"
-                type="password"
-                value={sndlPassword}
-                onChange={e => setSndlPassword(e.target.value)}
-              />
-            </div>
+              {selectedDemand.sndlPassword && (
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">SNDL Password</h3>
+                  <p className="mt-1 p-3 bg-muted rounded-md">{selectedDemand.sndlPassword}</p>
+                </div>
+              )}
 
-            {/* Action Buttons */}
-            <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => handleUpdateAction(selectedDemand.id, false)}
-              >
-                <X className="h-4 w-4 mr-1" /> Reject
-              </Button>
-              <Button
-                onClick={() => handleUpdateAction(selectedDemand.id, true)}
-              >
-                <Check className="h-4 w-4 mr-1" /> Approve
-              </Button>
+              {selectedDemand.adminNotes && (
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground">Admin Notes</h3>
+                  <p className="whitespace-pre-wrap mt-1 p-3 bg-muted rounded-md">{selectedDemand.adminNotes}</p>
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>

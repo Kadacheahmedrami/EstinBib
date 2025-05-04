@@ -8,6 +8,7 @@ import { addDays } from "date-fns"
 
 // Constants
 const DEFAULT_PAGE_SIZE = 10
+const DEFAULT_LOAN_DURATION = 14 // Default to 14 days
 
 export async function GET(req: NextRequest) {
 
@@ -122,16 +123,28 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-
-
-
-
   try {
     const body = await req.json()
-    const { bookId ,userId} = body
+    const { bookId, userId, loanDuration } = body
 
+    // Validate required fields
     if (!bookId) {
       return NextResponse.json({ error: "Book ID is required" }, { status: 400 })
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: "User ID is required" }, { status: 400 })
+    }
+
+    // Use custom loan duration if provided, otherwise use default
+    // Validate that the loan duration is a valid number within acceptable range
+    const parsedLoanDuration = loanDuration ? parseInt(String(loanDuration)) : DEFAULT_LOAN_DURATION
+    
+    // Basic validation - ensure loan duration is a reasonable number (between 1 and 180 days)
+    if (isNaN(parsedLoanDuration) || parsedLoanDuration < 1 || parsedLoanDuration > 180) {
+      return NextResponse.json({ 
+        error: "Invalid loan duration. Must be between 1 and 180 days." 
+      }, { status: 400 })
     }
 
     // Check if book exists and is available
@@ -161,19 +174,19 @@ export async function POST(req: NextRequest) {
 
     if (existingBorrow.length > 0) {
       return NextResponse.json(
-        { error: "You already have an active borrow for this book" },
+        { error: "User already has an active borrow for this book" },
         { status: 400 }
       )
     }
 
-    // Create borrow record
-    const dueDate = addDays(new Date(), 14) // 2 weeks from now
+    // Create borrow record with the custom loan duration
+    const dueDate = addDays(new Date(), parsedLoanDuration)
 
     const [newBorrow] = await db
       .insert(borrows)
       .values({
         bookId,
-        userId: userId,
+        userId,
         dueDate,
       })
       .returning()

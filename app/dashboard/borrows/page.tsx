@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { ArrowLeft, Loader2, Plus, ChevronLeft, ChevronRight, Search, X } from "lucide-react"
+import { ArrowLeft, Loader2, Plus, ChevronLeft, ChevronRight, Search, X, CalendarRange } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -23,6 +23,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 // Type definitions
 interface User {
@@ -80,6 +88,12 @@ export default function BorrowsPage() {
     hasPrevPage: false,
   })
   
+  // Dialog states
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false)
+  const [extendDialogOpen, setExtendDialogOpen] = useState(false)
+  const [activeBorrowId, setActiveBorrowId] = useState<string | null>(null)
+  const [extensionWeeks, setExtensionWeeks] = useState<string>("2")
+  
   const { toast } = useToast()
 
   // Load borrows data with pagination and filters
@@ -128,19 +142,64 @@ export default function BorrowsPage() {
     }
   }
 
+  // Open return confirmation dialog
+  const openReturnDialog = (id: string) => {
+    setActiveBorrowId(id)
+    setReturnDialogOpen(true)
+  }
+
+  // Open extend borrow dialog
+  const openExtendDialog = (id: string) => {
+    setActiveBorrowId(id)
+    setExtensionWeeks("2") // Reset to default
+    setExtendDialogOpen(true)
+  }
+
   // Handle book return
-  const handleReturn = async (id: string) => {
+  const handleReturn = async () => {
+    if (!activeBorrowId) return
+    
     setIsSubmitting(true)
     try {
-      const response = await fetch(`/api/dashboard/borrows/${id}/return`, { method: "POST" })
+      const response = await fetch(`/api/dashboard/borrows/${activeBorrowId}/return`, { method: "POST" })
       if (!response.ok) throw new Error(await response.text())
       
       await loadBorrows()
       toast({ title: "Success", description: "Book returned successfully" })
+      setReturnDialogOpen(false)
     } catch (error) {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to return book",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handle borrow extension
+  const handleExtend = async () => {
+    if (!activeBorrowId) return
+    
+    setIsSubmitting(true)
+    try {
+      const weeks = parseInt(extensionWeeks)
+      const response = await fetch(`/api/dashboard/borrows/${activeBorrowId}/extend`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ weeks })
+      })
+      
+      if (!response.ok) throw new Error(await response.text())
+      
+      await loadBorrows()
+      toast({ title: "Success", description: `Borrow extended by ${weeks} week${weeks !== 1 ? 's' : ''}` })
+      setExtendDialogOpen(false)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to extend borrow",
         variant: "destructive",
       })
     } finally {
@@ -327,16 +386,26 @@ export default function BorrowsPage() {
                 </TableCell>
                 <TableCell>
                   {!isReturned && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleReturn(borrow.id)}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
-                      <ArrowLeft className="h-4 w-4 mr-1" />
-                      Return
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openReturnDialog(borrow.id)}
+                        disabled={isSubmitting}
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-1" />
+                        Return
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openExtendDialog(borrow.id)}
+                        disabled={isSubmitting}
+                      >
+                        <CalendarRange className="h-4 w-4 mr-1" />
+                        Extend
+                      </Button>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>
@@ -385,6 +454,78 @@ export default function BorrowsPage() {
           </div>
         </div>
       )}
+
+      {/* Return Book Dialog */}
+      <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Return</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to mark this book as returned?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setReturnDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleReturn}
+              disabled={isSubmitting}
+            >
+              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Confirm Return
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Extend Borrow Dialog */}
+      <Dialog open={extendDialogOpen} onOpenChange={setExtendDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Extend Borrow Period</DialogTitle>
+            <DialogDescription>
+              Select how many weeks you want to extend the borrow period.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Select 
+              value={extensionWeeks} 
+              onValueChange={setExtensionWeeks}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="2 weeks" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 week</SelectItem>
+                <SelectItem value="2">2 weeks</SelectItem>
+                <SelectItem value="3">3 weeks</SelectItem>
+                <SelectItem value="4">4 weeks</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setExtendDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleExtend}
+              disabled={isSubmitting}
+            >
+              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Extend Borrow
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

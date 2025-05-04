@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Trash2 } from "lucide-react"
+import { Trash2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -17,6 +17,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface User {
   id: string
@@ -33,18 +41,23 @@ interface Idea {
 
 export default function IdeasPage() {
   const [ideas, setIdeas] = useState<Idea[]>([])
+  const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([])
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchType, setSearchType] = useState("all")
   const { toast } = useToast()
-
+  
   const loadIdeas = useCallback(async () => {
     try {
       const response = await fetch("/api/dashboard/ideas")
       if (!response.ok) {
         throw new Error(await response.text())
       }
+      
       const data = await response.json()
       setIdeas(data)
+      setFilteredIdeas(data)
     } catch (error) {
       toast({
         title: "Error",
@@ -55,6 +68,38 @@ export default function IdeasPage() {
       setIsLoading(false)
     }
   }, [toast])
+
+  const handleSearch = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const queryParams = new URLSearchParams()
+      if (searchQuery) {
+        queryParams.append('query', searchQuery)
+        if (searchType !== 'all') {
+          queryParams.append('type', searchType)
+        }
+      }
+      
+      const url = `/api/dashboard/ideas${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
+      
+      const data = await response.json()
+      setIdeas(data)
+      setFilteredIdeas(data)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to search ideas",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [searchQuery, searchType, toast]) // Removed filteredIdeas since it's not actually used in the function
 
   useEffect(() => {
     loadIdeas()
@@ -78,6 +123,7 @@ export default function IdeasPage() {
         description: "Idea deleted successfully",
       })
     } catch (error) {
+      console.log(filteredIdeas)
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to delete idea",
@@ -98,6 +144,38 @@ export default function IdeasPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Ideas Box</h1>
+      </div>
+
+      {/* Search functionality */}
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex-1">
+          <Input
+            placeholder="Search ideas..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full"
+          />
+        </div>
+        <div className="w-full md:w-48">
+          <Select value={searchType} onValueChange={setSearchType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Search in..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Fields</SelectItem>
+              <SelectItem value="name">Student Name</SelectItem>
+              <SelectItem value="email">Student Email</SelectItem>
+              <SelectItem value="idea">Idea Content</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button onClick={handleSearch} className="flex items-center gap-2">
+          <Search className="h-4 w-4" />
+          Search
+        </Button>
+        <Button variant="outline" onClick={loadIdeas}>
+          Reset
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -158,4 +236,4 @@ export default function IdeasPage() {
       )}
     </div>
   )
-} 
+}

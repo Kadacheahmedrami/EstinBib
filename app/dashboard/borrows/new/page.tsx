@@ -12,6 +12,13 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useDebounce } from "use-debounce" // Make sure to install this package
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select" // Import Select components
 
 // Type definitions
 interface User {
@@ -31,6 +38,14 @@ interface Book {
   available?: boolean
   categories?: Array<{ id: string; name: string }>
 }
+
+// Loan duration options
+const LOAN_DURATIONS = [
+  { value: "7", label: "1 Week" },
+  { value: "14", label: "2 Weeks (Default)" },
+  { value: "21", label: "3 Weeks" },
+  { value: "30", label: "1 Month" }
+]
 
 export default function NewBorrowPage() {
   const router = useRouter()
@@ -54,6 +69,9 @@ export default function NewBorrowPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
   const [bookAvailabilityFilter, setBookAvailabilityFilter] = useState<string>("all")
+  
+  // Loan duration state
+  const [loanDuration, setLoanDuration] = useState<string>("14") // Default to 14 days
   
   // Search users from API based on the actual API implementation
   const searchUsers = useCallback(async (query: string) => {
@@ -166,6 +184,11 @@ export default function NewBorrowPage() {
     searchBooks(bookSearchQuery, value)
   }
 
+  // Handle loan duration change
+  const handleLoanDurationChange = (value: string) => {
+    setLoanDuration(value)
+  }
+
   // Handle borrow submission
   const handleBorrow = async () => {
     if (!selectedUser || !selectedBook) return
@@ -178,6 +201,7 @@ export default function NewBorrowPage() {
         body: JSON.stringify({
           userId: selectedUser.id,
           bookId: selectedBook.id,
+          loanDuration: parseInt(loanDuration) // Send loan duration in days
         }),
       })
 
@@ -194,6 +218,16 @@ export default function NewBorrowPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // Get loan duration text
+  const getLoanDurationText = () => {
+    const days = parseInt(loanDuration)
+    if (days === 7) return "1 week"
+    if (days === 14) return "2 weeks"
+    if (days === 21) return "3 weeks"
+    if (days === 30) return "1 month"
+    return `${days} days`
   }
 
   return (
@@ -485,10 +519,29 @@ export default function NewBorrowPage() {
                 </CardContent>
               </Card>
 
+              {/* Loan Duration Selector */}
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="font-medium text-sm text-muted-foreground mb-2">LOAN DURATION</h3>
+                  <Select value={loanDuration} onValueChange={handleLoanDurationChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select loan duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LOAN_DURATIONS.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
+
               <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-md text-sm">
                 <p className="font-medium text-amber-800">Borrowing Terms</p>
                 <p className="text-amber-700">
-                  This item will be due back in 14 days. Late returns may incur fees.
+                  This item will be due back in {getLoanDurationText()}. Late returns may incur fees.
                 </p>
               </div>
 

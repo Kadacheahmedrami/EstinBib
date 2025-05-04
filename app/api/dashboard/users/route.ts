@@ -2,12 +2,9 @@ import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { users, borrows } from "@/db/schema"
 import { getServerSession } from "next-auth"
-import { eq, sql } from "drizzle-orm"
+import { eq, sql, and, or, ilike } from "drizzle-orm"
 
 export async function GET(req: NextRequest) {
-
-
-
   try {
     const { searchParams } = new URL(req.url)
     const page = Number.parseInt(searchParams.get("page") || "1")
@@ -17,8 +14,40 @@ export async function GET(req: NextRequest) {
 
     const offset = (page - 1) * limit
 
-    // Build base query
-    const baseQuery = db
+    // Build search condition
+    let searchCondition = undefined
+    if (search) {
+      searchCondition = or(
+        ilike(users.name, `%${search}%`),
+        ilike(users.email, `%${search}%`)
+      )
+    }
+
+    // Build role condition
+    let roleCondition = undefined
+    if (role) {
+      roleCondition = eq(users.role, role)
+    }
+
+    // Combine conditions
+    let whereCondition = undefined
+    if (searchCondition && roleCondition) {
+      whereCondition = and(searchCondition, roleCondition)
+    } else if (searchCondition) {
+      whereCondition = searchCondition
+    } else if (roleCondition) {
+      whereCondition = roleCondition
+    }
+
+    // Get total count for pagination
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(whereCondition || sql`1=1`)
+      .execute()
+
+    // Get user data with borrow statistics
+    const usersQuery = db
       .select({
         id: users.id,
         name: users.name,
@@ -36,28 +65,26 @@ export async function GET(req: NextRequest) {
       .groupBy(users.id)
 
     // Apply filters
-    if (search) {
-      baseQuery.where(sql`${users.name} ILIKE ${`%${search}%`} OR ${users.email} ILIKE ${`%${search}%`}`)
+    if (whereCondition) {
+      usersQuery.where(whereCondition)
     }
-
-    if (role) {
-      baseQuery.where(eq(users.role, role))
-    }
-
-    // Get total count
-    // const [{ count }] = await db
-    //   .select({ count: sql<number>`count(*)` })
-    //   .from(users)
-    //   .execute()
 
     // Get paginated results
-    const results = await baseQuery
+    const results = await usersQuery
       .limit(limit)
       .offset(offset)
       .orderBy(users.name)
       .execute()
 
-    return NextResponse.json(results)
+    return NextResponse.json({
+      users: results,
+      pagination: {
+        total: Number(count),
+        page,
+        limit,
+        pages: Math.ceil(Number(count) / limit)
+      }
+    })
   } catch (error) {
     console.error("Error fetching users:", error)
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 })
@@ -67,6 +94,9 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession()
 
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   try {
     const { userId, role } = await req.json()
@@ -81,7 +111,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Don't allow changing own role
-    if (userId === session!.user.id) {
+    if (userId === session.user.id) {
       return NextResponse.json(
         { error: "Cannot change your own role" },
         { status: 400 }
@@ -103,4 +133,4 @@ export async function PATCH(req: NextRequest) {
     console.error("Error updating user:", error)
     return NextResponse.json({ error: "Failed to update user" }, { status: 500 })
   }
-} 
+}
