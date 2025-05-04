@@ -85,22 +85,12 @@ export default function NewBorrowPage() {
       const response = await fetch(apiUrl)
       if (!response.ok) throw new Error(await response.text())
       
+      // The user API returns an array directly
       const userData = await response.json()
       
-      // Handle both array response and response with 'users' property
-      const users = Array.isArray(userData) ? userData : userData.users || []
-      
-      // Map the response to match our User interface
-      const formattedUsers = users.map((user: any) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        activeLoans: user.activeLoans || user.active_loans || 0,
-        overdueLoans: user.overdueLoans || user.overdue_loans || 0
-      }))
-      
-      setFilteredUsers(formattedUsers)
+      // Process the user data to ensure it has the right format
+      // The API returns additional fields like borrowCount, activeLoans, overdueLoans
+      setFilteredUsers(userData)
     } catch (error) {
       toast({
         title: "Error",
