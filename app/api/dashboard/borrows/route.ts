@@ -122,13 +122,13 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
+
 
 
 
   try {
     const body = await req.json()
-    const { bookId } = body
+    const { bookId ,userId} = body
 
     if (!bookId) {
       return NextResponse.json({ error: "Book ID is required" }, { status: 400 })
@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
       .where(
         and(
           eq(borrows.bookId, bookId),
-          eq(borrows.userId, session!.user.id),
+          eq(borrows.userId, userId),
           isNull(borrows.returnedAt)
         )
       )
@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
       .insert(borrows)
       .values({
         bookId,
-        userId: session!.user.id,
+        userId: userId,
         dueDate,
       })
       .returning()
