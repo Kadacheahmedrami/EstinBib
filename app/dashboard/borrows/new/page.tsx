@@ -85,12 +85,19 @@ export default function NewBorrowPage() {
       const response = await fetch(apiUrl)
       if (!response.ok) throw new Error(await response.text())
       
-      // The user API returns an array directly
       const userData = await response.json()
       
-      // Process the user data to ensure it has the right format
-      // The API returns additional fields like borrowCount, activeLoans, overdueLoans
-      setFilteredUsers(userData)
+      // Handle both array and object responses
+      let users: User[] = []
+      if (Array.isArray(userData)) {
+        users = userData
+      } else if (userData && typeof userData === 'object') {
+        // If the API returns an object with a data/users property
+        users = Array.isArray(userData.data) ? userData.data : 
+               Array.isArray(userData.users) ? userData.users : []
+      }
+      
+      setFilteredUsers(users)
     } catch (error) {
       toast({
         title: "Error",
