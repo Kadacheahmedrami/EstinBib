@@ -219,3 +219,36 @@ export const sndlDemands = pgTable(
     index("sndl_demand_requested_at_idx").on(table.requestedAt),
   ]
 );
+
+
+export const complaintStatusEnum = pgEnum("complaint_status", ["PENDING", "IN_PROGRESS", "RESOLVED", "REJECTED"]);
+
+export const complaints = pgTable(
+  "complaint",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    title: varchar("title", { length: 100 }).notNull(),
+    description: text("description").notNull(),
+    status: complaintStatusEnum("status").default("PENDING"),
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt")
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+    resolvedAt: timestamp("resolved_at"),
+    resolvedBy: varchar("resolved_by").references(() => users.id),
+    adminNotes: text("admin_notes"),
+    isPrivate: boolean("is_private").notNull().default(true),
+  },
+  (table) => [
+    index("complaint_user_id_idx").on(table.userId),
+    index("complaint_status_idx").on(table.status),
+    index("complaint_created_at_idx").on(table.createdAt),
+    index("complaint_is_private_idx").on(table.isPrivate),
+  ]
+);

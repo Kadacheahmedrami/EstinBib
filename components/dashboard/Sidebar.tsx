@@ -13,6 +13,7 @@ import {
   Globe,
   BookMarked,
   Lightbulb,
+  AlertCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -34,6 +35,8 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
     { name: 'Ideas Box', href: '/dashboard/ideas', icon: <Lightbulb className='h-5 w-5' /> },
     { name: 'Users Management', href: '/dashboard/users', icon: <Users className='h-5 w-5' /> },
     { name: 'Analytics', href: '/dashboard/analytics', icon: <BarChart3 className='h-5 w-5' /> },
+    { name: 'Complaints', href: '/dashboard/complaints', icon: <AlertCircle className='h-5 w-5' /> },
+
   ]
 
   return (

@@ -92,7 +92,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-select": "^5.0.1",
-    "drizzle-kit": "^0.31.0",
+    "drizzle-kit": "^0.31.1",
     "eslint": "^9",
     "eslint-config-next": "15.1.1",
     "postcss": "^8",

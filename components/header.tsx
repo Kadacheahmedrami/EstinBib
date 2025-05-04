@@ -11,7 +11,7 @@ import {
   Home,
   MessageCircle,
   BookOpen,
-
+  AlertCircle,
   Lightbulb,
   Clock,
   FileText,
@@ -81,6 +81,7 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
   // Secondary navigation items (for top bar)
   const secondaryNavItems = [
     { key: "about", label: "About Us", href: "/about", Icon: Info },
+
     { key: "events", label: "Events", href: "/events", Icon: Calendar },
     { key: "information_pratique",     label: "Information Pratique",      href: "/information-pratique",   Icon: Wrench,   },
     { key: "hours", label: "Library Hours", href: "/hours", Icon: Clock },
@@ -92,8 +93,8 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
     { key: "sndl", label: "SNDL request", href: "/sndl-request", Icon: Globe },
     { key: "formation", label: "Formation", href: "/formation", Icon: GraduationCap },
     { key: "visite-virtuelle", label: "Visite Virtuelle 360°", href: "https://visitevirtuelle.estin.dz/", Icon: Globe },
-
     
+    { key: "complaints", label: "complaint submit", href: "/complaints", Icon: AlertCircle },
   ];
 
   // Additional resources for the mobile menu
