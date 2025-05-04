@@ -30,10 +30,16 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 
+interface User {
+  id: string
+  name: string
+  email: string
+  image?: string
+}
 
 interface Complaint {
   id: string
-
+  user: User
   title: string
   description: string
   status: "PENDING" | "IN_PROGRESS" | "RESOLVED" | "REJECTED"
@@ -273,7 +279,7 @@ export default function ComplaintsPage() {
               </CardTitle>
               <div className="flex justify-between items-center">
                 <CardDescription>
-                  Anonyme
+                  {complaint.isPrivate ? "Anonymous" : complaint.user.name} • {new Date(complaint.createdAt).toLocaleDateString()}
                 </CardDescription>
                 {getStatusBadge(complaint.status)}
               </div>
@@ -324,7 +330,7 @@ export default function ComplaintsPage() {
                   <div>
                     <h3 className="font-medium">{selectedComplaint.title}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Submitted by Anonyme
+                      Submitted by {selectedComplaint.user.name} • {selectedComplaint.user.email}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {new Date(selectedComplaint.createdAt).toLocaleDateString()} at {new Date(selectedComplaint.createdAt).toLocaleTimeString()}
