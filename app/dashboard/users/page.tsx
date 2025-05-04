@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { UserCog, Shield, BookOpen, AlertTriangle, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { UserCog, Shield, BookOpen, AlertTriangle, Search, ChevronLeft, ChevronRight, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -28,6 +28,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
 
 interface User {
   id: string
@@ -63,6 +64,7 @@ export default function UsersPage() {
     pages: 0
   })
   const { toast } = useToast()
+  const router = useRouter()
 
   // Debounce search input
   useEffect(() => {
@@ -162,6 +164,10 @@ export default function UsersPage() {
     setPagination(prev => ({ ...prev, limit: parseInt(newLimit), page: 1 }))
   }
 
+  const navigateToUserProfile = (userId: string) => {
+    router.push(`/dashboard/users/${userId}`)
+  }
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -259,14 +265,24 @@ export default function UsersPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedUser(user)}
-                    >
-                      <UserCog className="h-4 w-4 mr-2" />
-                      Manage
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedUser(user)}
+                      >
+                        <UserCog className="h-4 w-4 mr-2" />
+                        Manage
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => navigateToUserProfile(user.id)}
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        Profile
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -435,6 +451,17 @@ export default function UsersPage() {
                   </div>
                 </div>
               </div>
+
+              <Button 
+                className="w-full mt-4"
+                onClick={() => {
+                  navigateToUserProfile(selectedUser.id);
+                  setSelectedUser(null);
+                }}
+              >
+                <User className="h-4 w-4 mr-2" />
+                View Full Profile
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
