@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/db"
 import { borrows, books, users } from "@/db/schema"
-import { getServerSession } from "next-auth"
+
 import { eq, and, isNull, not, sql, like, or } from "drizzle-orm"
 import { addDays } from "date-fns"
-import { authOptions } from "@/lib/auth"
+
 
 // Constants
 const DEFAULT_PAGE_SIZE = 10
