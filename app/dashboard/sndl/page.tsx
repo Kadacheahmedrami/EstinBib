@@ -29,10 +29,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import {
-  processSndlDemand,
+// import {
+//   processSndlDemand,
 
-} from "@/app/actions/sndl"
+// } from "@/app/actions/sndl"
 
 interface User {
   id: string
@@ -98,13 +98,13 @@ export default function SNDLDemandsPage() {
       }
 
       // call signature: processSndlDemand(demandId, approved, adminNotes?, sndlEmail?, sndlPassword?)
-      await processSndlDemand(
-        id,
-        approved,
-        adminNotes,
-        approved ? sndlEmail : undefined,
-        approved ? sndlPassword : undefined
-      )
+      // await processSndlDemand(
+      //   id,
+      //   approved,
+      //   adminNotes,
+      //   approved ? sndlEmail : undefined,
+      //   approved ? sndlPassword : undefined
+      // )
 
       setSelectedDemand(null)
       setAdminNotes("")
