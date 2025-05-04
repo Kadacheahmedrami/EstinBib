@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { books } from "@/db/schema"
 import { db } from "@/db"
 import { BaseBook } from "@/types/_types"
-import { keywordsMatch, isInappropriateQuery } from "@/lib/semantic"
+import {  isInappropriateQuery } from "@/lib/semantic"
 import { checkSpecialTriggers } from "@/lib/triggers"
 
 /**

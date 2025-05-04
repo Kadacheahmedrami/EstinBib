@@ -150,8 +150,8 @@ const Header: React.FC<HeaderProps> = ({ session }) => {
       {/* Main header */}
       <nav className="fixed top-0 lg:top-7  left-0 z-[40] w-full bg-white backdrop-blur-lg shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex h-[70px] text-3xl text-[#F1413E] items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
+          <div className="flex h-[70px]  text-[#F1413E] items-center justify-between">
+            <Link href="/" className="flex items-center text-[22px] md:text-[24px] gap-2">
               <Image src="/logo.png" alt="logo" width={160} height={160} className="w-[65px]"  />
               𝕰𝖘𝖙𝖎𝖓 𝖇𝖎𝖇𝖑𝖎𝖔𝖙𝖍è𝖖𝖚𝖊
             </Link>
