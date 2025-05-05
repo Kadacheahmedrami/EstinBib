@@ -73,6 +73,7 @@ export default function UserDetailPage({ params }: PageProps) {
   const [editRoleOpen, setEditRoleOpen] = useState(false)
   const [newRole, setNewRole] = useState<string>("")
   const [userId, setUserId] = useState<string | null>(null)
+  const [isAuthorized, setIsAuthorized] = useState(false)
   const [stats, setStats] = useState({
     totalBorrows: 0,
     activeLoans: 0,
@@ -115,40 +116,51 @@ export default function UserDetailPage({ params }: PageProps) {
       try {
         setIsLoading(true)
         
-        // Fetch user data
+        // Fetch user data (using the updated API endpoint)
         const userResponse = await fetch(`/api/dashboard/users/${userId}`)
-        
         if (!userResponse.ok) {
+          if (userResponse.status === 403) {
+            toast({
+              title: "Access Denied",
+              description: "You don't have permission to view this user's information",
+              variant: "destructive",
+            })
+            setIsAuthorized(false)
+            return
+          }
           throw new Error("Failed to fetch user")
         }
         
+        setIsAuthorized(true)
         const userData = await userResponse.json()
-        setUser(userData.user)
-        setNewRole(userData.user.role)
+        setUser(userData)
+        setNewRole(userData.role)
         
         // Fetch borrow history
         const borrowsResponse = await fetch(`/api/dashboard/users/${userId}/borrows`)
         
         if (!borrowsResponse.ok) {
-          throw new Error("Failed to fetch borrow history")
+          if (borrowsResponse.status !== 403) {
+            throw new Error("Failed to fetch borrow history")
+          }
+        } else {
+          const borrowsData = await borrowsResponse.json()
+          setBorrowHistory(borrowsData)
+          
+          // Calculate stats
+          const active = borrowsData.filter((b: BorrowHistory) => b.returnedAt === null).length
+          const overdue = borrowsData.filter((b: BorrowHistory) => b.isOverdue).length
+          const returned = borrowsData.filter((b: BorrowHistory) => 
+            b.returnedAt !== null && !b.isOverdue
+          ).length
+          
+          setStats({
+            totalBorrows: borrowsData.length,
+            activeLoans: active,
+            overdueLoans: overdue,
+            returnedOnTime: returned
+          })
         }
-        
-        const borrowsData = await borrowsResponse.json()
-        setBorrowHistory(borrowsData.borrows)
-        
-        // Calculate stats
-        const active = borrowsData.borrows.filter((b: BorrowHistory) => b.returnedAt === null).length
-        const overdue = borrowsData.borrows.filter((b: BorrowHistory) => b.isOverdue).length
-        const returned = borrowsData.borrows.filter((b: BorrowHistory) => 
-          b.returnedAt !== null && !b.isOverdue
-        ).length
-        
-        setStats({
-          totalBorrows: borrowsData.borrows.length,
-          activeLoans: active,
-          overdueLoans: overdue,
-          returnedOnTime: returned
-        })
         
       } catch (error) {
         toast({
@@ -168,13 +180,17 @@ export default function UserDetailPage({ params }: PageProps) {
     if (!userId) return
 
     try {
-      const response = await fetch(`/api/dashboard/users`, {
+      // Updated to use the API route provided
+      const response = await fetch(`/api/dashboard/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userId, role: newRole }),
+        body: JSON.stringify({ role: newRole }),
       })
 
       if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error("You don't have permission to update this user's role")
+        }
         throw new Error(await response.text())
       }
 
@@ -205,6 +221,18 @@ export default function UserDetailPage({ params }: PageProps) {
     return (
       <div className="flex h-[300px] w-full items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (!isAuthorized) {
+    return (
+      <div className="p-6 text-center">
+        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+        <p className="mb-6">You dont have permission to view this users information.</p>
+        <Button asChild>
+          <Link href="/dashboard">Return to Dashboard</Link>
+        </Button>
       </div>
     )
   }
@@ -247,7 +275,7 @@ export default function UserDetailPage({ params }: PageProps) {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-        <div className="md:flex">
+        <div className="md:flex md:h-[350px] ">
           <div className="md:w-1/3 lg:w-1/4 bg-gray-50 dark:bg-gray-900 p-6 flex flex-col items-center justify-center">
             <Avatar className="h-32 w-32 mb-4">
               <AvatarImage src={user.image || undefined} />
@@ -288,7 +316,7 @@ export default function UserDetailPage({ params }: PageProps) {
             </div>
           </div>
           
-          <div className="p-6 md:w-2/3 lg:w-3/4">
+          <div className="p-6 md:w-2/3 lg:w-3/4 overflow-y-scroll">
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="mb-4">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
