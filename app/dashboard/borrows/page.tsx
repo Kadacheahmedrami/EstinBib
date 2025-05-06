@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useToast } from "@/components/ui/use-toast"
-import { format, isAfter } from "date-fns"
+import { format } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import {
@@ -31,12 +31,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 
 // Type definitions
 interface User {
   id: string
   name: string
   email: string
+  educationYear?: string
   role?: string
 }
 
@@ -45,6 +47,8 @@ interface Book {
   title: string
   author: string
   isbn?: string
+  barcode?: string
+  coverImage?: string
   categories?: Array<{ id: string; name: string }>
 }
 
@@ -53,6 +57,8 @@ interface Borrow {
   borrowedAt: string
   dueDate: string
   returnedAt: string | null
+  extensionCount: number
+  isOverdue: boolean
   user: User
   book: Book
 }
@@ -69,6 +75,11 @@ interface PaginationInfo {
 interface BorrowsResponse {
   data: Borrow[]
   pagination: PaginationInfo
+}
+
+interface ExtendBorrowFormData {
+  weeks: number
+  reason?: string
 }
 
 export default function BorrowsPage() {
@@ -92,7 +103,10 @@ export default function BorrowsPage() {
   const [returnDialogOpen, setReturnDialogOpen] = useState(false)
   const [extendDialogOpen, setExtendDialogOpen] = useState(false)
   const [activeBorrowId, setActiveBorrowId] = useState<string | null>(null)
-  const [extensionWeeks, setExtensionWeeks] = useState<string>("2")
+  const [extensionFormData, setExtensionFormData] = useState<ExtendBorrowFormData>({
+    weeks: 2,
+    reason: ""
+  })
   
   const { toast } = useToast()
 
@@ -151,7 +165,10 @@ export default function BorrowsPage() {
   // Open extend borrow dialog
   const openExtendDialog = (id: string) => {
     setActiveBorrowId(id)
-    setExtensionWeeks("2") // Reset to default
+    setExtensionFormData({
+      weeks: 2, // Reset to default
+      reason: ""
+    })
     setExtendDialogOpen(true)
   }
 
@@ -161,8 +178,14 @@ export default function BorrowsPage() {
     
     setIsSubmitting(true)
     try {
-      const response = await fetch(`/api/dashboard/borrows/${activeBorrowId}/return`, { method: "POST" })
-      if (!response.ok) throw new Error(await response.text())
+      const response = await fetch(`/api/dashboard/borrows/${activeBorrowId}/return`, { 
+        method: "POST"
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to return book")
+      }
       
       await loadBorrows()
       toast({ title: "Success", description: "Book returned successfully" })
@@ -184,17 +207,25 @@ export default function BorrowsPage() {
     
     setIsSubmitting(true)
     try {
-      const weeks = parseInt(extensionWeeks)
       const response = await fetch(`/api/dashboard/borrows/${activeBorrowId}/extend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ weeks })
+        body: JSON.stringify({
+          weeks: extensionFormData.weeks,
+          reason: extensionFormData.reason || undefined
+        })
       })
       
-      if (!response.ok) throw new Error(await response.text())
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to extend borrow")
+      }
       
       await loadBorrows()
-      toast({ title: "Success", description: `Borrow extended by ${weeks} week${weeks !== 1 ? 's' : ''}` })
+      toast({ 
+        title: "Success", 
+        description: `Borrow extended by ${extensionFormData.weeks} week${extensionFormData.weeks !== 1 ? 's' : ''}` 
+      })
       setExtendDialogOpen(false)
     } catch (error) {
       toast({
@@ -250,7 +281,7 @@ export default function BorrowsPage() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search by book title, ISBN, student name or email..."
+              placeholder="Search by book title, ISBN, barcode, student name or email..."
               className="pl-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -335,13 +366,14 @@ export default function BorrowsPage() {
             <TableHead>Borrowed Date</TableHead>
             <TableHead>Due Date</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Extensions</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {borrows.map((borrow) => {
             const isReturned = borrow.returnedAt !== null
-            const isOverdue = !isReturned && isAfter(new Date(), new Date(borrow.dueDate))
+            const isOverdue = borrow.isOverdue
             
             let status = { label: "Borrowed", badgeVariant: "default" as "default" | "outline" | "destructive" }
             if (isReturned) {
@@ -363,6 +395,11 @@ export default function BorrowsPage() {
                         ISBN: {borrow.book.isbn}
                       </span>
                     )}
+                    {borrow.book.barcode && (
+                      <span className="text-xs text-muted-foreground">
+                        Barcode: {borrow.book.barcode}
+                      </span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -371,6 +408,11 @@ export default function BorrowsPage() {
                     <span className="text-sm text-muted-foreground">
                       {borrow.user.email}
                     </span>
+                    {borrow.user.educationYear && (
+                      <span className="text-xs text-muted-foreground">
+                        Year: {borrow.user.educationYear}
+                      </span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -383,6 +425,11 @@ export default function BorrowsPage() {
                   <Badge variant={status.badgeVariant}>
                     {status.label}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm">
+                    {borrow.extensionCount} / 3
+                  </span>
                 </TableCell>
                 <TableCell>
                   {!isReturned && (
@@ -400,7 +447,8 @@ export default function BorrowsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => openExtendDialog(borrow.id)}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || borrow.extensionCount >= 3}
+                        title={borrow.extensionCount >= 3 ? "Maximum extensions reached" : "Extend borrow period"}
                       >
                         <CalendarRange className="h-4 w-4 mr-1" />
                         Extend
@@ -414,7 +462,7 @@ export default function BorrowsPage() {
           {borrows.length === 0 && (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="text-center text-muted-foreground py-8"
               >
                 {searchTerm ? "No results found for your search" : "No borrows found"}
@@ -492,21 +540,45 @@ export default function BorrowsPage() {
               Select how many weeks you want to extend the borrow period.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <Select 
-              value={extensionWeeks} 
-              onValueChange={setExtensionWeeks}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="2 weeks" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1 week</SelectItem>
-                <SelectItem value="2">2 weeks</SelectItem>
-                <SelectItem value="3">3 weeks</SelectItem>
-                <SelectItem value="4">4 weeks</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="extension-weeks" className="text-sm font-medium">
+                Extension Period
+              </label>
+              <Select 
+                value={extensionFormData.weeks.toString()} 
+                onValueChange={(value) => setExtensionFormData({
+                  ...extensionFormData,
+                  weeks: parseInt(value)
+                })}
+              >
+                <SelectTrigger id="extension-weeks">
+                  <SelectValue placeholder="2 weeks" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 week</SelectItem>
+                  <SelectItem value="2">2 weeks</SelectItem>
+                  <SelectItem value="3">3 weeks</SelectItem>
+                  <SelectItem value="4">4 weeks</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="extension-reason" className="text-sm font-medium">
+                Reason (Optional)
+              </label>
+              <Textarea
+                id="extension-reason"
+                placeholder="Why is this extension needed?"
+                value={extensionFormData.reason || ""}
+                onChange={(e) => setExtensionFormData({
+                  ...extensionFormData,
+                  reason: e.target.value
+                })}
+                rows={3}
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button 

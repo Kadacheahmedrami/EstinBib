@@ -3,6 +3,7 @@ import { db } from "@/db"
 import { borrows, books } from "@/db/schema"
 import { eq } from "drizzle-orm"
 
+
 type Context = {
   params: Promise<{
     id: string | string[] | undefined
@@ -21,11 +22,10 @@ export async function POST(
     const id = Array.isArray(rawId) ? rawId[0] : rawId
 
     if (!id) {
-      return new NextResponse("Invalid borrow ID", { status: 400 })
+      return NextResponse.json({ error: "Invalid borrow ID" }, { status: 400 })
     }
-   
 
-    // 2) fetch the borrow record
+    // Fetch the borrow record
     const [borrow] = await db
       .select()
       .from(borrows)
@@ -33,29 +33,42 @@ export async function POST(
       .limit(1)
 
     if (!borrow) {
-      return new NextResponse("Borrow record not found", { status: 404 })
-    }
-    if (borrow.returnedAt) {
-      return new NextResponse("Book already returned", { status: 400 })
+      return NextResponse.json({ error: "Borrow record not found" }, { status: 404 })
     }
 
-    // 3) mark as returned
+    if (borrow.returnedAt) {
+      return NextResponse.json({ error: "Book already returned" }, { status: 400 })
+    }
+
+    // Execute updates sequentially since transactions are not supported
     const [updatedBorrow] = await db
       .update(borrows)
       .set({ returnedAt: new Date() })
       .where(eq(borrows.id, id))
       .returning()
 
-    // 4) update book availability
-    await db
+    const [updatedBook] = await db
       .update(books)
       .set({ available: true })
       .where(eq(books.id, borrow.bookId))
+      .returning()
 
-    return NextResponse.json(updatedBorrow)
+    const result = { borrow: updatedBorrow, book: updatedBook }
+
+    return NextResponse.json({
+      message: "Book returned successfully",
+      data: {
+        id: result.borrow.id,
+        returnedAt: result.borrow.returnedAt?.toISOString(),
+        bookId: result.book.id,
+        bookTitle: result.book.title
+      }
+    })
   } catch (error) {
-    console.log(request)
     console.error("[BORROW_RETURN]", error)
-    return new NextResponse("Internal error", { status: 500 })
+    return NextResponse.json({ 
+      error: "Failed to return book", 
+      details: error instanceof Error ? error.message : String(error) 
+    }, { status: 500 })
   }
 }

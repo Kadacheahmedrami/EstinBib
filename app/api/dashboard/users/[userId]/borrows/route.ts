@@ -6,9 +6,6 @@ import { getServerAuthSession } from "@/lib/auth"
 
 type Context = { params: Promise<{ userId: string | string[] | undefined }> }
 
-/**
- * GET - Retrieve borrows for a user
- */
 export async function GET(
   request: Request,
   context: Context
@@ -27,12 +24,7 @@ export async function GET(
       return new NextResponse("User ID is required", { status: 400 })
     }
     
-    // Regular users can only get their own borrows
-    if (session.user.role !== "LIBRARIAN" && userId !== session.user.id) {
-      return new NextResponse("Forbidden", { status: 403 })
-    }
     
-    // Check if user exists
     const userExists = await db
       .select({ id: users.id })
       .from(users)
@@ -43,30 +35,32 @@ export async function GET(
       return new NextResponse("User not found", { status: 404 })
     }
     
-    // Optional query parameters
     const url = new URL(request.url)
     const limit = parseInt(url.searchParams.get("limit") || "10")
     const offset = parseInt(url.searchParams.get("offset") || "0")
-    const status = url.searchParams.get("status") // 'active', 'returned', or null for all
+    const status = url.searchParams.get("status")
     
-    // Create the query based on status filter
     let borrowsQuery;
+    const baseSelect = {
+      id: borrows.id,
+      bookId: borrows.bookId,
+      borrowedAt: borrows.borrowedAt,
+      dueDate: borrows.dueDate,
+      returnedAt: borrows.returnedAt,
+      extensionCount: borrows.extensionCount,
+      book: {
+        title: books.title,
+        author: books.author,
+        coverImage: books.coverImage,
+        isbn: books.isbn,
+        barcode: books.barcode,
+        type: books.type,
+      }
+    }
     
     if (status === "active") {
       borrowsQuery = db
-        .select({
-          id: borrows.id,
-          bookId: borrows.bookId,
-          borrowedAt: borrows.borrowedAt,
-          dueDate: borrows.dueDate,
-          returnedAt: borrows.returnedAt,
-          book: {
-            title: books.title,
-            author: books.author,
-            coverImage: books.coverImage,
-            isbn: books.isbn,
-          }
-        })
+        .select(baseSelect)
         .from(borrows)
         .innerJoin(books, eq(borrows.bookId, books.id))
         .where(and(
@@ -78,19 +72,7 @@ export async function GET(
         .offset(offset)
     } else if (status === "returned") {
       borrowsQuery = db
-        .select({
-          id: borrows.id,
-          bookId: borrows.bookId,
-          borrowedAt: borrows.borrowedAt,
-          dueDate: borrows.dueDate,
-          returnedAt: borrows.returnedAt,
-          book: {
-            title: books.title,
-            author: books.author,
-            coverImage: books.coverImage,
-            isbn: books.isbn,
-          }
-        })
+        .select(baseSelect)
         .from(borrows)
         .innerJoin(books, eq(borrows.bookId, books.id))
         .where(and(
@@ -102,19 +84,7 @@ export async function GET(
         .offset(offset)
     } else {
       borrowsQuery = db
-        .select({
-          id: borrows.id,
-          bookId: borrows.bookId,
-          borrowedAt: borrows.borrowedAt,
-          dueDate: borrows.dueDate,
-          returnedAt: borrows.returnedAt,
-          book: {
-            title: books.title,
-            author: books.author,
-            coverImage: books.coverImage,
-            isbn: books.isbn,
-          }
-        })
+        .select(baseSelect)
         .from(borrows)
         .innerJoin(books, eq(borrows.bookId, books.id))
         .where(eq(borrows.userId, userId))
@@ -132,9 +102,6 @@ export async function GET(
   }
 }
 
-/**
- * POST - Create a new borrow for a user
- */
 export async function POST(
   request: Request,
   context: Context
@@ -146,7 +113,6 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 401 })
     }
     
-    // Only librarians can create borrows
     if (session.user.role !== "LIBRARIAN") {
       return new NextResponse("Forbidden", { status: 403 })
     }
@@ -158,7 +124,6 @@ export async function POST(
       return new NextResponse("User ID is required", { status: 400 })
     }
     
-    // Check if user exists
     const userExists = await db
       .select({ id: users.id })
       .from(users)
@@ -176,7 +141,6 @@ export async function POST(
       return new NextResponse("Missing required fields", { status: 400 })
     }
     
-    // Check if book exists and is available
     const book = await db
       .select()
       .from(books)
@@ -192,18 +156,17 @@ export async function POST(
       return new NextResponse("Book not found or not available", { status: 404 })
     }
     
-    // Create new borrow
     const [newBorrow] = await db
       .insert(borrows)
       .values({
         bookId,
         userId,
         borrowedAt: new Date(),
-        dueDate: new Date(dueDate)
+        dueDate: new Date(dueDate),
+        extensionCount: 0
       })
       .returning()
     
-    // Update book availability
     await db
       .update(books)
       .set({ available: false })
@@ -216,9 +179,6 @@ export async function POST(
   }
 }
 
-/**
- * PATCH - Update a user's borrow (return a book)
- */
 export async function PATCH(
   request: Request,
   context: Context
@@ -230,7 +190,6 @@ export async function PATCH(
       return new NextResponse("Unauthorized", { status: 401 })
     }
     
-    // Only librarians can mark books as returned
     if (session.user.role !== "LIBRARIAN") {
       return new NextResponse("Forbidden", { status: 403 })
     }
@@ -249,7 +208,6 @@ export async function PATCH(
       return new NextResponse("Missing borrow ID", { status: 400 })
     }
     
-    // Check if borrow exists and belongs to the user
     const existingBorrow = await db
       .select()
       .from(borrows)
@@ -266,14 +224,12 @@ export async function PATCH(
       return new NextResponse("Borrow not found or already returned", { status: 404 })
     }
     
-    // Update borrow to mark as returned
     const [updatedBorrow] = await db
       .update(borrows)
       .set({ returnedAt: new Date() })
       .where(eq(borrows.id, borrowId))
       .returning()
     
-    // Make book available again
     await db
       .update(books)
       .set({ available: true })

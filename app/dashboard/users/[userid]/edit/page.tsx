@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ChevronLeft, Save, User, Mail, Trash2, AlertTriangle } from "lucide-react"
+import { ChevronLeft, Save, User, Mail, Trash2, AlertTriangle, CreditCard, GraduationCap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -44,9 +44,12 @@ interface User {
   name: string
   email: string
   role: "STUDENT" | "LIBRARIAN"
-  emailVerified: string | null
+  emailVerified: Date | null
   image: string | null
-  createdAt: string
+  nfcCardId: string | null
+  educationYear: "1CP" | "2CP" | "1CS" | "2CS" | "3CS" | null
+  createdAt: Date
+  updatedAt: Date
 }
 
 export default function UserEditPage({ params }: PageProps) {
@@ -63,9 +66,10 @@ export default function UserEditPage({ params }: PageProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: "STUDENT" as "STUDENT" | "LIBRARIAN"
+    role: "STUDENT" as "STUDENT" | "LIBRARIAN",
+    nfcCardId: null as string | null,
+    educationYear: null as "1CP" | "2CP" | "1CS" | "2CS" | "3CS" | null
   })
-  
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -133,7 +137,9 @@ export default function UserEditPage({ params }: PageProps) {
         setFormData({
           name: userData.name,
           email: userData.email,
-          role: userData.role
+          role: userData.role,
+          nfcCardId: userData.nfcCardId,
+          educationYear: userData.educationYear
         })
         
       } catch (error) {
@@ -158,6 +164,13 @@ export default function UserEditPage({ params }: PageProps) {
   const handleRoleChange = (value: string) => {
     setFormData(prev => ({ ...prev, role: value as "STUDENT" | "LIBRARIAN" }))
   }
+
+  const handleNfcCardIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target
+    setFormData(prev => ({ ...prev, nfcCardId: value === "" ? null : value }))
+  }
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -185,8 +198,6 @@ export default function UserEditPage({ params }: PageProps) {
         description: "User information updated successfully",
       })
       
-      // Redirect back to user profile
-      window.location.href = `/dashboard/users/${userId}`
       
     } catch (error) {
       toast({
@@ -305,62 +316,106 @@ export default function UserEditPage({ params }: PageProps) {
                 {/* Note: Image upload functionality would require additional components */}
               </div>
               
-              <div className="w-full space-y-4">
+                <div className="w-full space-y-4">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        className="pl-9"
-                        placeholder="Full Name"
-                      />
-                    </div>
+                  <Label htmlFor="name">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="pl-9"
+                    placeholder="Full Name"
+                    />
+                  </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="pl-9"
-                        placeholder="Email Address"
-                      />
-                    </div>
+                  <Label htmlFor="email">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="pl-9"
+                    placeholder="Email Address"
+                    />
+                  </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="role">User Role</Label>
                   <Select
-                    value={formData.role}
-                    onValueChange={handleRoleChange}
+                  value={formData.role}
+                  onValueChange={handleRoleChange}
                   >
-                    <SelectTrigger id="role">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="STUDENT">Student</SelectItem>
-                      <SelectItem value="LIBRARIAN">Librarian</SelectItem>
-                    </SelectContent>
+                  <SelectTrigger id="role">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="STUDENT">Student</SelectItem>
+                    <SelectItem value="LIBRARIAN">Librarian</SelectItem>
+                  </SelectContent>
                   </Select>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {formData.role === "LIBRARIAN" 
-                      ? "Librarians have full access to manage books, loans, and users." 
-                      : "Students can browse books and manage their loans."
-                    }
+                  {formData.role === "LIBRARIAN" 
+                    ? "Librarians have full access to manage books, loans, and users." 
+                    : "Students can browse books and manage their loans."
+                  }
                   </p>
                 </div>
-              </div>
+                
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                  <Label htmlFor="nfcCardId">NFC Card ID</Label>
+                  <div className="relative">
+                    <CreditCard className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                    id="nfcCardId"
+                    name="nfcCardId"
+                    value={formData.nfcCardId || ""}
+                    onChange={handleNfcCardIdChange}
+                    className="pl-9"
+                    placeholder="NFC Card ID (optional)"
+                    />
+                  </div>
+                  </div>
+                  
+                  {formData.role === "STUDENT" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="educationYear">Education Year</Label>
+                    <div className="relative">
+                    <GraduationCap className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
+                    <Select
+                      value={formData.educationYear || ""}
+                      onValueChange={(value) => setFormData(prev => ({
+                      ...prev,
+                      educationYear: value as "1CP" | "2CP" | "1CS" | "2CS" | "3CS" | null
+                      }))}
+                    >
+                      <SelectTrigger id="educationYear" className="pl-9">
+                      <SelectValue placeholder="Select year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                      <SelectItem value="1CP">1CP</SelectItem>
+                      <SelectItem value="2CP">2CP</SelectItem>
+                      <SelectItem value="1CS">1CS</SelectItem>
+                      <SelectItem value="2CS">2CS</SelectItem>
+                      <SelectItem value="3CS">3CS</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    </div>
+                  </div>
+                  )}
+                </div>
+                </div>
             </div>
 
             {isCurrentUser && (

@@ -29,7 +29,7 @@ export async function GET(
     
     // If userId is provided, return specific user
     if (userId) {
-      // Regular users can only get their own data
+      // Students can only get their own data
       if (session.user.role !== "LIBRARIAN" && userId !== session.user.id) {
         return new NextResponse("Forbidden", { status: 403 })
       }
@@ -115,6 +115,70 @@ export async function DELETE(
     return NextResponse.json(deleted)
   } catch (error) {
     console.error("[USER_DELETE]", error)
+    return new NextResponse("Internal error", { status: 500 })
+  }
+}
+
+
+/**
+ * PUT - Update user information
+ */
+export async function PUT(
+  request: Request,
+  context: Context
+) {
+  try {
+    const session = await getServerAuthSession()
+    
+    if (!session?.user) {
+      return new NextResponse("Unauthorized", { status: 401 })
+    }
+    
+    const params = await context.params
+    const userId = params.userId ? (Array.isArray(params.userId) ? params.userId[0] : params.userId) : undefined
+    
+    if (!userId) {
+      return new NextResponse("Invalid user ID", { status: 400 })
+    }
+
+    // Students can only update their own data
+    if (session.user.role !== "LIBRARIAN" && userId !== session.user.id) {
+      return new NextResponse("Forbidden", { status: 403 })
+    }
+
+    const body = await request.json()
+    const { name, email, role, nfcCardId, educationYear } = body
+
+    // Validate input
+    if (!name || !email) {
+      return new NextResponse("Name and email are required", { status: 400 })
+    }
+
+    // Only librarians can update roles
+    if (role && session.user.role !== "LIBRARIAN") {
+      return new NextResponse("Cannot update role", { status: 403 })
+    }
+
+    const [updated] = await db
+      .update(users)
+      .set({
+        name,
+        email,
+        role: role as "STUDENT" | "LIBRARIAN",
+        nfcCardId,
+        educationYear: educationYear as "1CP" | "2CP" | "1CS" | "2CS" | "3CS" | null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning()
+
+    if (!updated) {
+      return new NextResponse("User not found", { status: 404 })
+    }
+
+    return NextResponse.json(updated)
+  } catch (error) {
+    console.error("[USER_PUT]", error)
     return new NextResponse("Internal error", { status: 500 })
   }
 }

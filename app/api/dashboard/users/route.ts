@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     const limit = Number.parseInt(searchParams.get("limit") || "10")
     const search = searchParams.get("search") || ""
     const role = searchParams.get("role") as "STUDENT" | "LIBRARIAN" | undefined
+    const educationYear = searchParams.get("educationYear") as "1CP" | "2CP" | "1CS" | "2CS" | "3CS" | undefined
 
     const offset = (page - 1) * limit
 
@@ -19,7 +20,8 @@ export async function GET(req: NextRequest) {
     if (search) {
       searchCondition = or(
         ilike(users.name, `%${search}%`),
-        ilike(users.email, `%${search}%`)
+        ilike(users.email, `%${search}%`),
+        ilike(users.nfcCardId, `%${search}%`)
       )
     }
 
@@ -29,14 +31,28 @@ export async function GET(req: NextRequest) {
       roleCondition = eq(users.role, role)
     }
 
+    // Build education year condition
+    let educationYearCondition = undefined
+    if (educationYear) {
+      educationYearCondition = eq(users.educationYear, educationYear)
+    }
+
     // Combine conditions
     let whereCondition = undefined
-    if (searchCondition && roleCondition) {
+    if (searchCondition && roleCondition && educationYearCondition) {
+      whereCondition = and(searchCondition, roleCondition, educationYearCondition)
+    } else if (searchCondition && roleCondition) {
       whereCondition = and(searchCondition, roleCondition)
+    } else if (searchCondition && educationYearCondition) {
+      whereCondition = and(searchCondition, educationYearCondition)
+    } else if (roleCondition && educationYearCondition) {
+      whereCondition = and(roleCondition, educationYearCondition)
     } else if (searchCondition) {
       whereCondition = searchCondition
     } else if (roleCondition) {
       whereCondition = roleCondition
+    } else if (educationYearCondition) {
+      whereCondition = educationYearCondition
     }
 
     // Get total count for pagination
@@ -56,6 +72,8 @@ export async function GET(req: NextRequest) {
         image: users.image,
         emailVerified: users.emailVerified,
         createdAt: users.createdAt,
+        educationYear: users.educationYear,
+        nfcCardId: users.nfcCardId,
         borrowCount: sql<number>`count(distinct ${borrows.id})`.as("borrow_count"),
         activeLoans: sql<number>`count(distinct case when ${borrows.returnedAt} is null then ${borrows.id} end)`.as("active_loans"),
         overdueLoans: sql<number>`count(distinct case when ${borrows.returnedAt} is null and ${borrows.dueDate} < now() then ${borrows.id} end)`.as("overdue_loans"),
@@ -99,28 +117,61 @@ export async function PATCH(req: NextRequest) {
   }
 
   try {
-    const { userId, role } = await req.json()
+    const { userId, role, educationYear, nfcCardId } = await req.json()
 
-    if (!userId || !role) {
+    if (!userId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // Validate role
-    if (!["STUDENT", "LIBRARIAN"].includes(role)) {
+    // Validate role if provided
+    if (role && !["STUDENT", "LIBRARIAN"].includes(role)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 })
     }
 
+    // Validate education year if provided
+    if (educationYear && !["1CP", "2CP", "1CS", "2CS", "3CS"].includes(educationYear)) {
+      return NextResponse.json({ error: "Invalid education year" }, { status: 400 })
+    }
+
     // Don't allow changing own role
-    if (userId === session.user.id) {
+    if (userId === session.user.id && role !== undefined) {
       return NextResponse.json(
         { error: "Cannot change your own role" },
         { status: 400 }
       )
     }
 
+    // Check if NFC card ID is already used by another user
+    if (nfcCardId) {
+      const existingUser = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(and(
+          eq(users.nfcCardId, nfcCardId),
+          sql`${users.id} != ${userId}`
+        ))
+        .limit(1)
+        .execute()
+      
+      if (existingUser.length > 0) {
+        return NextResponse.json({ error: "NFC card ID is already assigned to another user" }, { status: 400 })
+      }
+    }
+
+    // Build update data
+    const updateData: Record<string, string | null> = {}
+    if (role !== undefined) updateData.role = role
+    if (educationYear !== undefined) updateData.educationYear = educationYear
+    if (nfcCardId !== undefined) updateData.nfcCardId = nfcCardId
+
+    // Only update if there's something to update
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 })
+    }
+
     const [updatedUser] = await db
       .update(users)
-      .set({ role })
+      .set(updateData)
       .where(eq(users.id, userId))
       .returning()
 

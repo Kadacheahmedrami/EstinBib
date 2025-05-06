@@ -15,6 +15,13 @@
       "when": 1746365534434,
       "tag": "0001_tense_toro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1746557726088,
+      "tag": "0002_wet_warlock",
+      "breakpoints": true
     }
   ]
 }
