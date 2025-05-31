@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Initialize the Google Generative AI with the API key
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "AIzaSyAs44KUuNewiuVQynu3ywdByeJCepX0TzE")
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "No api key")
     const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
     // Add the current message to the conversation history
