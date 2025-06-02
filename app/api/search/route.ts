@@ -1,98 +1,261 @@
 import { NextRequest, NextResponse } from "next/server";
-import { desc, sql } from "drizzle-orm";
-import { eq } from "drizzle-orm";
+import { desc, asc, sql, and, or, inArray, between, eq, count, like, ilike } from "drizzle-orm";
 import { books, bookCategories, categories } from "@/db/schema";
 import { db } from "@/db";
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = request.nextUrl;
-  const q = searchParams.get("q");
-  const sizeParam = searchParams.get("size"); // Format: "min-max"
-  const categoryParam = searchParams.get("categories"); // Format: "cat1+cat2"
-  const availableParam = searchParams.get("available"); // "true" or "false"
+// Types for better type safety
+interface SearchParams {
+  q?: string;
+  size?: string;
+  categories?: string;
+  available?: string;
+  type?: string; // Changed from documentType to match schema
+  language?: string;
+  periodicalFrequency?: string; // Changed from periodicType to match schema
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
 
-  // Start with a default condition that always evaluates to true.
-  let conditions = sql`true`;
-  let selectRank = sql`0`; // Default rank when not searching
-  let orderByClause = desc(books.addedAt); // Default ordering by addedAt
+interface SearchResponse {
+  books: any[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  filters: {
+    appliedFilters: Record<string, any>;
+    resultsCount: number;
+  };
+}
 
-  if (q) {
-    // Build a tsquery for full-text search with prefix matching.
-    // For example, "fict" becomes "fict:*", and "how works" becomes "how:* & works:*"
-    const modifiedSearch = q
-      .trim()
-      .split(/\s+/)
-      .map((term) => `${term}:*`)
-      .join(" & ");
-    const tsQuery = sql`to_tsquery('english', ${modifiedSearch})`;
-
-    // Build a weighted text vector using title, author, and category name.
-    const weightedVector = sql`
-      (
-        setweight(to_tsvector('english', ${books.title}), 'A') ||
-        setweight(to_tsvector('english', ${books.author}), 'B') ||
-        setweight(to_tsvector('english', ${categories.name}), 'C')
-      )
-    `;
-
-    // Use the full-text search condition.
-    conditions = sql`${weightedVector} @@ ${tsQuery}`;
-    // Calculate rank based on the match.
-    selectRank = sql`ts_rank(${weightedVector}, ${tsQuery})`;
-    // Order by relevance when searching.
-    orderByClause = sql`ts_rank(${weightedVector}, ${tsQuery}) DESC`;
-  }
-
-  // Add size filter if provided.
-  if (sizeParam) {
-    const [minStr, maxStr] = sizeParam.split("-");
-    const minSize = Number(minStr);
-    const maxSize = Number(maxStr);
-    if (!isNaN(minSize) && !isNaN(maxSize)) {
-      conditions = sql`${conditions} AND ${books.size} BETWEEN ${minSize} AND ${maxSize}`;
-    }
-  }
-
-  // Add category filter if provided.
-  if (categoryParam) {
-    const categoryList = categoryParam.split("+").map((cat) => cat.trim());
-    conditions = sql`${conditions} AND ${
-      categories.name
-    } = ANY(ARRAY[${sql.join(categoryList)}])`;
-  }
-
-  // Add availability filter if provided.
-  if (availableParam !== null) {
-    const available = availableParam.toLowerCase() === "true";
-    conditions = sql`${conditions} AND ${books.available} = ${available}`;
-  }
-
+export async function GET(request: NextRequest): Promise<NextResponse<SearchResponse | { error: string }>> {
   try {
-    const results = await db
-      .select({
+    const { searchParams } = request.nextUrl;
+    
+    // Extract and validate pagination parameters
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "20")));
+    const offset = (page - 1) * limit;
+    
+    // Extract search parameters
+    const params: SearchParams = {
+      q: searchParams.get("q")?.trim() || undefined,
+      size: searchParams.get("size") || undefined,
+      categories: searchParams.get("categories") || undefined,
+      available: searchParams.get("available") || undefined,
+      type: searchParams.get("type") || undefined, // Fixed field name
+      language: searchParams.get("language") || undefined,
+      periodicalFrequency: searchParams.get("periodicalFrequency") || undefined, // Fixed field name
+      sortBy: searchParams.get("sortBy") || "relevance",
+      sortOrder: searchParams.get("sortOrder") || "desc"
+    };
+
+    // Build conditions array
+    const conditions: any[] = [];
+    let orderByClause;
+
+    // Text search using ILIKE for PostgreSQL compatibility
+    if (params.q) {
+      const searchTerm = `%${params.q.toLowerCase()}%`;
+      conditions.push(
+        or(
+          ilike(books.title, searchTerm),
+          ilike(books.author, searchTerm),
+          ilike(books.description, searchTerm)
+        )
+      );
+    }
+
+    // Size filter
+    if (params.size) {
+      const sizeRange = params.size.split("-").map(s => parseInt(s.trim()));
+      if (sizeRange.length === 2 && !sizeRange.some(isNaN)) {
+        const [minSize, maxSize] = sizeRange;
+        conditions.push(between(books.size, minSize, maxSize));
+      }
+    }
+
+    // Category filter
+    if (params.categories) {
+      const categoryList = params.categories
+        .split("+")
+        .map(cat => decodeURIComponent(cat.trim()))
+        .filter(cat => cat.length > 0);
+      
+      if (categoryList.length > 0) {
+        conditions.push(inArray(categories.name, categoryList));
+      }
+    }
+
+    // Availability filter
+    if (params.available !== undefined && params.available !== "") {
+      const available = params.available.toLowerCase() === "true";
+      conditions.push(eq(books.available, available));
+    }
+
+    // Book type filter (fixed to match schema)
+    if (params.type) {
+      const types = params.type.split(",").map(t => t.trim() as "BOOK" | "DOCUMENT" | "PERIODIC" | "ARTICLE");
+      // Validate that all types are valid enum values
+      const validTypes = types.filter(type => ["BOOK", "DOCUMENT", "PERIODIC", "ARTICLE"].includes(type));
+      if (validTypes.length > 0) {
+        conditions.push(inArray(books.type, validTypes));
+      }
+    }
+
+    // Language filter
+    if (params.language) {
+      const languages = params.language.split(",").map(lang => lang.trim());
+      conditions.push(inArray(books.language, languages));
+    }
+
+    // Periodical frequency filter (fixed to match schema)
+    if (params.periodicalFrequency) {
+      const frequencies = params.periodicalFrequency.split(",").map(pf => pf.trim());
+      conditions.push(inArray(books.periodicalFrequency, frequencies));
+    }
+
+    // Combine all conditions
+    const finalCondition = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // Determine sort order
+    switch (params.sortBy) {
+      case "title":
+        orderByClause = params.sortOrder === "asc" ? asc(books.title) : desc(books.title);
+        break;
+      case "author":
+        orderByClause = params.sortOrder === "asc" ? asc(books.author) : desc(books.author);
+        break;
+      case "date":
+        orderByClause = params.sortOrder === "asc" ? asc(books.publishedAt) : desc(books.publishedAt);
+        break;
+      case "added":
+        orderByClause = params.sortOrder === "asc" ? asc(books.addedAt) : desc(books.addedAt);
+        break;
+      case "size":
+        orderByClause = params.sortOrder === "asc" ? asc(books.size) : desc(books.size);
+        break;
+      case "relevance":
+      default:
+        // For relevance, prioritize exact matches in title, then author, then recent additions
+        if (params.q) {
+          orderByClause = sql`CASE 
+            WHEN LOWER(${books.title}) LIKE LOWER(${`%${params.q}%`}) THEN 1
+            WHEN LOWER(${books.author}) LIKE LOWER(${`%${params.q}%`}) THEN 2
+            WHEN LOWER(${books.description}) LIKE LOWER(${`%${params.q}%`}) THEN 3
+            ELSE 4
+          END ASC, ${books.addedAt} DESC`;
+        } else {
+          orderByClause = desc(books.addedAt);
+        }
+        break;
+    }
+
+    // Build base query for counting
+    const baseCountQuery = db
+      .select({ count: count() })
+      .from(books)
+      .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
+      .leftJoin(categories, eq(bookCategories.categoryId, categories.id));
+
+    // Get total count
+    const totalCountResult = finalCondition 
+      ? await baseCountQuery.where(finalCondition)
+      : await baseCountQuery;
+    
+    const totalItems = totalCountResult[0]?.count || 0;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    // Build main query with proper distinct handling
+    const baseQuery = db
+      .selectDistinct({
         id: books.id,
         title: books.title,
         author: books.author,
         isbn: books.isbn,
+        barcode: books.barcode,
         description: books.description,
         language: books.language,
         coverImage: books.coverImage,
+        pdfUrl: books.pdfUrl,
         publishedAt: books.publishedAt,
         addedAt: books.addedAt,
         size: books.size,
         available: books.available,
-        rank: selectRank,
+        type: books.type,
+        periodicalFrequency: books.periodicalFrequency,
+        periodicalIssue: books.periodicalIssue,
+        articleJournal: books.articleJournal,
+        documentType: books.documentType,
       })
       .from(books)
       .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
       .leftJoin(categories, eq(bookCategories.categoryId, categories.id))
-      .where(conditions)
-      .orderBy(orderByClause)
-      .execute();
+      .limit(limit)
+      .offset(offset);
 
-    return NextResponse.json({ books: results });
+    // Execute main query
+    const results = finalCondition 
+      ? await baseQuery.where(finalCondition).orderBy(orderByClause)
+      : await baseQuery.orderBy(orderByClause);
+
+    // Get categories for each book separately to avoid duplication issues
+    const bookIds = results.map(book => book.id);
+    const bookCategoriesData = bookIds.length > 0 ? await db
+      .select({
+        bookId: bookCategories.bookId,
+        categoryName: categories.name,
+      })
+      .from(bookCategories)
+      .leftJoin(categories, eq(bookCategories.categoryId, categories.id))
+      .where(inArray(bookCategories.bookId, bookIds)) : [];
+
+    // Group categories by book ID
+    const categoriesByBook = bookCategoriesData.reduce((acc, row) => {
+      if (!acc[row.bookId]) {
+        acc[row.bookId] = [];
+      }
+      if (row.categoryName) {
+        acc[row.bookId].push(row.categoryName);
+      }
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    // Attach categories to books
+    const booksWithCategories = results.map(book => ({
+      ...book,
+      categories: categoriesByBook[book.id] || []
+    }));
+
+    // Build response
+    const response: SearchResponse = {
+      books: booksWithCategories,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        itemsPerPage: limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+      filters: {
+        appliedFilters: Object.fromEntries(
+          Object.entries(params).filter(([_, value]) => value !== undefined)
+        ),
+        resultsCount: booksWithCategories.length,
+      },
+    };
+
+    return NextResponse.json(response);
+
   } catch (error) {
-    console.error("Error executing query:", error);
+    console.error("Error executing search query:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

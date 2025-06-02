@@ -1,19 +1,46 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect, useCallback, useRef, memo, useMemo } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Search, Filter, X } from "lucide-react"
-import NeonCheckbox from "@/components/pages/checkBox/checkbox"
-import RadioButton from "@/components/pages/radioInput/radiobutton"
+import { Filter, ChevronLeft, ChevronRight } from "lucide-react"
+import SearchBar from "@/components/searchBar"
+import FilterSidebar from "@/components/FilterSideBAr"
 import BookCard from "@/components/pages/catalogue/BookCard"
 import type { FilterState, Book } from "@/types/_types"
+
+// Extended FilterState to include pagination and sorting
+interface ExtendedFilterState extends FilterState {
+  type?: string[] // Maps to your API's type field
+  periodicalFrequency?: string[] // Maps to your API's periodicalFrequency field
+  page?: number
+  limit?: number
+  sortBy?: string
+  sortOrder?: string
+}
 import debounce from "lodash.debounce"
 
 interface NoResultsMessageProps {
   title: string
   subtitle?: string
+}
+
+interface PaginationInfo {
+  currentPage: number
+  totalPages: number
+  totalItems: number
+  itemsPerPage: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
+}
+
+interface SearchResponse {
+  books: Book[]
+  pagination: PaginationInfo
+  filters: {
+    appliedFilters: Record<string, any>
+    resultsCount: number
+  }
 }
 
 const NoResultsMessage = ({ title, subtitle }: NoResultsMessageProps) => (
@@ -23,91 +50,103 @@ const NoResultsMessage = ({ title, subtitle }: NoResultsMessageProps) => (
   </div>
 )
 
-const KeywordItem = memo(
-  ({
-    keyword,
-    onClick,
-    onRemove,
-  }: {
-    keyword: string
-    onClick: () => void
-    onRemove: () => void
-  }) => (
-    <div className="bg-[#FCF3F3] text-black shadow rounded-full px-4 py-2 text-sm cursor-pointer hover:bg-[#e0e0e0] flex items-center gap-2 transition-all duration-200 ease-in-out transform hover:scale-105">
-      <span onClick={onClick}>{keyword}</span>
-      <span
-        className="text-red-500 hover:text-red-700 transition-colors duration-200"
-        onClick={(e) => {
-          e.stopPropagation()
-          onRemove()
-        }}
-      >
-        X
-      </span>
-    </div>
-  ),
-)
-KeywordItem.displayName = "KeywordItem"
+const Pagination = ({ 
+  pagination, 
+  onPageChange 
+}: { 
+  pagination: PaginationInfo
+  onPageChange: (page: number) => void 
+}) => {
+  const { currentPage, totalPages, totalItems, hasNextPage, hasPrevPage } = pagination
 
-const FilterSection = memo(({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div>
-    <h3 className="text-lg font-semibold mb-4 text-gray-700 uppercase tracking-wide">{title}:</h3>
-    <div className="space-y-3">{children}</div>
-  </div>
-))
-FilterSection.displayName = "FilterSection"
+  const getPageNumbers = () => {
+    const pages = []
+    const delta = 2 // Number of pages to show on each side of current page
+    
+    // Always show first page
+    pages.push(1)
+    
+    // Add pages around current page
+    const start = Math.max(2, currentPage - delta)
+    const end = Math.min(totalPages - 1, currentPage + delta)
+    
+    // Add ellipsis if needed
+    if (start > 2) {
+      pages.push('...')
+    }
+    
+    // Add middle pages
+    for (let i = start; i <= end; i++) {
+      pages.push(i)
+    }
+    
+    // Add ellipsis if needed
+    if (end < totalPages - 1) {
+      pages.push('...')
+    }
+    
+    // Always show last page (if more than 1 page)
+    if (totalPages > 1) {
+      pages.push(totalPages)
+    }
+    
+    return pages.filter((page, index, array) => 
+      array.indexOf(page) === index // Remove duplicates
+    )
+  }
 
-const CheckboxItem = memo(
-  ({
-    id,
-    checked,
-    onChange,
-    label,
-  }: {
-    id: string
-    checked: boolean
-    onChange: (checked: boolean) => void
-    label: string
-  }) => (
-    <div className="flex items-center group cursor-pointer">
-      <NeonCheckbox id={id} checked={checked} onChange={onChange} />
-      <label
-        htmlFor={id}
-        className="ml-3 text-base text-gray-600 group-hover:text-gray-900 transition-colors cursor-pointer"
-      >
-        {label}
-      </label>
-    </div>
-  ),
-)
-CheckboxItem.displayName = "CheckboxItem"
+  if (totalPages <= 1) return null
 
-const RadioItem = memo(
-  ({
-    id,
-    checked,
-    onChange,
-    label,
-    name,
-  }: {
-    id: string
-    checked: boolean
-    onChange: () => void
-    label: string
-    name: string
-  }) => (
-    <div className="flex items-center group cursor-pointer">
-      <RadioButton id={id} checked={checked} onChange={onChange} name={name} value={label} label="" />
-      <label
-        htmlFor={id}
-        className="ml-3 text-base text-gray-600 group-hover:text-gray-900 transition-colors cursor-pointer"
-      >
-        {label}
-      </label>
+  return (
+    <div className="flex flex-col items-center space-y-4 py-8">
+      <div className="text-gray-600 text-sm">
+        Showing {((currentPage - 1) * pagination.itemsPerPage) + 1}-{Math.min(currentPage * pagination.itemsPerPage, totalItems)} of {totalItems} results
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        {/* Previous button */}
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={!hasPrevPage}
+          className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Previous
+        </button>
+
+        {/* Page numbers */}
+        <div className="flex items-center space-x-1">
+          {getPageNumbers().map((page, index) => (
+            <button
+              key={index}
+              onClick={() => typeof page === 'number' ? onPageChange(page) : undefined}
+              disabled={page === '...'}
+              className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                page === currentPage
+                  ? 'bg-[#F1413E] text-white'
+                  : page === '...'
+                  ? 'text-gray-400 cursor-default'
+                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+
+        {/* Next button */}
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={!hasNextPage}
+          className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Next
+          <ChevronRight className="w-4 h-4 ml-1" />
+        </button>
+      </div>
     </div>
-  ),
-)
-RadioItem.displayName = "RadioItem"
+  )
+}
 
 export default function Catalogue() {
   const router = useRouter()
@@ -116,11 +155,7 @@ export default function Catalogue() {
 
   // Search state
   const [searchInput, setSearchInput] = useState(searchParams.get("q") || "")
-  const [previousKeywords, setPreviousKeywords] = useState<string[]>([])
-  const [isFocused, setIsFocused] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
   const [isSticky, setIsSticky] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
   const searchBarRef = useRef<HTMLDivElement>(null)
 
   // Filter state
@@ -128,31 +163,35 @@ export default function Catalogue() {
   const [isMobile, setIsMobile] = useState(false)
   const [books, setBooks] = useState<Book[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 20,
+    hasNextPage: false,
+    hasPrevPage: false
+  })
 
-  // Filter parameters
-  const [filters, setFilters] = useState<FilterState>(() => ({
+  // Filter parameters - Extended to include pagination and sorting
+  const [filters, setFilters] = useState<ExtendedFilterState>(() => ({
+    // Existing FilterState properties
     schoolYear: searchParams.get("schoolYear")?.split(",") || [],
     size: searchParams.get("size") || "",
     categories: searchParams.get("categories")?.split("+") || [],
     availability: searchParams.get("available") || "",
-    documentType: searchParams.get("documentType")?.split(",") || [],
+    documentType: searchParams.get("documentType")?.split(",") || [], // Keep existing field
     language: searchParams.get("language")?.split(",") || [],
-    periodicType: searchParams.get("periodicType")?.split(",") || [],
+    periodicType: searchParams.get("periodicType")?.split(",") || [], // Keep existing field
     q: searchParams.get("q") || "",
+    // New properties for API compatibility
+    type: searchParams.get("type")?.split(",") || [],
+    periodicalFrequency: searchParams.get("periodicalFrequency")?.split(",") || [],
+    // Pagination
+    page: parseInt(searchParams.get("page") || "1"),
+    limit: parseInt(searchParams.get("limit") || "20"),
+    sortBy: searchParams.get("sortBy") || "relevance",
+    sortOrder: searchParams.get("sortOrder") || "desc"
   }))
-
-  // Load previous keywords
-  useEffect(() => {
-    const storedKeywords = localStorage.getItem("searchKeywords")
-    if (storedKeywords) {
-      setPreviousKeywords(JSON.parse(storedKeywords))
-    }
-  }, [])
-
-  // Save previous keywords
-  useEffect(() => {
-    localStorage.setItem("searchKeywords", JSON.stringify(previousKeywords))
-  }, [previousKeywords])
 
   // Handle mobile view
   useEffect(() => {
@@ -169,49 +208,57 @@ export default function Catalogue() {
     const handleScroll = () => {
       if (searchBarRef.current) {
         const searchBarTop = searchBarRef.current.getBoundingClientRect().top
-        const headerHeight = 140 // Height of the fixed header
+        const headerHeight = 140
 
-        // When the original position of the search bar is at or below the header,
-        // we should unstick it
         setIsSticky(searchBarTop <= headerHeight && window.scrollY > 200)
       }
     }
 
-    // Initial check
     handleScroll()
-
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   // Create debounced search function
-// Move the debounce call outside of useCallback
-const debouncedSearch = useMemo(() => {
-  return debounce(async (params: Record<string, string | string[]>) => {
-    try {
-      setIsLoading(true);
-      const queryString = new URLSearchParams(
-        Object.entries(params).map(([key, value]) =>
-          Array.isArray(value) ? [key, value.join("+")] : [key, String(value)],
-        ),
-      ).toString();
+  const debouncedSearch = useMemo(() => {
+    return debounce(async (params: Record<string, string | string[] | number>) => {
+      try {
+        setIsLoading(true);
+        const queryString = new URLSearchParams(
+          Object.entries(params).map(([key, value]) => {
+            if (Array.isArray(value)) {
+              return [key, key === "categories" ? value.join("+") : value.join(",")]
+            }
+            return [key, String(value)]
+          })
+        ).toString();
 
-      const response = await fetch(`/api/search?${queryString}`);
-      if (!response.ok) throw new Error("Failed to fetch books");
-      const data = await response.json();
-      setBooks(data.books);
-    } catch (error) {
-      console.error("Error fetching search results:", error);
-      setBooks([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, 500);
-}, [setIsLoading, setBooks]);
+        const response = await fetch(`/api/search?${queryString}`);
+        if (!response.ok) throw new Error("Failed to fetch books");
+        
+        const data: SearchResponse = await response.json();
+        setBooks(data.books);
+        setPagination(data.pagination);
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+        setBooks([]);
+        setPagination({
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0,
+          itemsPerPage: 20,
+          hasNextPage: false,
+          hasPrevPage: false
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }, 500);
+  }, []);
 
   // Update URL parameters
   const updateUrlParams = useCallback(
-    (params: Record<string, string | string[]>) => {
+    (params: Record<string, string | string[] | number>) => {
       const newParams = new URLSearchParams()
       Object.entries(params).forEach(([key, value]) => {
         if (value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0)) {
@@ -219,7 +266,7 @@ const debouncedSearch = useMemo(() => {
         } else if (Array.isArray(value)) {
           newParams.set(key, key === "categories" ? value.join("+") : value.join(","))
         } else {
-          newParams.set(key, value)
+          newParams.set(key, String(value))
         }
       })
       router.replace(`?${newParams.toString()}`, { scroll: false })
@@ -231,22 +278,38 @@ const debouncedSearch = useMemo(() => {
   const handleSearch = useCallback(
     (value: string) => {
       setSearchInput(value)
-      if (value.trim() && !previousKeywords.includes(value.trim())) {
-        setPreviousKeywords((prev) => [value.trim(), ...prev].slice(0, 5))
-      }
-      setFilters((prev) => ({ ...prev, q: value }))
+      setFilters((prev) => ({ ...prev, q: value, page: 1 })) // Reset to page 1 on new search
     },
-    [previousKeywords],
+    [],
   )
 
   // Handle filter changes
   const handleFilterChange = useCallback((newFilters: FilterState) => {
-    setFilters(newFilters)
+    setFilters(prev => ({ 
+      ...prev, 
+      ...newFilters, 
+      // Map old field names to new API field names
+      type: newFilters.documentType || [],
+      periodicalFrequency: newFilters.periodicType || [],
+      page: 1 
+    }))
+  }, [])
+
+  // Handle page changes
+  const handlePageChange = useCallback((page: number) => {
+    setFilters(prev => ({ ...prev, page }))
+    // Scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  // Handle sorting changes
+  const handleSortChange = useCallback((sortBy: string, sortOrder: string) => {
+    setFilters(prev => ({ ...prev, sortBy, sortOrder, page: 1 }))
   }, [])
 
   // Reset filters
   const handleResetFilters = useCallback(() => {
-    const newFilters = {
+    const newFilters: ExtendedFilterState = {
       schoolYear: [],
       size: "",
       categories: [],
@@ -255,6 +318,13 @@ const debouncedSearch = useMemo(() => {
       language: [],
       periodicType: [],
       q: searchInput,
+      // API compatible fields
+      type: [],
+      periodicalFrequency: [],
+      page: 1,
+      limit: 20,
+      sortBy: "relevance",
+      sortOrder: "desc"
     }
     setFilters(newFilters)
     updateUrlParams({ q: searchInput })
@@ -270,9 +340,9 @@ const debouncedSearch = useMemo(() => {
       return
     }
 
-    const searchParameters: Record<string, string | string[]> = {}
+    const searchParameters: Record<string, string | string[] | number> = {}
 
-    if (filters.q.trim()) {
+    if (filters.q?.trim()) {
       searchParameters.q = filters.q
     }
 
@@ -287,25 +357,33 @@ const debouncedSearch = useMemo(() => {
       searchParameters.available = filters.availability === "Available" ? "true" : "false"
     }
 
-    if (filters.categories.length) {
+    if (filters.categories?.length) {
       searchParameters.categories = filters.categories
     }
 
-    if (filters.schoolYear.length) {
-      searchParameters.schoolYear = filters.schoolYear
+    if (filters.type?.length) {
+      searchParameters.type = filters.type
+    } else if (filters.documentType?.length) {
+      // Fallback to documentType if type is not set
+      searchParameters.type = filters.documentType
     }
 
-    if (filters.documentType.length) {
-      searchParameters.documentType = filters.documentType
-    }
-
-    if (filters.language.length) {
+    if (filters.language?.length) {
       searchParameters.language = filters.language
     }
 
-    if (filters.periodicType.length) {
-      searchParameters.periodicType = filters.periodicType
+    if (filters.periodicalFrequency?.length) {
+      searchParameters.periodicalFrequency = filters.periodicalFrequency
+    } else if (filters.periodicType?.length) {
+      // Fallback to periodicType if periodicalFrequency is not set
+      searchParameters.periodicalFrequency = filters.periodicType
     }
+
+    // Add pagination and sorting parameters
+    searchParameters.page = filters.page || 1
+    searchParameters.limit = filters.limit || 20
+    searchParameters.sortBy = filters.sortBy || "relevance"
+    searchParameters.sortOrder = filters.sortOrder || "desc"
 
     updateUrlParams(searchParameters)
     debouncedSearch(searchParameters)
@@ -320,33 +398,32 @@ const debouncedSearch = useMemo(() => {
 
   // Initial load
   useEffect(() => {
-    const initialParams: Record<string, string | string[]> = {}
+    const initialParams: Record<string, string | string[] | number> = {}
     if (filters.q) initialParams.q = filters.q
     if (filters.size) initialParams.size = filters.size
     if (filters.availability) initialParams.available = filters.availability === "Available" ? "true" : "false"
-    if (filters.categories.length) initialParams.categories = filters.categories
-    if (filters.schoolYear.length) initialParams.schoolYear = filters.schoolYear
-    if (filters.documentType.length) initialParams.documentType = filters.documentType
-    if (filters.language.length) initialParams.language = filters.language
-    if (filters.periodicType.length) initialParams.periodicType = filters.periodicType
+    if (filters.categories?.length) initialParams.categories = filters.categories
+    if (filters.schoolYear?.length) initialParams.schoolYear = filters.schoolYear
+    if (filters.type?.length) {
+      initialParams.type = filters.type
+    } else if (filters.documentType?.length) {
+      initialParams.type = filters.documentType
+    }
+    if (filters.language?.length) initialParams.language = filters.language
+    if (filters.periodicalFrequency?.length) {
+      initialParams.periodicalFrequency = filters.periodicalFrequency
+    } else if (filters.periodicType?.length) {
+      initialParams.periodicalFrequency = filters.periodicType
+    }
+    
+    // Add pagination and sorting
+    initialParams.page = filters.page || 1
+    initialParams.limit = filters.limit || 20
+    initialParams.sortBy = filters.sortBy || "relevance"
+    initialParams.sortOrder = filters.sortOrder || "desc"
 
     debouncedSearch(initialParams)
-  }, [
-    debouncedSearch, 
-    filters.q, 
-    filters.size, 
-    filters.availability, 
-    filters.categories, 
-    filters.schoolYear, 
-    filters.documentType,
-    filters.language,
-    filters.periodicType
-  ])
-
-  // Function to toggle search suggestions visibility
-  const toggleSearchSuggestions = useCallback(() => {
-    setIsVisible(prev => !prev);
-  }, []);
+  }, [debouncedSearch])
 
   return (
     <div className="w-screen mx-auto">
@@ -363,84 +440,12 @@ const debouncedSearch = useMemo(() => {
         }}
       >
         <div className="flex w-[100%] px-4 justify-center items-start gap-4 flex-row">
-          <div className="flex flex-col mx-auto w-[80%] md:max-w-[800px]">
-            <div
-              className={`flex shadow overflow-hidden items-center h-[57px] w-full bg-[#F8F7F7] rounded-[22px] p-3 transition-all duration-300 ${
-                isSticky ? "shadow-lg" : ""
-              }`}
-            >
-              <input
-                ref={inputRef}
-                value={searchInput}
-                type="text"
-                placeholder= "Search a name, category, or a module"
-                className="flex-1 bg-transparent outline-none px-4 text-sm placeholder-gray-500"
-                onClick={() => {
-                  setIsFocused(true);
-                  toggleSearchSuggestions();
-                }}
-                onFocus={() => {
-                  setIsFocused(true);
-                  toggleSearchSuggestions();
-                }}
-                onBlur={(e) => {
-                  const relatedTarget = e.relatedTarget as HTMLElement | null
-                  if (!relatedTarget?.closest(".search-container")) {
-                    setTimeout(() => {
-                      setIsFocused(false);
-                      setIsVisible(false);
-                    }, 200)
-                  }
-                }}
-                onChange={(e) => handleSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault()
-                    debouncedSearch.cancel()
-                    handleSearch(searchInput)
-                  }
-                }}
-              />
-
-              <div
-                onClick={() => handleSearch(searchInput)}
-                className="flex items-center mr-2 gap-2 text-[#9B1616] cursor-pointer"
-              >
-                <Search className="w-5 h-5" />
-                <span className="text-[16px] hidden md:block font-medium">Search</span>
-              </div>
-            </div>
-
-            {/* Keywords */}
-            <div className={`h-[100px] relative ${isSticky ? "mt-2" : ""}`}>
-              <div
-                className={`w-full bg-white rounded-[22px] bg-opacity-40 z-50 search-container absolute top-0 left-0 transition-all duration-300 ease-in-out ${
-                  isVisible && isFocused && previousKeywords.length > 0
-                    ? "opacity-100 transform translate-y-0 pointer-events-auto"
-                    : "opacity-0 transform -translate-y-2 pointer-events-none"
-                }`}
-              >
-                <div className="flex flex-wrap gap-2 p-3">
-                  {previousKeywords.map((keyword, index) => (
-                    <KeywordItem
-                      key={index}
-                      keyword={keyword}
-                      onClick={() => handleSearch(keyword)}
-                      onRemove={() => setPreviousKeywords((prev) => prev.filter((k) => k !== keyword))}
-                    />
-                  ))}
-                  {previousKeywords.length >= 2 && (
-                    <div
-                      className="bg-[#FCF3F3] text-black shadow rounded-full px-4 py-2 text-sm cursor-pointer hover:bg-[#e0e0e0] flex items-center gap-2 transition-all duration-200 ease-in-out transform hover:scale-105"
-                      onClick={() => setPreviousKeywords([])}
-                    >
-                      <span>Delete All</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          <SearchBar
+            searchInput={searchInput}
+            onSearchChange={setSearchInput}
+            onSearch={handleSearch}
+            isSticky={isSticky}
+          />
           <div className="block lg:hidden">
             <button
               className={`flex border-solid bg-white border-[#F1413E] border-[2px] p-3 rounded-full mr-4 transition-all duration-300 ${
@@ -453,188 +458,66 @@ const debouncedSearch = useMemo(() => {
             </button>
           </div>
         </div>
-    
       </div>
-      <div className = {`h-[160px] w-full ${isSticky ? "" : "hidden"}`} >
-            </div>
+      
+      <div className={`h-[160px] w-full ${isSticky ? "" : "hidden"}`} />
+
       {/* Main Content */}
       <div className={`grid grid-cols-12 gap-5 ${isSticky ? "mt-32" : "mt-0 md:mt-16"} md:flex-row w-full`}>
         {/* Filter Sidebar */}
         <div className="col-span-0 relative bottom-4 lg:col-span-2">
-          <div
-            className={`z-[3] bg-[#F8F8F8] min-w-[240px] p-6 rounded-r-[15px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
-              border border-gray-100 overflow-x-auto overflow-y-auto custom-scrollbar transition-transform duration-300 ${
-                isMobile
-                  ? isFilterOpen
-                    ? "fixed inset-y-0 left-0 z-[3] transform translate-x-0"
-                    : "fixed inset-y-0 left-0 z-[3] transform -translate-x-full"
-                  : "sticky top-[100px] max-h-[calc(100vh-8rem)]"
-              }`}
-          >
-            {isMobile && (
-              <button
-                onClick={() => setIsFilterOpen(false)}
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                aria-label="Close filter"
-              >
-                <X size={24} />
-              </button>
-            )}
-
-            <div className="flex items-center mb-8 pb-4 border-b border-gray-100">
-              <svg className="w-6 h-6 mr-3 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                />
-              </svg>
-              <h2 className="text-2xl font-semibold text-gray-800">Filter by:</h2>
-            </div>
-
-            <div className="space-y-8">
-              {/* Categories Section */}
-              <FilterSection title="Categories">
-                {["Business", "Commerce", "Science", "Technology", "Arts", "Literature"].map((category, index) => (
-                  <CheckboxItem
-                    key={index}
-                    id={`category-${index}`}
-                    checked={filters.categories.includes(category)}
-                    onChange={(checked) =>
-                      handleFilterChange({
-                        ...filters,
-                        categories: checked
-                          ? [...filters.categories, category]
-                          : filters.categories.filter((item) => item !== category),
-                      })
-                    }
-                    label={category}
-                  />
-                ))}
-              </FilterSection>
-
-              {/* Document Type Section */}
-              <FilterSection title="Document Type">
-                {["Document", "Periodic", "Article"].map((type, index) => (
-                  <CheckboxItem
-                    key={index}
-                    id={`document-type-${index}`}
-                    checked={filters.documentType.includes(type)}
-                    onChange={(checked) =>
-                      handleFilterChange({
-                        ...filters,
-                        documentType: checked
-                          ? [...filters.documentType, type]
-                          : filters.documentType.filter((item) => item !== type),
-                      })
-                    }
-                    label={type}
-                  />
-                ))}
-              </FilterSection>
-
-              {/* Language Section */}
-              <FilterSection title="Language">
-                {["English (en)", "Arabic (ar)", "French (fr)", "Spanish (es)", "German (de)"].map((lang, index) => (
-                  <CheckboxItem
-                    key={index}
-                    id={`language-${index}`}
-                    checked={filters.language.includes(lang)}
-                    onChange={(checked) =>
-                      handleFilterChange({
-                        ...filters,
-                        language: checked
-                          ? [...filters.language, lang]
-                          : filters.language.filter((item) => item !== lang),
-                      })
-                    }
-                    label={lang}
-                  />
-                ))}
-              </FilterSection>
-
-              {/* Periodic Type Section */}
-              <FilterSection title="Periodic Type">
-                {["Magazines", "Journals", "Newspapers", "Newsletters", "Books"].map((type, index) => (
-                  <CheckboxItem
-                    key={index}
-                    id={`periodic-type-${index}`}
-                    checked={filters.periodicType.includes(type)}
-                    onChange={(checked) =>
-                      handleFilterChange({
-                        ...filters,
-                        periodicType: checked
-                          ? [...filters.periodicType, type]
-                          : filters.periodicType.filter((item) => item !== type),
-                      })
-                    }
-                    label={type}
-                  />
-                ))}
-              </FilterSection>
-
-              {/* School Year Section */}
-              <FilterSection title="School Year">
-                {["1cp", "2cp", "1cs", "2cs", "3cs", "Other"].map((year, index) => (
-                  <CheckboxItem
-                    key={index}
-                    id={`year-${index}`}
-                    checked={filters.schoolYear.includes(year)}
-                    onChange={(checked) =>
-                      handleFilterChange({
-                        ...filters,
-                        schoolYear: checked
-                          ? [...filters.schoolYear, year]
-                          : filters.schoolYear.filter((item) => item !== year),
-                      })
-                    }
-                    label={year}
-                  />
-                ))}
-              </FilterSection>
-
-              {/* Size Section */}
-              <FilterSection title="Size">
-                {["0 - 250 pages", "250 - 500 pages", "500 - 750 pages", "750 - 1000 pages"].map((size, index) => (
-                  <RadioItem
-                    key={index}
-                    id={`size-${index}`}
-                    checked={filters.size === size}
-                    onChange={() => handleFilterChange({ ...filters, size })}
-                    label={size}
-                    name="size"
-                  />
-                ))}
-              </FilterSection>
-
-              {/* Availability Section */}
-              <FilterSection title="Availability">
-                {["Available", "Not Available"].map((availability, index) => (
-                  <RadioItem
-                    key={index}
-                    id={`availability-${index}`}
-                    checked={filters.availability === availability}
-                    onChange={() => handleFilterChange({ ...filters, availability })}
-                    label={availability}
-                    name="availability"
-                  />
-                ))}
-              </FilterSection>
-            </div>
-
-            {/* Reset Filter Button */}
-            <button
-              className="w-full py-3 bg-[#F1413E] text-white font-semibold rounded-lg transition-all hover:bg-[#F1412E] mt-8"
-              onClick={handleResetFilters}
-            >
-              Reset Filters
-            </button>
-          </div>
+          <FilterSidebar
+            filters={{
+              schoolYear: filters.schoolYear || [],
+              size: filters.size || "",
+              categories: filters.categories || [],
+              availability: filters.availability || "",
+              documentType: filters.documentType || [],
+              language: filters.language || [],
+              periodicType: filters.periodicType || [],
+              q: filters.q || ""
+            }}
+            onFilterChange={handleFilterChange}
+            onResetFilters={handleResetFilters}
+            isFilterOpen={isFilterOpen}
+            isMobile={isMobile}
+            onCloseFilter={() => setIsFilterOpen(false)}
+          />
         </div>
 
         {/* Results */}
         <div className="col-span-12 w-full lg:col-span-10">
+          {/* Sort Options */}
+          <div className="flex justify-between items-center mb-4 px-4">
+            <div className="text-gray-600">
+              {pagination.totalItems > 0 && (
+                <span>
+                  {pagination.totalItems} result{pagination.totalItems !== 1 ? 's' : ''} found
+                </span>
+              )}
+            </div>
+            <select
+              value={`${filters.sortBy}-${filters.sortOrder}`}
+              onChange={(e) => {
+                const [sortBy, sortOrder] = e.target.value.split('-')
+                handleSortChange(sortBy, sortOrder)
+              }}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F1413E]"
+            >
+              <option value="relevance-desc">Most Relevant</option>
+              <option value="title-asc">Title (A-Z)</option>
+              <option value="title-desc">Title (Z-A)</option>
+              <option value="author-asc">Author (A-Z)</option>
+              <option value="author-desc">Author (Z-A)</option>
+              <option value="date-desc">Newest Published</option>
+              <option value="date-asc">Oldest Published</option>
+              <option value="added-desc">Recently Added</option>
+              <option value="added-asc">Oldest Added</option>
+              <option value="size-asc">Smallest Size</option>
+              <option value="size-desc">Largest Size</option>
+            </select>
+          </div>
+
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <p className="text-xl font-medium text-gray-600">Loading results...</p>
@@ -645,26 +528,34 @@ const debouncedSearch = useMemo(() => {
               subtitle="No books found matching your search criteria. Please try different keywords or filters."
             />
           ) : (
-            <div className="container mx-auto px-10 justify-center">
-              <div className="grid grid-cols-1  z-[0] sm:grid-cols-2 lg:grid-cols-5 gap-8 p-4">
-                {books.map((book, index) => (
-                  <BookCard
-                    key={book.id || index}
-                    id={book.id}
-                    title={book.title}
-                    author={book.author}
-                    description={book.description}
-                    size={book.size}
-                    available={book.available}
-                    coverImage={book.coverImage}
-                    publishedAt={book.publishedAt || new Date()}
-                    addedAt={book.addedAt || null}
-                    language={book.language || ""}
-                    isbn={book.isbn}
-                  />
-                ))}
+            <>
+              <div className="container mx-auto px-10 justify-center">
+                <div className="grid grid-cols-1 z-[0] sm:grid-cols-2 lg:grid-cols-5 gap-8 p-4">
+                  {books.map((book, index) => (
+                    <BookCard
+                      key={book.id || index}
+                      id={book.id}
+                      title={book.title}
+                      author={book.author}
+                      description={book.description}
+                      size={book.size}
+                      available={book.available}
+                      coverImage={book.coverImage}
+                      publishedAt={book.publishedAt || new Date()}
+                      addedAt={book.addedAt || null}
+                      language={book.language || ""}
+                      isbn={book.isbn}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+              
+              {/* Pagination */}
+              <Pagination 
+                pagination={pagination} 
+                onPageChange={handlePageChange} 
+              />
+            </>
           )}
         </div>
       </div>
