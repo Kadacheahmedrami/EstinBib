@@ -4,7 +4,7 @@ import LandingPageSearch from '@/components/pages/home/HomeSearch';
 
 const HeroLanding: React.FC = () => {
   const stats = [
-    { value: '200', label: 'Books' },
+    { value: '500', label: 'Books' },
     { value: '200', label: 'Authors' },
     { value: '2', label: 'Subjects' }
   ];
