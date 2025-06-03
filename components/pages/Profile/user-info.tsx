@@ -1,64 +1,68 @@
-import { getUserInfo } from "@/app/actions/user";
-import { CircleUserRound } from "lucide-react";
-import Signout from "../auth/signout";
-
+import { getUserInfo } from "@/app/actions/user"
+import { CircleUserRound } from "lucide-react"
+import Signout from "../auth/signout"
 
 const UserInfo = async () => {
-  const info = await getUserInfo();
-  
+  const info = await getUserInfo()
+
   return (
-    <div className="p-4 sm:p-8 bg-white">
-      <div className="flex flex-col lg:flex-row justify-center items-center gap-8 lg:gap-12 max-w-7xl mx-auto">
+    <div className="max-w-7xl  mx-auto p-6 sm:p-8 bg-white rounded-xl shadow-sm border border-gray-200">
+      <div className="flex flex-col lg:flex-row justify-center items-center gap-8 lg:gap-16 max-w-7xl mx-auto">
         {/* Profile Section */}
         <div className="flex flex-col items-center text-center w-full lg:w-auto">
-        
           <div className="relative group">
-            <CircleUserRound className="w-48 h-48 sm:w-80 sm:h-80 text-slate-600 transition-colors group-hover:text-slate-700" />
-            <button className="mt-4 text-slate-600 underline text-sm hover:text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
-              Change profile picture
-            </button>
+          {info?.image ? (
+  <img
+    src={info.image}
+    alt="Profile"
+    className="w-40 h-40 sm:w-60 sm:h-60 rounded-full object-cover border border-gray-200 shadow-md"
+  />
+) : (
+  <CircleUserRound className="w-40 h-40 sm:w-60 sm:h-60 text-gray-400 transition-colors group-hover:text-gray-500" />
+)}
+
           </div>
         </div>
 
         {/* Info Section */}
         <div className="w-full max-w-2xl space-y-6 sm:space-y-8">
           <div className="space-y-6 sm:space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
-              <label className="text-slate-900 text-xl sm:text-2xl font-bold w-full sm:w-48 shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+              <label className="text-gray-900 text-lg sm:text-xl font-semibold w-full sm:w-48 shrink-0">
                 Full Name :
               </label>
-              <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
-                {info?.name}
+              <div className="w-full bg-gray-50 h-[50px] p-3 rounded-lg border border-gray-200 text-gray-900 flex items-center">
+                {info?.name || "Not provided"}
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
-              <label className="text-slate-900 text-xl sm:text-2xl font-bold w-full sm:w-48 shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+              <label className="text-gray-900 text-lg sm:text-xl font-semibold w-full sm:w-48 shrink-0">
                 User ID :
               </label>
-              <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
-                {info?.id}
+              <div className="w-full bg-gray-50 h-[50px] p-3 rounded-lg border border-gray-200 text-gray-900 flex items-center font-mono text-sm">
+                {info?.id || "Not available"}
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
-              <label className="text-slate-900 text-xl sm:text-2xl font-bold w-full sm:w-48 shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+              <label className="text-gray-900 text-lg sm:text-xl font-semibold w-full sm:w-48 shrink-0">
                 Email Address :
               </label>
-              <div className="w-full bg-slate-100 h-[50px] p-3 rounded-md border border-slate-200 text-slate-900">
-                {info?.email}
+              <div className="w-full bg-gray-50 h-[50px] p-3 rounded-lg border border-gray-200 text-gray-900 flex items-center">
+                {info?.email || "Not provided"}
               </div>
             </div>
           </div>
 
           {/* Sign-out Button */}
-          <div className="flex justify-end pt-4">
+          <div className="flex justify-end pt-6">
             <Signout />
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default UserInfo;
+export default UserInfo
