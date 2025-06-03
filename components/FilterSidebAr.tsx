@@ -6,6 +6,7 @@ import { X, Loader2 } from "lucide-react"
 import NeonCheckbox from "@/components/pages/checkBox/checkbox"
 import RadioButton from "@/components/pages/radioInput/radiobutton"
 import { useCategories } from "@/hooks/useCategories"
+import { useFilterData } from "@/hooks/useFilterData"
 import type { FilterState } from "@/types/_types"
 
 interface FilterSidebarProps {
@@ -104,7 +105,44 @@ export default function FilterSidebar({
   isMobile,
   onCloseFilter,
 }: FilterSidebarProps) {
-  const { categories, loading: categoriesLoading, error: categoriesError, refetch } = useCategories()
+  const { categories, loading: categoriesLoading, error: categoriesError, refetch: refetchCategories } = useCategories()
+  const { filterData, loading: filterDataLoading, error: filterDataError, refetch: refetchFilterData } = useFilterData()
+
+  // Map book types to display names
+  const getBookTypeDisplayName = (type: string) => {
+    switch (type) {
+      case 'BOOK': return 'Book'
+      case 'DOCUMENT': return 'Document'
+      case 'PERIODIC': return 'Periodic'
+      case 'ARTICLE': return 'Article'
+      default: return type
+    }
+  }
+
+  // Map periodical frequencies to display names
+  const getPeriodicTypeDisplayName = (frequency: string) => {
+    switch (frequency?.toLowerCase()) {
+      case 'daily': return 'Daily'
+      case 'weekly': return 'Weekly'
+      case 'monthly': return 'Monthly'
+      case 'quarterly': return 'Quarterly'
+      case 'yearly': return 'Yearly'
+      case 'biannual': return 'Biannual'
+      default: return frequency || 'Other'
+    }
+  }
+
+  // Format language display
+  const formatLanguageDisplay = (lang: string) => {
+    const langMap: Record<string, string> = {
+      'en': 'English (en)',
+      'ar': 'Arabic (ar)',
+      'fr': 'French (fr)',
+      'es': 'Spanish (es)',
+      'de': 'German (de)',
+    }
+    return langMap[lang] || `${lang.charAt(0).toUpperCase() + lang.slice(1)} (${lang})`
+  }
 
   return (
     <div
@@ -140,95 +178,133 @@ export default function FilterSidebar({
       </div>
 
       <div className="space-y-8">
-        {/* Categories Section - Now Dynamic */}
+        {/* Categories Section - Dynamic from Database */}
         <FilterSection title="Categories">
           {categoriesLoading ? (
             <LoadingSpinner />
           ) : categoriesError ? (
-            <ErrorMessage message={categoriesError} onRetry={refetch} />
+            <ErrorMessage message={categoriesError} onRetry={refetchCategories} />
           ) : (
-            categories.map((category) => (
-              <CheckboxItem
-                key={category.id}
-                id={`category-${category.id}`}
-                checked={filters.categories.includes(category.name)}
-                onChange={(checked) =>
-                  onFilterChange({
-                    ...filters,
-                    categories: checked
-                      ? [...filters.categories, category.name]
-                      : filters.categories.filter((item) => item !== category.name),
-                  })
-                }
-                label={category.name}
-              />
-            ))
+            // Added safety check: ensure categories is an array before mapping
+            Array.isArray(categories) && categories.length > 0 ? (
+              categories.map((category) => (
+                <CheckboxItem
+                  key={category.id}
+                  id={`category-${category.id}`}
+                  checked={filters.categories.includes(category.name)}
+                  onChange={(checked) =>
+                    onFilterChange({
+                      ...filters,
+                      categories: checked
+                        ? [...filters.categories, category.name]
+                        : filters.categories.filter((item) => item !== category.name),
+                    })
+                  }
+                  label={category.name}
+                />
+              ))
+            ) : (
+              <div className="text-sm text-gray-500 py-2">No categories available</div>
+            )
           )}
         </FilterSection>
 
-        {/* Document Type Section */}
+        {/* Document Type Section - Dynamic from Database */}
         <FilterSection title="Document Type">
-          {["Document", "Periodic", "Article"].map((type, index) => (
-            <CheckboxItem
-              key={index}
-              id={`document-type-${index}`}
-              checked={filters.documentType.includes(type)}
-              onChange={(checked) =>
-                onFilterChange({
-                  ...filters,
-                  documentType: checked
-                    ? [...filters.documentType, type]
-                    : filters.documentType.filter((item) => item !== type),
-                })
-              }
-              label={type}
-            />
-          ))}
+          {filterDataLoading ? (
+            <LoadingSpinner />
+          ) : filterDataError ? (
+            <ErrorMessage message={filterDataError} onRetry={refetchFilterData} />
+          ) : (
+            // Added safety check: ensure bookTypes exists and is an array
+            Array.isArray(filterData?.bookTypes) && filterData.bookTypes.length > 0 ? (
+              filterData.bookTypes.map((type, index) => (
+                <CheckboxItem
+                  key={index}
+                  id={`document-type-${index}`}
+                  checked={filters.documentType.includes(getBookTypeDisplayName(type))}
+                  onChange={(checked) =>
+                    onFilterChange({
+                      ...filters,
+                      documentType: checked
+                        ? [...filters.documentType, getBookTypeDisplayName(type)]
+                        : filters.documentType.filter((item) => item !== getBookTypeDisplayName(type)),
+                    })
+                  }
+                  label={getBookTypeDisplayName(type)}
+                />
+              ))
+            ) : (
+              <div className="text-sm text-gray-500 py-2">No document types available</div>
+            )
+          )}
         </FilterSection>
 
-        {/* Language Section */}
+        {/* Language Section - Dynamic from Database */}
         <FilterSection title="Language">
-          {["English (en)", "Arabic (ar)", "French (fr)", "Spanish (es)", "German (de)"].map((lang, index) => (
-            <CheckboxItem
-              key={index}
-              id={`language-${index}`}
-              checked={filters.language.includes(lang)}
-              onChange={(checked) =>
-                onFilterChange({
-                  ...filters,
-                  language: checked
-                    ? [...filters.language, lang]
-                    : filters.language.filter((item) => item !== lang),
-                })
-              }
-              label={lang}
-            />
-          ))}
+          {filterDataLoading ? (
+            <LoadingSpinner />
+          ) : filterDataError ? (
+            <ErrorMessage message={filterDataError} onRetry={refetchFilterData} />
+          ) : (
+            // Added safety check: ensure languages exists and is an array
+            Array.isArray(filterData?.languages) && filterData.languages.length > 0 ? (
+              filterData.languages.map((lang, index) => (
+                <CheckboxItem
+                  key={index}
+                  id={`language-${index}`}
+                  checked={filters.language.includes(formatLanguageDisplay(lang))}
+                  onChange={(checked) =>
+                    onFilterChange({
+                      ...filters,
+                      language: checked
+                        ? [...filters.language, formatLanguageDisplay(lang)]
+                        : filters.language.filter((item) => item !== formatLanguageDisplay(lang)),
+                    })
+                  }
+                  label={formatLanguageDisplay(lang)}
+                />
+              ))
+            ) : (
+              <div className="text-sm text-gray-500 py-2">No languages available</div>
+            )
+          )}
         </FilterSection>
 
-        {/* Periodic Type Section */}
+        {/* Periodic Type Section - Dynamic from Database */}
         <FilterSection title="Periodic Type">
-          {["Magazines", "Journals", "Newspapers", "Newsletters", "Books"].map((type, index) => (
-            <CheckboxItem
-              key={index}
-              id={`periodic-type-${index}`}
-              checked={filters.periodicType.includes(type)}
-              onChange={(checked) =>
-                onFilterChange({
-                  ...filters,
-                  periodicType: checked
-                    ? [...filters.periodicType, type]
-                    : filters.periodicType.filter((item) => item !== type),
-                })
-              }
-              label={type}
-            />
-          ))}
+          {filterDataLoading ? (
+            <LoadingSpinner />
+          ) : filterDataError ? (
+            <ErrorMessage message={filterDataError} onRetry={refetchFilterData} />
+          ) : (
+            // Added safety check: ensure periodicTypes exists and is an array
+            Array.isArray(filterData?.periodicTypes) && filterData.periodicTypes.length > 0 ? (
+              filterData.periodicTypes.map((type, index) => (
+                <CheckboxItem
+                  key={index}
+                  id={`periodic-type-${index}`}
+                  checked={filters.periodicType.includes(getPeriodicTypeDisplayName(type))}
+                  onChange={(checked) =>
+                    onFilterChange({
+                      ...filters,
+                      periodicType: checked
+                        ? [...filters.periodicType, getPeriodicTypeDisplayName(type)]
+                        : filters.periodicType.filter((item) => item !== getPeriodicTypeDisplayName(type)),
+                    })
+                  }
+                  label={getPeriodicTypeDisplayName(type)}
+                />
+              ))
+            ) : (
+              <div className="text-sm text-gray-500 py-2">No periodic types available</div>
+            )
+          )}
         </FilterSection>
 
-        {/* School Year Section */}
+        {/* School Year Section - Static based on your schema enum */}
         <FilterSection title="School Year">
-          {["1cp", "2cp", "1cs", "2cs", "3cs", "Other"].map((year, index) => (
+          {["1CP", "2CP", "1CS", "2CS", "3CS", "Other"].map((year, index) => (
             <CheckboxItem
               key={index}
               id={`year-${index}`}
@@ -246,18 +322,29 @@ export default function FilterSidebar({
           ))}
         </FilterSection>
 
-        {/* Size Section */}
+        {/* Size Section - Dynamic from Database */}
         <FilterSection title="Size">
-          {["0 - 250 pages", "250 - 500 pages", "500 - 750 pages", "750 - 1000 pages"].map((size, index) => (
-            <RadioItem
-              key={index}
-              id={`size-${index}`}
-              checked={filters.size === size}
-              onChange={() => onFilterChange({ ...filters, size })}
-              label={size}
-              name="size"
-            />
-          ))}
+          {filterDataLoading ? (
+            <LoadingSpinner />
+          ) : filterDataError ? (
+            <ErrorMessage message={filterDataError} onRetry={refetchFilterData} />
+          ) : (
+            // Added safety check: ensure sizeRanges exists and is an array
+            Array.isArray(filterData?.sizeRanges) && filterData.sizeRanges.length > 0 ? (
+              filterData.sizeRanges.map((sizeRange, index) => (
+                <RadioItem
+                  key={index}
+                  id={`size-${index}`}
+                  checked={filters.size === sizeRange.label}
+                  onChange={() => onFilterChange({ ...filters, size: sizeRange.label })}
+                  label={sizeRange.label}
+                  name="size"
+                />
+              ))
+            ) : (
+              <div className="text-sm text-gray-500 py-2">No size ranges available</div>
+            )
+          )}
         </FilterSection>
 
         {/* Availability Section */}
