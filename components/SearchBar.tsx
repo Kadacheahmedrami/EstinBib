@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback, useRef, memo } from "react"
-import { Search } from "lucide-react"
+import { Search, X, Clock } from "lucide-react"
 
 interface SearchBarProps {
   searchInput: string
@@ -11,144 +11,188 @@ interface SearchBarProps {
   isSticky?: boolean
 }
 
-const KeywordItem = memo(
-  ({
-    keyword,
-    onClick,
-    onRemove,
-  }: {
-    keyword: string
-    onClick: () => void
-    onRemove: () => void
-  }) => (
-    <div className="bg-[#FCF3F3] text-black shadow rounded-full px-4 py-2 text-sm cursor-pointer hover:bg-[#e0e0e0] flex items-center gap-2 transition-all duration-200 ease-in-out transform hover:scale-105">
-      <span onClick={onClick}>{keyword}</span>
-      <span
-        className="text-red-500 hover:text-red-700 transition-colors duration-200"
-        onClick={(e) => {
-          e.stopPropagation()
-          onRemove()
-        }}
-      >
-        X
-      </span>
-    </div>
-  ),
-)
-KeywordItem.displayName = "KeywordItem"
-
 export default function SearchBar({ searchInput, onSearchChange, onSearch, isSticky = false }: SearchBarProps) {
   const [previousKeywords, setPreviousKeywords] = useState<string[]>([])
   const [isFocused, setIsFocused] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  // Load previous keywords
+  // Load previous keywords from localStorage
   useEffect(() => {
-    const storedKeywords = localStorage.getItem("searchKeywords")
-    if (storedKeywords) {
-      setPreviousKeywords(JSON.parse(storedKeywords))
+    try {
+      const storedKeywords = localStorage.getItem("searchKeywords")
+      if (storedKeywords) {
+        setPreviousKeywords(JSON.parse(storedKeywords))
+      }
+    } catch (error) {
+      console.warn("Failed to load search keywords from localStorage")
+      setPreviousKeywords([])
     }
   }, [])
 
-  // Save previous keywords
+  // Save previous keywords to localStorage
   useEffect(() => {
-    localStorage.setItem("searchKeywords", JSON.stringify(previousKeywords))
+    try {
+      localStorage.setItem("searchKeywords", JSON.stringify(previousKeywords))
+    } catch (error) {
+      console.warn("Failed to save search keywords to localStorage")
+    }
   }, [previousKeywords])
+
+  // Enhanced animation handling
+  useEffect(() => {
+    if (isSticky) {
+      setIsAnimating(true)
+      const timer = setTimeout(() => setIsAnimating(false), 300)
+      return () => clearTimeout(timer)
+    }
+  }, [isSticky])
 
   // Function to toggle search suggestions visibility
   const toggleSearchSuggestions = useCallback(() => {
-    setIsVisible(prev => !prev);
-  }, []);
+    setIsVisible(prev => !prev)
+  }, [])
 
   const handleSearch = useCallback(
     (value: string) => {
       onSearchChange(value)
       if (value.trim() && !previousKeywords.includes(value.trim())) {
-        setPreviousKeywords((prev) => [value.trim(), ...prev].slice(0, 5))
+        setPreviousKeywords((prev) => [value.trim(), ...prev].slice(0, 8)) // Increased to 8 keywords
       }
       onSearch(value)
+      setIsVisible(false) // Hide suggestions after search
     },
     [previousKeywords, onSearchChange, onSearch],
   )
 
+  const handleSuggestionClick = useCallback((keyword: string) => {
+    handleSearch(keyword)
+    inputRef.current?.blur()
+  }, [handleSearch])
+
+  const clearSearchHistory = useCallback(() => {
+    setPreviousKeywords([])
+    setIsVisible(false)
+  }, [])
+
+  const removeSuggestion = useCallback((keyword: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setPreviousKeywords(prev => prev.filter(k => k !== keyword))
+  }, [])
+
+  // Enhanced keyboard navigation
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      handleSearch(searchInput)
+    } else if (e.key === "Escape") {
+      setIsVisible(false)
+      inputRef.current?.blur()
+    }
+  }, [searchInput, handleSearch])
+
   return (
-    <div className="flex flex-col mx-auto w-[80%] md:max-w-[800px]">
+    <div className="flex flex-col mx-auto w-[80%] md:max-w-[800px] relative">
       <div
+        ref={containerRef}
         className={`flex shadow overflow-hidden items-center h-[57px] w-full bg-[#F8F7F7] rounded-[22px] p-3 transition-all duration-300 ${
-          isSticky ? "shadow-lg" : ""
-        }`}
+          isSticky ? "sticky top-4 z-50 shadow-2xl border border-gray-200 backdrop-blur-sm bg-[#F8F7F7]/95" : ""
+        } ${isAnimating ? "scale-[1.02]" : ""}`}
       >
         <input
           ref={inputRef}
           value={searchInput}
           type="text"
           placeholder="Search a name, category, or a module"
-          className="flex-1 bg-transparent outline-none px-4 text-sm placeholder-gray-500"
+          className="flex-1 bg-transparent outline-none px-4 text-sm placeholder-gray-500 transition-all duration-200"
           onClick={() => {
-            setIsFocused(true);
-            toggleSearchSuggestions();
+            setIsFocused(true)
+            toggleSearchSuggestions()
           }}
           onFocus={() => {
-            setIsFocused(true);
-            toggleSearchSuggestions();
+            setIsFocused(true)
+            if (previousKeywords.length > 0) {
+              setIsVisible(true)
+            }
           }}
           onBlur={(e) => {
             const relatedTarget = e.relatedTarget as HTMLElement | null
             if (!relatedTarget?.closest(".search-container")) {
               setTimeout(() => {
-                setIsFocused(false);
-                setIsVisible(false);
+                setIsFocused(false)
+                setIsVisible(false)
               }, 200)
             }
           }}
           onChange={(e) => handleSearch(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault()
-              handleSearch(searchInput)
-            }
-          }}
+          onKeyDown={handleKeyDown}
         />
+
+        {/* Clear button when there's input */}
+        {searchInput && (
+          <button
+            onClick={() => handleSearch("")}
+            className="p-1 hover:bg-gray-200 rounded-full transition-colors duration-200 mr-2"
+            type="button"
+          >
+            <X className="w-4 h-4 text-gray-400" />
+          </button>
+        )}
 
         <div
           onClick={() => handleSearch(searchInput)}
-          className="flex items-center mr-2 gap-2 text-[#9B1616] cursor-pointer"
+          className="flex items-center mr-2 gap-2 text-[#9B1616] cursor-pointer hover:text-[#7A1212] transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-[#9B1616]/10"
         >
           <Search className="w-5 h-5" />
           <span className="text-[16px] hidden md:block font-medium">Search</span>
         </div>
       </div>
 
-      {/* Keywords */}
-      <div className={`h-[100px] relative ${isSticky ? "mt-2" : ""}`}>
-        <div
-          className={`w-full bg-white rounded-[22px] bg-opacity-40 z-50 search-container absolute top-0 left-0 transition-all duration-300 ease-in-out ${
-            isVisible && isFocused && previousKeywords.length > 0
-              ? "opacity-100 transform translate-y-0 pointer-events-auto"
-              : "opacity-0 transform -translate-y-2 pointer-events-none"
+      {/* Enhanced Search Suggestions */}
+      {isVisible && previousKeywords.length > 0 && (
+        <div 
+          className={`search-container absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-40 transition-all duration-200 ${
+            isSticky ? "shadow-2xl" : ""
           }`}
         >
-          <div className="flex flex-wrap gap-2 p-3">
+          <div className="p-3 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Clock className="w-4 h-4" />
+              <span className="font-medium">Recent searches</span>
+            </div>
+            <button
+              onClick={clearSearchHistory}
+              className="text-xs text-gray-400 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded hover:bg-gray-50"
+            >
+              Clear all
+            </button>
+          </div>
+          <div className="max-h-64 overflow-y-auto">
             {previousKeywords.map((keyword, index) => (
-              <KeywordItem
-                key={index}
-                keyword={keyword}
-                onClick={() => handleSearch(keyword)}
-                onRemove={() => setPreviousKeywords((prev) => prev.filter((k) => k !== keyword))}
-              />
-            ))}
-            {previousKeywords.length >= 2 && (
               <div
-                className="bg-[#FCF3F3] text-black shadow rounded-full px-4 py-2 text-sm cursor-pointer hover:bg-[#e0e0e0] flex items-center gap-2 transition-all duration-200 ease-in-out transform hover:scale-105"
-                onClick={() => setPreviousKeywords([])}
+                key={index}
+                onClick={() => handleSuggestionClick(keyword)}
+                className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150 group"
               >
-                <span>Delete All</span>
+                <div className="flex items-center gap-3">
+                  <Search className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-700 group-hover:text-gray-900">
+                    {keyword}
+                  </span>
+                </div>
+                <button
+                  onClick={(e) => removeSuggestion(keyword, e)}
+                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 rounded-full transition-all duration-200"
+                >
+                  <X className="w-3 h-3 text-gray-400 hover:text-red-500" />
+                </button>
               </div>
-            )}
+            ))}
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

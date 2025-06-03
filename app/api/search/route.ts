@@ -9,9 +9,9 @@ interface SearchParams {
   size?: string;
   categories?: string;
   available?: string;
-  type?: string; // Changed from documentType to match schema
+  type?: string;
   language?: string;
-  periodicalFrequency?: string; // Changed from periodicType to match schema
+  periodicalFrequency?: string;
   page?: string;
   limit?: string;
   sortBy?: string;
@@ -73,16 +73,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
       size: searchParams.get("size") || undefined,
       categories: searchParams.get("categories") || undefined,
       available: searchParams.get("available") || undefined,
-      type: searchParams.get("type") || undefined, // Fixed field name
+      type: searchParams.get("type") || undefined,
       language: searchParams.get("language") || undefined,
-      periodicalFrequency: searchParams.get("periodicalFrequency") || undefined, // Fixed field name
+      periodicalFrequency: searchParams.get("periodicalFrequency") || undefined,
       sortBy: searchParams.get("sortBy") || "relevance",
       sortOrder: searchParams.get("sortOrder") || "desc"
     };
 
     // Build conditions array
     const conditions: DrizzleCondition[] = [];
-    let orderByClause;
 
     // Text search using ILIKE for PostgreSQL compatibility
     if (params.q) {
@@ -96,9 +95,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
       );
     }
 
-    // Size filter
+    // Size filter - handle both "250-500" and "250 - 500 pages" formats
     if (params.size) {
-      const sizeRange = params.size.split("-").map(s => parseInt(s.trim()));
+      const cleanSize = params.size.replace(/\s*pages?\s*/i, '').replace(/\s*-\s*/, '-');
+      const sizeRange = cleanSize.split("-").map(s => parseInt(s.trim()));
       if (sizeRange.length === 2 && !sizeRange.some(isNaN)) {
         const [minSize, maxSize] = sizeRange;
         conditions.push(between(books.size, minSize, maxSize));
@@ -123,10 +123,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
       conditions.push(eq(books.available, available));
     }
 
-    // Book type filter (fixed to match schema)
+    // Book type filter
     if (params.type) {
       const types = params.type.split(",").map(t => t.trim() as "BOOK" | "DOCUMENT" | "PERIODIC" | "ARTICLE");
-      // Validate that all types are valid enum values
       const validTypes = types.filter(type => ["BOOK", "DOCUMENT", "PERIODIC", "ARTICLE"].includes(type));
       if (validTypes.length > 0) {
         conditions.push(inArray(books.type, validTypes));
@@ -139,7 +138,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
       conditions.push(inArray(books.language, languages));
     }
 
-    // Periodical frequency filter (fixed to match schema)
+    // Periodical frequency filter
     if (params.periodicalFrequency) {
       const frequencies = params.periodicalFrequency.split(",").map(pf => pf.trim());
       conditions.push(inArray(books.periodicalFrequency, frequencies));
@@ -148,7 +147,92 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
     // Combine all conditions
     const finalCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
+    // Build base query for counting
+    const baseCountQuery = db
+      .select({ count: count() })
+      .from(books)
+      .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
+      .leftJoin(categories, eq(bookCategories.categoryId, categories.id));
+
+    // Get total count
+    const totalCountResult = finalCondition 
+      ? await baseCountQuery.where(finalCondition)
+      : await baseCountQuery;
+    
+    const totalItems = totalCountResult[0]?.count || 0;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    // Build main query with relevance score for sorting
+    let baseQuery;
+    
+    if (params.sortBy === "relevance" && params.q) {
+      // For relevance sorting with search query, include relevance score in SELECT
+      const relevanceScore = sql`CASE 
+        WHEN LOWER(${books.title}) LIKE LOWER(${`%${params.q}%`}) THEN 1
+        WHEN LOWER(${books.author}) LIKE LOWER(${`%${params.q}%`}) THEN 2
+        WHEN LOWER(${books.description}) LIKE LOWER(${`%${params.q}%`}) THEN 3
+        ELSE 4
+      END`.as('relevance_score');
+
+      baseQuery = db
+        .selectDistinct({
+          id: books.id,
+          title: books.title,
+          author: books.author,
+          isbn: books.isbn,
+          barcode: books.barcode,
+          description: books.description,
+          language: books.language,
+          coverImage: books.coverImage,
+          pdfUrl: books.pdfUrl,
+          publishedAt: books.publishedAt,
+          addedAt: books.addedAt,
+          size: books.size,
+          available: books.available,
+          type: books.type,
+          periodicalFrequency: books.periodicalFrequency,
+          periodicalIssue: books.periodicalIssue,
+          articleJournal: books.articleJournal,
+          documentType: books.documentType,
+          relevance_score: relevanceScore,
+        })
+        .from(books)
+        .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
+        .leftJoin(categories, eq(bookCategories.categoryId, categories.id))
+        .limit(limit)
+        .offset(offset);
+    } else {
+      // For other sorting options, use regular query
+      baseQuery = db
+        .selectDistinct({
+          id: books.id,
+          title: books.title,
+          author: books.author,
+          isbn: books.isbn,
+          barcode: books.barcode,
+          description: books.description,
+          language: books.language,
+          coverImage: books.coverImage,
+          pdfUrl: books.pdfUrl,
+          publishedAt: books.publishedAt,
+          addedAt: books.addedAt,
+          size: books.size,
+          available: books.available,
+          type: books.type,
+          periodicalFrequency: books.periodicalFrequency,
+          periodicalIssue: books.periodicalIssue,
+          articleJournal: books.articleJournal,
+          documentType: books.documentType,
+        })
+        .from(books)
+        .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
+        .leftJoin(categories, eq(bookCategories.categoryId, categories.id))
+        .limit(limit)
+        .offset(offset);
+    }
+
     // Determine sort order
+    let orderByClause;
     switch (params.sortBy) {
       case "title":
         orderByClause = params.sortOrder === "asc" ? asc(books.title) : desc(books.title);
@@ -167,62 +251,14 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
         break;
       case "relevance":
       default:
-        // For relevance, prioritize exact matches in title, then author, then recent additions
         if (params.q) {
-          orderByClause = sql`CASE 
-            WHEN LOWER(${books.title}) LIKE LOWER(${`%${params.q}%`}) THEN 1
-            WHEN LOWER(${books.author}) LIKE LOWER(${`%${params.q}%`}) THEN 2
-            WHEN LOWER(${books.description}) LIKE LOWER(${`%${params.q}%`}) THEN 3
-            ELSE 4
-          END ASC, ${books.addedAt} DESC`;
+          // Use the relevance_score column we included in SELECT
+          orderByClause = sql`relevance_score ASC, ${books.addedAt} DESC`;
         } else {
           orderByClause = desc(books.addedAt);
         }
         break;
     }
-
-    // Build base query for counting
-    const baseCountQuery = db
-      .select({ count: count() })
-      .from(books)
-      .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
-      .leftJoin(categories, eq(bookCategories.categoryId, categories.id));
-
-    // Get total count
-    const totalCountResult = finalCondition 
-      ? await baseCountQuery.where(finalCondition)
-      : await baseCountQuery;
-    
-    const totalItems = totalCountResult[0]?.count || 0;
-    const totalPages = Math.ceil(totalItems / limit);
-
-    // Build main query with proper distinct handling
-    const baseQuery = db
-      .selectDistinct({
-        id: books.id,
-        title: books.title,
-        author: books.author,
-        isbn: books.isbn,
-        barcode: books.barcode,
-        description: books.description,
-        language: books.language,
-        coverImage: books.coverImage,
-        pdfUrl: books.pdfUrl,
-        publishedAt: books.publishedAt,
-        addedAt: books.addedAt,
-        size: books.size,
-        available: books.available,
-        type: books.type,
-        periodicalFrequency: books.periodicalFrequency,
-        periodicalIssue: books.periodicalIssue,
-        articleJournal: books.articleJournal,
-        documentType: books.documentType,
-      })
-      .from(books)
-      .leftJoin(bookCategories, eq(books.id, bookCategories.bookId))
-      .leftJoin(categories, eq(bookCategories.categoryId, categories.id))
-      .limit(limit)
-      .offset(offset);
 
     // Execute main query
     const results = finalCondition 
@@ -251,11 +287,14 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
       return acc;
     }, {} as Record<string, string[]>);
 
-    // Attach categories to books
-    const booksWithCategories: BookResult[] = results.map(book => ({
-      ...book,
-      categories: categoriesByBook[book.id] || []
-    }));
+    // Attach categories to books and remove relevance_score from results
+    const booksWithCategories: BookResult[] = results.map(book => {
+      const { relevance_score, ...bookData } = book as any;
+      return {
+        ...bookData,
+        categories: categoriesByBook[book.id] || []
+      };
+    });
 
     // Build response
     const response: SearchResponse = {

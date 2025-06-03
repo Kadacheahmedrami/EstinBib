@@ -1,11 +1,17 @@
 // app/api/filter-data/route.ts
 import { NextResponse } from 'next/server'
 import { db } from '@/db' // Adjust path to your database connection
-import { books } from '@/db/schema' // Adjust path to your schema
+import { books, categories } from '@/db/schema' // Adjust path to your schema
 import { sql } from 'drizzle-orm'
 
 export async function GET() {
   try {
+    // Get all categories
+    const allCategories = await db.select({
+      id: categories.id,
+      name: categories.name,
+    }).from(categories)
+
     // Get distinct languages
     const languages = await db.selectDistinct({
       language: books.language
@@ -38,6 +44,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: {
+        categories: allCategories,
         languages: languages.map(l => l.language).filter(Boolean),
         documentTypes: documentTypes.map(d => d.documentType).filter(Boolean),
         bookTypes: bookTypes.map(t => t.type),

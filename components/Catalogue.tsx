@@ -495,10 +495,10 @@ export default function Catalogue() {
         </div>
       </div>
       
-      <div className={`h-[160px] w-full ${isSticky ? "" : "hidden"}`} />
+      
 
       {/* Main Content */}
-      <div className={`grid grid-cols-12 gap-5 ${isSticky ? "mt-32" : "mt-0 md:mt-16"} md:flex-row w-full`}>
+      <div className={`grid grid-cols-12 gap-5 ${isSticky ? "mt-52" : "mt-32 md:mt-36"} md:flex-row w-full`}>
         {/* Filter Sidebar */}
         <div className="col-span-0 relative bottom-4 lg:col-span-2">
           <FilterSidebar
@@ -521,10 +521,10 @@ export default function Catalogue() {
         </div>
 
         {/* Results */}
-        <div className="col-span-12 w-full lg:col-span-10">
+        <div className="col-span-12 mt-8 md:mt-0 w-full lg:col-span-10">
           {/* Sort Options */}
           <div className="flex justify-between items-center mb-4 px-4">
-            <div className="text-gray-600">
+            <div className="text-black">
               {pagination.totalItems > 0 && (
                 <span>
                   {pagination.totalItems} result{pagination.totalItems !== 1 ? 's' : ''} found

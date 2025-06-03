@@ -5,7 +5,6 @@ import { memo } from "react"
 import { X, Loader2 } from "lucide-react"
 import NeonCheckbox from "@/components/pages/checkBox/checkbox"
 import RadioButton from "@/components/pages/radioInput/radiobutton"
-import { useCategories } from "@/hooks/useCategories"
 import { useFilterData } from "@/hooks/useFilterData"
 import type { FilterState } from "@/types/_types"
 
@@ -105,8 +104,7 @@ export default function FilterSidebar({
   isMobile,
   onCloseFilter,
 }: FilterSidebarProps) {
-  const { categories, loading: categoriesLoading, error: categoriesError, refetch: refetchCategories } = useCategories()
-  const { filterData, loading: filterDataLoading, error: filterDataError, refetch: refetchFilterData } = useFilterData()
+  const { filterData, loading, error, refetch } = useFilterData()
 
   // Map book types to display names
   const getBookTypeDisplayName = (type: string) => {
@@ -178,170 +176,141 @@ export default function FilterSidebar({
       </div>
 
       <div className="space-y-8">
-        {/* Categories Section - Dynamic from Database */}
-        <FilterSection title="Categories">
-          {categoriesLoading ? (
-            <LoadingSpinner />
-          ) : categoriesError ? (
-            <ErrorMessage message={categoriesError} onRetry={refetchCategories} />
-          ) : (
-            // Added safety check: ensure categories is an array before mapping
-            Array.isArray(categories) && categories.length > 0 ? (
-              categories.map((category) => (
-                <CheckboxItem
-                  key={category.id}
-                  id={`category-${category.id}`}
-                  checked={filters.categories.includes(category.name)}
-                  onChange={(checked) =>
-                    onFilterChange({
-                      ...filters,
-                      categories: checked
-                        ? [...filters.categories, category.name]
-                        : filters.categories.filter((item) => item !== category.name),
-                    })
-                  }
-                  label={category.name}
-                />
-              ))
-            ) : (
-              <div className="text-sm text-gray-500 py-2">No categories available</div>
-            )
-          )}
-        </FilterSection>
+        {loading ? (
+          <LoadingSpinner />
+        ) : error ? (
+          <ErrorMessage message={error} onRetry={refetch} />
+        ) : (
+          <>
+            {/* Categories Section */}
+            <FilterSection title="Categories">
+              {Array.isArray(filterData?.categories) && filterData.categories.length > 0 ? (
+                filterData.categories.map((category) => (
+                  <CheckboxItem
+                    key={category.id}
+                    id={`category-${category.id}`}
+                    checked={filters.categories.includes(category.name)}
+                    onChange={(checked) =>
+                      onFilterChange({
+                        ...filters,
+                        categories: checked
+                          ? [...filters.categories, category.name]
+                          : filters.categories.filter((item) => item !== category.name),
+                      })
+                    }
+                    label={category.name}
+                  />
+                ))
+              ) : (
+                <div className="text-sm text-gray-500 py-2">No categories available</div>
+              )}
+            </FilterSection>
 
-        {/* Document Type Section - Dynamic from Database */}
-        <FilterSection title="Document Type">
-          {filterDataLoading ? (
-            <LoadingSpinner />
-          ) : filterDataError ? (
-            <ErrorMessage message={filterDataError} onRetry={refetchFilterData} />
-          ) : (
-            // Added safety check: ensure bookTypes exists and is an array
-            Array.isArray(filterData?.bookTypes) && filterData.bookTypes.length > 0 ? (
-              filterData.bookTypes.map((type, index) => (
-                <CheckboxItem
-                  key={index}
-                  id={`document-type-${index}`}
-                  checked={filters.documentType.includes(getBookTypeDisplayName(type))}
-                  onChange={(checked) =>
-                    onFilterChange({
-                      ...filters,
-                      documentType: checked
-                        ? [...filters.documentType, getBookTypeDisplayName(type)]
-                        : filters.documentType.filter((item) => item !== getBookTypeDisplayName(type)),
-                    })
-                  }
-                  label={getBookTypeDisplayName(type)}
-                />
-              ))
-            ) : (
-              <div className="text-sm text-gray-500 py-2">No document types available</div>
-            )
-          )}
-        </FilterSection>
+            {/* Document Type Section */}
+            <FilterSection title="Document Type">
+              {Array.isArray(filterData?.bookTypes) && filterData.bookTypes.length > 0 ? (
+                filterData.bookTypes.map((type, index) => (
+                  <CheckboxItem
+                    key={index}
+                    id={`document-type-${index}`}
+                    checked={filters.documentType.includes(getBookTypeDisplayName(type))}
+                    onChange={(checked) =>
+                      onFilterChange({
+                        ...filters,
+                        documentType: checked
+                          ? [...filters.documentType, getBookTypeDisplayName(type)]
+                          : filters.documentType.filter((item) => item !== getBookTypeDisplayName(type)),
+                      })
+                    }
+                    label={getBookTypeDisplayName(type)}
+                  />
+                ))
+              ) : (
+                <div className="text-sm text-gray-500 py-2">No document types available</div>
+              )}
+            </FilterSection>
 
-        {/* Language Section - Dynamic from Database */}
-        <FilterSection title="Language">
-          {filterDataLoading ? (
-            <LoadingSpinner />
-          ) : filterDataError ? (
-            <ErrorMessage message={filterDataError} onRetry={refetchFilterData} />
-          ) : (
-            // Added safety check: ensure languages exists and is an array
-            Array.isArray(filterData?.languages) && filterData.languages.length > 0 ? (
-              filterData.languages.map((lang, index) => (
-                <CheckboxItem
-                  key={index}
-                  id={`language-${index}`}
-                  checked={filters.language.includes(formatLanguageDisplay(lang))}
-                  onChange={(checked) =>
-                    onFilterChange({
-                      ...filters,
-                      language: checked
-                        ? [...filters.language, formatLanguageDisplay(lang)]
-                        : filters.language.filter((item) => item !== formatLanguageDisplay(lang)),
-                    })
-                  }
-                  label={formatLanguageDisplay(lang)}
-                />
-              ))
-            ) : (
-              <div className="text-sm text-gray-500 py-2">No languages available</div>
-            )
-          )}
-        </FilterSection>
+            {/* Language Section */}
+            <FilterSection title="Language">
+              {Array.isArray(filterData?.languages) && filterData.languages.length > 0 ? (
+                filterData.languages.map((lang, index) => (
+                  <CheckboxItem
+                    key={index}
+                    id={`language-${index}`}
+                    checked={filters.language.includes(formatLanguageDisplay(lang))}
+                    onChange={(checked) =>
+                      onFilterChange({
+                        ...filters,
+                        language: checked
+                          ? [...filters.language, formatLanguageDisplay(lang)]
+                          : filters.language.filter((item) => item !== formatLanguageDisplay(lang)),
+                      })
+                    }
+                    label={formatLanguageDisplay(lang)}
+                  />
+                ))
+              ) : (
+                <div className="text-sm text-gray-500 py-2">No languages available</div>
+              )}
+            </FilterSection>
 
-        {/* Periodic Type Section - Dynamic from Database */}
-        <FilterSection title="Periodic Type">
-          {filterDataLoading ? (
-            <LoadingSpinner />
-          ) : filterDataError ? (
-            <ErrorMessage message={filterDataError} onRetry={refetchFilterData} />
-          ) : (
-            // Added safety check: ensure periodicTypes exists and is an array
-            Array.isArray(filterData?.periodicTypes) && filterData.periodicTypes.length > 0 ? (
-              filterData.periodicTypes.map((type, index) => (
-                <CheckboxItem
-                  key={index}
-                  id={`periodic-type-${index}`}
-                  checked={filters.periodicType.includes(getPeriodicTypeDisplayName(type))}
-                  onChange={(checked) =>
-                    onFilterChange({
-                      ...filters,
-                      periodicType: checked
-                        ? [...filters.periodicType, getPeriodicTypeDisplayName(type)]
-                        : filters.periodicType.filter((item) => item !== getPeriodicTypeDisplayName(type)),
-                    })
-                  }
-                  label={getPeriodicTypeDisplayName(type)}
-                />
-              ))
-            ) : (
-              <div className="text-sm text-gray-500 py-2">No periodic types available</div>
-            )
-          )}
-        </FilterSection>
+            {/* Periodic Type Section */}
+            <FilterSection title="Periodic Type">
+              {Array.isArray(filterData?.periodicTypes) && filterData.periodicTypes.length > 0 ? (
+                filterData.periodicTypes.map((type, index) => (
+                  <CheckboxItem
+                    key={index}
+                    id={`periodic-type-${index}`}
+                    checked={filters.periodicType.includes(getPeriodicTypeDisplayName(type))}
+                    onChange={(checked) =>
+                      onFilterChange({
+                        ...filters,
+                        periodicType: checked
+                          ? [...filters.periodicType, getPeriodicTypeDisplayName(type)]
+                          : filters.periodicType.filter((item) => item !== getPeriodicTypeDisplayName(type)),
+                      })
+                    }
+                    label={getPeriodicTypeDisplayName(type)}
+                  />
+                ))
+              ) : (
+                <div className="text-sm text-gray-500 py-2">No periodic types available</div>
+              )}
+            </FilterSection>
 
-       
+            {/* Size Section */}
+            <FilterSection title="Size">
+              {Array.isArray(filterData?.sizeRanges) && filterData.sizeRanges.length > 0 ? (
+                filterData.sizeRanges.map((sizeRange, index) => (
+                  <RadioItem
+                    key={index}
+                    id={`size-${index}`}
+                    checked={filters.size === sizeRange.label}
+                    onChange={() => onFilterChange({ ...filters, size: sizeRange.label })}
+                    label={sizeRange.label}
+                    name="size"
+                  />
+                ))
+              ) : (
+                <div className="text-sm text-gray-500 py-2">No size ranges available</div>
+              )}
+            </FilterSection>
 
-        {/* Size Section - Dynamic from Database */}
-        <FilterSection title="Size">
-          {filterDataLoading ? (
-            <LoadingSpinner />
-          ) : filterDataError ? (
-            <ErrorMessage message={filterDataError} onRetry={refetchFilterData} />
-          ) : (
-            // Added safety check: ensure sizeRanges exists and is an array
-            Array.isArray(filterData?.sizeRanges) && filterData.sizeRanges.length > 0 ? (
-              filterData.sizeRanges.map((sizeRange, index) => (
+            {/* Availability Section */}
+            <FilterSection title="Availability">
+              {["Available", "Not Available"].map((availability, index) => (
                 <RadioItem
                   key={index}
-                  id={`size-${index}`}
-                  checked={filters.size === sizeRange.label}
-                  onChange={() => onFilterChange({ ...filters, size: sizeRange.label })}
-                  label={sizeRange.label}
-                  name="size"
+                  id={`availability-${index}`}
+                  checked={filters.availability === availability}
+                  onChange={() => onFilterChange({ ...filters, availability })}
+                  label={availability}
+                  name="availability"
                 />
-              ))
-            ) : (
-              <div className="text-sm text-gray-500 py-2">No size ranges available</div>
-            )
-          )}
-        </FilterSection>
-
-        {/* Availability Section */}
-        <FilterSection title="Availability">
-          {["Available", "Not Available"].map((availability, index) => (
-            <RadioItem
-              key={index}
-              id={`availability-${index}`}
-              checked={filters.availability === availability}
-              onChange={() => onFilterChange({ ...filters, availability })}
-              label={availability}
-              name="availability"
-            />
-          ))}
-        </FilterSection>
+              ))}
+            </FilterSection>
+          </>
+        )}
       </div>
 
       {/* Reset Filter Button */}
