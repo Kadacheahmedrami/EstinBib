@@ -152,9 +152,9 @@ export async function POST(req: NextRequest) {
         relevantBooks: [] // No books to suggest for inappropriate queries
       }, { status: 200 })
     }
-
+    console.log(process.env.GeminiApiKey )
     // Initialize the Google Generative AI with the API key
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "No api key")
+    const genAI = new GoogleGenerativeAI(process.env.GeminiApiKey || "No api key")
     const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
     // Add the current message to the conversation history
