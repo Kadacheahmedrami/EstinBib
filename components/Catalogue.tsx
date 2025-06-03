@@ -4,8 +4,8 @@ import type React from "react"
 import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Filter, ChevronLeft, ChevronRight } from "lucide-react"
-import SearchBar from "@/components/searchBar"
-import FilterSidebar from "@/components/FilterSideBAr"
+import SearchBar from "@/components/SearchBar"
+import FilterSidebar from "@/components/FilterSidebAr"
 import BookCard from "@/components/pages/catalogue/BookCard"
 import type { FilterState, Book } from "@/types/_types"
 
@@ -38,7 +38,7 @@ interface SearchResponse {
   books: Book[]
   pagination: PaginationInfo
   filters: {
-    appliedFilters: Record<string, any>
+    appliedFilters: Record<string, string | string[] | number | boolean>
     resultsCount: number
   }
 }
@@ -60,7 +60,7 @@ const Pagination = ({
   const { currentPage, totalPages, totalItems, hasNextPage, hasPrevPage } = pagination
 
   const getPageNumbers = () => {
-    const pages = []
+    const pages: (number | string)[] = []
     const delta = 2 // Number of pages to show on each side of current page
     
     // Always show first page
@@ -333,6 +333,41 @@ export default function Catalogue() {
     }
   }, [searchInput, updateUrlParams, isMobile])
 
+  // Create a serialized version of filters for dependency tracking
+  const filtersString = useMemo(() => {
+    return JSON.stringify({
+      q: filters.q,
+      size: filters.size,
+      availability: filters.availability,
+      categories: filters.categories,
+      schoolYear: filters.schoolYear,
+      type: filters.type,
+      documentType: filters.documentType,
+      language: filters.language,
+      periodicalFrequency: filters.periodicalFrequency,
+      periodicType: filters.periodicType,
+      page: filters.page,
+      limit: filters.limit,
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder
+    })
+  }, [
+    filters.q,
+    filters.size,
+    filters.availability,
+    filters.categories,
+    filters.schoolYear,
+    filters.type,
+    filters.documentType,
+    filters.language,
+    filters.periodicalFrequency,
+    filters.periodicType,
+    filters.page,
+    filters.limit,
+    filters.sortBy,
+    filters.sortOrder
+  ])
+
   // Effect to perform search when filters change
   useEffect(() => {
     if (isInitialMount.current) {
@@ -387,7 +422,7 @@ export default function Catalogue() {
 
     updateUrlParams(searchParameters)
     debouncedSearch(searchParameters)
-  }, [filters, debouncedSearch, updateUrlParams])
+  }, [filtersString, debouncedSearch, updateUrlParams])
 
   // Cleanup debounced function
   useEffect(() => {
@@ -423,7 +458,7 @@ export default function Catalogue() {
     initialParams.sortOrder = filters.sortOrder || "desc"
 
     debouncedSearch(initialParams)
-  }, [debouncedSearch])
+  }, [debouncedSearch, filtersString])
 
   return (
     <div className="w-screen mx-auto">

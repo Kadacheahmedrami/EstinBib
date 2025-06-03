@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { desc, asc, sql, and, or, inArray, between, eq, count, like, ilike } from "drizzle-orm";
+import { desc, asc, sql, and, or, inArray, between, eq, count, ilike } from "drizzle-orm";
 import { books, bookCategories, categories } from "@/db/schema";
 import { db } from "@/db";
 
@@ -18,8 +18,30 @@ interface SearchParams {
   sortOrder?: string;
 }
 
+interface BookResult {
+  id: string;
+  title: string;
+  author: string;
+  isbn: string | null;
+  barcode: string | null;
+  description: string | null;
+  language: string;
+  coverImage: string | null;
+  pdfUrl: string | null;
+  publishedAt: Date | null;
+  addedAt: Date;
+  size: number;
+  available: boolean;
+  type: "BOOK" | "DOCUMENT" | "PERIODIC" | "ARTICLE";
+  periodicalFrequency: string | null;
+  periodicalIssue: string | null;
+  articleJournal: string | null;
+  documentType: string | null;
+  categories: string[];
+}
+
 interface SearchResponse {
-  books: any[];
+  books: BookResult[];
   pagination: {
     currentPage: number;
     totalPages: number;
@@ -29,10 +51,12 @@ interface SearchResponse {
     hasPrevPage: boolean;
   };
   filters: {
-    appliedFilters: Record<string, any>;
+    appliedFilters: Record<string, string>;
     resultsCount: number;
   };
 }
+
+type DrizzleCondition = ReturnType<typeof and> | ReturnType<typeof or> | ReturnType<typeof eq> | ReturnType<typeof ilike> | ReturnType<typeof between> | ReturnType<typeof inArray>;
 
 export async function GET(request: NextRequest): Promise<NextResponse<SearchResponse | { error: string }>> {
   try {
@@ -57,7 +81,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
     };
 
     // Build conditions array
-    const conditions: any[] = [];
+    const conditions: DrizzleCondition[] = [];
     let orderByClause;
 
     // Text search using ILIKE for PostgreSQL compatibility
@@ -228,7 +252,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
     }, {} as Record<string, string[]>);
 
     // Attach categories to books
-    const booksWithCategories = results.map(book => ({
+    const booksWithCategories: BookResult[] = results.map(book => ({
       ...book,
       categories: categoriesByBook[book.id] || []
     }));
@@ -246,8 +270,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
       },
       filters: {
         appliedFilters: Object.fromEntries(
-          Object.entries(params).filter(([_, value]) => value !== undefined)
-        ),
+          Object.entries(params).filter(([, value]) => value !== undefined)
+        ) as Record<string, string>,
         resultsCount: booksWithCategories.length,
       },
     };

@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback, useRef, memo } from "react"
-import { Search, X } from "lucide-react"
+import { Search } from "lucide-react"
 
 interface SearchBarProps {
   searchInput: string
