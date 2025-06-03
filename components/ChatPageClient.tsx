@@ -126,7 +126,7 @@ export default function ChatPageClient() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-red-50/30">
+    <div className="h-full flex flex-col bg-gradient-to-br from-gray-50 via-white to-red-50/30">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 sm:py-6">
         <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
