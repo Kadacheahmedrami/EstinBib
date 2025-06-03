@@ -1,6 +1,14 @@
+import { getServerAuthSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import ComplaintForm from "@/components/ComplaintForm";
 
-export default function SubmitComplaintPage() {
+export default async function SubmitComplaintPage() {
+  const session = await getServerAuthSession();
+
+  if (!session) {
+    redirect("/auth/login");
+  }
+
   return (
     <div className="h-[92vh] overflow-y-scroll bg-gradient-to-br text-gray-700">
       <div className="max-w-4xl h-full mx-auto pt-12 pb-20 px-4 sm:px-6 lg:px-8">
