@@ -333,41 +333,6 @@ export default function Catalogue() {
     }
   }, [searchInput, updateUrlParams, isMobile])
 
-  // Create a serialized version of filters for dependency tracking
-  const filtersString = useMemo(() => {
-    return JSON.stringify({
-      q: filters.q,
-      size: filters.size,
-      availability: filters.availability,
-      categories: filters.categories,
-      schoolYear: filters.schoolYear,
-      type: filters.type,
-      documentType: filters.documentType,
-      language: filters.language,
-      periodicalFrequency: filters.periodicalFrequency,
-      periodicType: filters.periodicType,
-      page: filters.page,
-      limit: filters.limit,
-      sortBy: filters.sortBy,
-      sortOrder: filters.sortOrder
-    })
-  }, [
-    filters.q,
-    filters.size,
-    filters.availability,
-    filters.categories,
-    filters.schoolYear,
-    filters.type,
-    filters.documentType,
-    filters.language,
-    filters.periodicalFrequency,
-    filters.periodicType,
-    filters.page,
-    filters.limit,
-    filters.sortBy,
-    filters.sortOrder
-  ])
-
   // Effect to perform search when filters change
   useEffect(() => {
     if (isInitialMount.current) {
@@ -422,7 +387,24 @@ export default function Catalogue() {
 
     updateUrlParams(searchParameters)
     debouncedSearch(searchParameters)
-  }, [filtersString, debouncedSearch, updateUrlParams])
+  }, [
+    filters.q,
+    filters.size,
+    filters.availability,
+    filters.categories,
+    filters.schoolYear,
+    filters.type,
+    filters.documentType,
+    filters.language,
+    filters.periodicalFrequency,
+    filters.periodicType,
+    filters.page,
+    filters.limit,
+    filters.sortBy,
+    filters.sortOrder,
+    debouncedSearch,
+    updateUrlParams
+  ])
 
   // Cleanup debounced function
   useEffect(() => {
@@ -458,7 +440,23 @@ export default function Catalogue() {
     initialParams.sortOrder = filters.sortOrder || "desc"
 
     debouncedSearch(initialParams)
-  }, [debouncedSearch, filtersString])
+  }, [
+    debouncedSearch,
+    filters.availability,
+    filters.categories,
+    filters.documentType,
+    filters.language,
+    filters.limit,
+    filters.page,
+    filters.periodicType,
+    filters.periodicalFrequency,
+    filters.q,
+    filters.schoolYear,
+    filters.size,
+    filters.sortBy,
+    filters.sortOrder,
+    filters.type
+  ])
 
   return (
     <div className="w-screen mx-auto">

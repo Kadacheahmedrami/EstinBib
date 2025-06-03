@@ -18,8 +18,6 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
- 
-
   // Enhanced animation handling
   useEffect(() => {
     if (isSticky) {
@@ -121,7 +119,48 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
         </div>
       </div>
 
-  
+      {isVisible && previousKeywords.length > 0 && (
+        <div
+          className={`search-container absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-40 transition-all duration-200 ${
+            isSticky ? "shadow-2xl" : ""
+          }`}
+        >
+          <div className="p-3 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Clock className="w-4 h-4" />
+              <span className="font-medium">Recent searches</span>
+            </div>
+            <button
+              onClick={clearSearchHistory}
+              className="text-xs text-gray-400 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded hover:bg-gray-50"
+            >
+              Clear all
+            </button>
+          </div>
+          <div className="max-h-64 overflow-y-auto">
+            {previousKeywords.map((keyword, index) => (
+              <div
+                key={index}
+                onClick={() => handleSuggestionClick(keyword)}
+                className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150 group"
+              >
+                <div className="flex items-center gap-3">
+                  <Search className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-700 group-hover:text-gray-900">
+                    {keyword}
+                  </span>
+                </div>
+                <button
+                  onClick={(e) => removeSuggestion(keyword, e)}
+                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 rounded-full transition-all duration-200"
+                >
+                  <X className="w-3 h-3 text-gray-400 hover:text-red-500" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
