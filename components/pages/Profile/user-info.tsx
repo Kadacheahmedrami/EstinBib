@@ -1,7 +1,7 @@
 import { getUserInfo } from "@/app/actions/user"
 import { CircleUserRound } from "lucide-react"
 import Signout from "../auth/signout"
-
+import Image from "next/image"
 const UserInfo = async () => {
   const info = await getUserInfo()
 
@@ -12,11 +12,13 @@ const UserInfo = async () => {
         <div className="flex flex-col items-center text-center w-full lg:w-auto">
           <div className="relative group">
           {info?.image ? (
-  <img
-    src={info.image}
-    alt="Profile"
-    className="w-40 h-40 sm:w-60 sm:h-60 rounded-full object-cover border border-gray-200 shadow-md"
-  />
+      <Image
+      src={info.image}
+      alt="Profile"
+      fill
+      className="object-cover"
+      sizes="(max-width: 640px) 10rem, 15rem"
+    />
 ) : (
   <CircleUserRound className="w-40 h-40 sm:w-60 sm:h-60 text-gray-400 transition-colors group-hover:text-gray-500" />
 )}

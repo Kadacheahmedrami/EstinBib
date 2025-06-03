@@ -3,6 +3,7 @@ import { desc, asc, sql, and, or, inArray, between, eq, count, ilike } from "dri
 import { books, bookCategories, categories } from "@/db/schema";
 import { db } from "@/db";
 
+type WithRelevance = BookResult & { relevance_score?: number };
 // Types for better type safety
 interface SearchParams {
   q?: string;
@@ -288,8 +289,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<SearchResp
     }, {} as Record<string, string[]>);
 
     // Attach categories to books and remove relevance_score from results
-    const booksWithCategories: BookResult[] = results.map(book => {
-      const { relevance_score, ...bookData } = book as any;
+    const booksWithCategories: BookResult[] = (results as WithRelevance[]).map((book) => {
+      // Cast away the `relevance_score` and spread into BookResult directly:
+      const bookData = book as BookResult;
       return {
         ...bookData,
         categories: categoriesByBook[book.id] || []
