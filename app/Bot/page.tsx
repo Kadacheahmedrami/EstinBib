@@ -6,6 +6,20 @@ export const metadata: Metadata = {
   description: "Chat with our AI assistant about books in our library",
 }
 
-export default function ChatPage() {
+
+import { getServerAuthSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
+
+
+export default async function ChatPage() {
+  const session = await getServerAuthSession();
+
+  if (!session) {
+    redirect("/auth/login");
+  }
+
   return <ChatPageClient />
 }
+
+ 
+
