@@ -2,9 +2,10 @@
 
 import type React from "react"
 import { memo } from "react"
-import { X } from "lucide-react"
+import { X, Loader2 } from "lucide-react"
 import NeonCheckbox from "@/components/pages/checkBox/checkbox"
 import RadioButton from "@/components/pages/radioInput/radiobutton"
+import { useCategories } from "@/hooks/useCategories"
 import type { FilterState } from "@/types/_types"
 
 interface FilterSidebarProps {
@@ -76,6 +77,25 @@ const RadioItem = memo(
 )
 RadioItem.displayName = "RadioItem"
 
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center py-4">
+    <Loader2 className="w-5 h-5 animate-spin text-gray-500" />
+    <span className="ml-2 text-sm text-gray-500">Loading...</span>
+  </div>
+)
+
+const ErrorMessage = ({ message, onRetry }: { message: string; onRetry: () => void }) => (
+  <div className="text-center py-4">
+    <p className="text-sm text-red-500 mb-2">{message}</p>
+    <button
+      onClick={onRetry}
+      className="text-xs text-blue-500 hover:text-blue-700 underline"
+    >
+      Try again
+    </button>
+  </div>
+)
+
 export default function FilterSidebar({
   filters,
   onFilterChange,
@@ -84,6 +104,8 @@ export default function FilterSidebar({
   isMobile,
   onCloseFilter,
 }: FilterSidebarProps) {
+  const { categories, loading: categoriesLoading, error: categoriesError, refetch } = useCategories()
+
   return (
     <div
       className={`z-[3] bg-[#F8F8F8] min-w-[240px] p-6 rounded-r-[15px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
@@ -118,24 +140,30 @@ export default function FilterSidebar({
       </div>
 
       <div className="space-y-8">
-        {/* Categories Section */}
+        {/* Categories Section - Now Dynamic */}
         <FilterSection title="Categories">
-          {["Business", "Commerce", "Science", "Technology", "Arts", "Literature"].map((category, index) => (
-            <CheckboxItem
-              key={index}
-              id={`category-${index}`}
-              checked={filters.categories.includes(category)}
-              onChange={(checked) =>
-                onFilterChange({
-                  ...filters,
-                  categories: checked
-                    ? [...filters.categories, category]
-                    : filters.categories.filter((item) => item !== category),
-                })
-              }
-              label={category}
-            />
-          ))}
+          {categoriesLoading ? (
+            <LoadingSpinner />
+          ) : categoriesError ? (
+            <ErrorMessage message={categoriesError} onRetry={refetch} />
+          ) : (
+            categories.map((category) => (
+              <CheckboxItem
+                key={category.id}
+                id={`category-${category.id}`}
+                checked={filters.categories.includes(category.name)}
+                onChange={(checked) =>
+                  onFilterChange({
+                    ...filters,
+                    categories: checked
+                      ? [...filters.categories, category.name]
+                      : filters.categories.filter((item) => item !== category.name),
+                  })
+                }
+                label={category.name}
+              />
+            ))
+          )}
         </FilterSection>
 
         {/* Document Type Section */}
