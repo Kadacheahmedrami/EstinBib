@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback, useRef, memo } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Search, X, Clock } from "lucide-react"
 
 interface SearchBarProps {
@@ -13,7 +13,6 @@ interface SearchBarProps {
 
 export default function SearchBar({ searchInput, onSearchChange, onSearch, isSticky = false }: SearchBarProps) {
   const [previousKeywords, setPreviousKeywords] = useState<string[]>([])
-  const [isFocused, setIsFocused] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -26,7 +25,7 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
       if (storedKeywords) {
         setPreviousKeywords(JSON.parse(storedKeywords))
       }
-    } catch (error) {
+    } catch (_) {
       console.warn("Failed to load search keywords from localStorage")
       setPreviousKeywords([])
     }
@@ -36,7 +35,7 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
   useEffect(() => {
     try {
       localStorage.setItem("searchKeywords", JSON.stringify(previousKeywords))
-    } catch (error) {
+    } catch (_) {
       console.warn("Failed to save search keywords to localStorage")
     }
   }, [previousKeywords])
@@ -50,7 +49,6 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
     }
   }, [isSticky])
 
-  // Function to toggle search suggestions visibility
   const toggleSearchSuggestions = useCallback(() => {
     setIsVisible(prev => !prev)
   }, [])
@@ -59,10 +57,10 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
     (value: string) => {
       onSearchChange(value)
       if (value.trim() && !previousKeywords.includes(value.trim())) {
-        setPreviousKeywords((prev) => [value.trim(), ...prev].slice(0, 8)) // Increased to 8 keywords
+        setPreviousKeywords((prev) => [value.trim(), ...prev].slice(0, 8))
       }
       onSearch(value)
-      setIsVisible(false) // Hide suggestions after search
+      setIsVisible(false)
     },
     [previousKeywords, onSearchChange, onSearch],
   )
@@ -82,7 +80,6 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
     setPreviousKeywords(prev => prev.filter(k => k !== keyword))
   }, [])
 
-  // Enhanced keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault()
@@ -107,12 +104,8 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
           type="text"
           placeholder="Search a name, category, or a module"
           className="flex-1 bg-transparent outline-none px-4 text-sm placeholder-gray-500 transition-all duration-200"
-          onClick={() => {
-            setIsFocused(true)
-            toggleSearchSuggestions()
-          }}
+          onClick={toggleSearchSuggestions}
           onFocus={() => {
-            setIsFocused(true)
             if (previousKeywords.length > 0) {
               setIsVisible(true)
             }
@@ -121,7 +114,6 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
             const relatedTarget = e.relatedTarget as HTMLElement | null
             if (!relatedTarget?.closest(".search-container")) {
               setTimeout(() => {
-                setIsFocused(false)
                 setIsVisible(false)
               }, 200)
             }
@@ -130,7 +122,6 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
           onKeyDown={handleKeyDown}
         />
 
-        {/* Clear button when there's input */}
         {searchInput && (
           <button
             onClick={() => handleSearch("")}
@@ -150,9 +141,8 @@ export default function SearchBar({ searchInput, onSearchChange, onSearch, isSti
         </div>
       </div>
 
-      {/* Enhanced Search Suggestions */}
       {isVisible && previousKeywords.length > 0 && (
-        <div 
+        <div
           className={`search-container absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-40 transition-all duration-200 ${
             isSticky ? "shadow-2xl" : ""
           }`}
