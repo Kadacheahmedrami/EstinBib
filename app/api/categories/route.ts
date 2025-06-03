@@ -1,58 +1,74 @@
-// app/api/filter-data/route.ts
+// app/api/categories/route.ts
 import { NextResponse } from 'next/server'
 import { db } from '@/db' // Adjust path to your database connection
-import { books } from '@/db/schema' // Adjust path to your schema
-import { sql } from 'drizzle-orm'
+import { categories } from '@/db/schema' // Adjust path to your schema
+import { eq } from 'drizzle-orm'
 
 export async function GET() {
   try {
-    // Get distinct languages
-    const languages = await db.selectDistinct({
-      language: books.language
-    }).from(books).where(sql`${books.language} IS NOT NULL`)
-
-    // Get distinct document types
-    const documentTypes = await db.selectDistinct({
-      documentType: books.documentType
-    }).from(books).where(sql`${books.documentType} IS NOT NULL`)
-
-    // Get distinct book types (BOOK, DOCUMENT, PERIODIC, ARTICLE)
-    const bookTypes = await db.selectDistinct({
-      type: books.type
-    }).from(books)
-
-    // Get distinct periodical frequencies for periodic type filter
-    const periodicTypes = await db.selectDistinct({
-      periodicalFrequency: books.periodicalFrequency
-    }).from(books).where(sql`${books.periodicalFrequency} IS NOT NULL`)
-
-    // Calculate size ranges based on actual data
-    const sizeRanges = [
-      { label: "0 - 250 pages", min: 0, max: 250 },
-      { label: "250 - 500 pages", min: 250, max: 500 },
-      { label: "500 - 750 pages", min: 500, max: 750 },
-      { label: "750 - 1000 pages", min: 750, max: 1000 },
-      { label: "1000+ pages", min: 1000, max: null }
-    ]
-
+    const allCategories = await db.select({
+      id: categories.id,
+      name: categories.name,
+    }).from(categories)
+    
     return NextResponse.json({
       success: true,
-      data: {
-        languages: languages.map(l => l.language).filter(Boolean),
-        documentTypes: documentTypes.map(d => d.documentType).filter(Boolean),
-        bookTypes: bookTypes.map(t => t.type),
-        periodicTypes: periodicTypes.map(p => p.periodicalFrequency).filter(Boolean),
-        sizeRanges,
-        availability: ["Available", "Not Available"]
-      }
+      data: allCategories,
+      count: allCategories.length
     })
   } catch (error) {
-    console.error('Error fetching filter data:', error)
+    console.error('Error fetching categories:', error)
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Failed to fetch filter data' 
+        error: 'Failed to fetch categories' 
       },
+      { status: 500 }
+    )
+  }
+}
+
+// Add new category
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const { name } = body
+    
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      return NextResponse.json(
+        { success: false, error: 'Category name is required' },
+        { status: 400 }
+      )
+    }
+    
+    // Check if category already exists
+    const existingCategory = await db.select()
+      .from(categories)
+      .where(eq(categories.name, name.trim()))
+      .limit(1)
+    
+    if (existingCategory.length > 0) {
+      return NextResponse.json(
+        { success: false, error: 'Category already exists' },
+        { status: 409 }
+      )
+    }
+    
+    const [newCategory] = await db.insert(categories)
+      .values({ name: name.trim() })
+      .returning({
+        id: categories.id,
+        name: categories.name,
+      })
+    
+    return NextResponse.json({
+      success: true,
+      data: newCategory
+    }, { status: 201 })
+  } catch (error) {
+    console.error('Error creating category:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to create category' },
       { status: 500 }
     )
   }

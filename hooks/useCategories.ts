@@ -10,6 +10,7 @@ interface CategoriesResponse {
   success: boolean
   data: Category[]
   count: number
+  error?: string // Add optional error property
 }
 
 export const useCategories = () => {
@@ -81,10 +82,10 @@ export const useCategories = () => {
     }
   }
 
-  return { 
-    categories, 
-    loading, 
-    error, 
+  return {
+    categories,
+    loading,
+    error,
     refetch,
     addCategory
   }

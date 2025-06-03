@@ -302,25 +302,7 @@ export default function FilterSidebar({
           )}
         </FilterSection>
 
-        {/* School Year Section - Static based on your schema enum */}
-        <FilterSection title="School Year">
-          {["1CP", "2CP", "1CS", "2CS", "3CS", "Other"].map((year, index) => (
-            <CheckboxItem
-              key={index}
-              id={`year-${index}`}
-              checked={filters.schoolYear.includes(year)}
-              onChange={(checked) =>
-                onFilterChange({
-                  ...filters,
-                  schoolYear: checked
-                    ? [...filters.schoolYear, year]
-                    : filters.schoolYear.filter((item) => item !== year),
-                })
-              }
-              label={year}
-            />
-          ))}
-        </FilterSection>
+       
 
         {/* Size Section - Dynamic from Database */}
         <FilterSection title="Size">
