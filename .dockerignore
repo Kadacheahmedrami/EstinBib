@@ -1,5 +1,27 @@
-node_modules
-npm-debug.log
-Dockerfile
-.dockerignore
-.env
+ Dockerfile*
+ docker-compose*
+ .dockerignore
+ .git
+ .gitignore
+ README.md
+ .env*
+ .next
+ .swc
+ node_modules
+ npm-debug.log*
+ yarn-debug.log*
+ yarn-error.log*
+ .pnpm-debug.log*
+ 
+ # Vercel
+ .vercel
+ 
+ # typescript
+-*.ts
++# Ignore all .ts files by default…
++*.ts
++# …but make sure Drizzle’s config and schema get included:
++!drizzle.config.ts
++!db/schema.ts
+ 
+ next-env.d.ts

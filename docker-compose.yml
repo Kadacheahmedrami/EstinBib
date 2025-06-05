@@ -1,0 +1,108 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: library_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: neondb
+      POSTGRES_USER: neondb_owner
+      POSTGRES_PASSWORD: postgres_password_123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - library_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neondb_owner -d neondb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Service to generate and run migrations
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: deps
+    container_name: library_migrate
+    environment:
+      DATABASE_URL: postgresql://neondb_owner:postgres_password_123@postgres:5432/neondb?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - library_network
+    volumes:
+      - ./drizzle:/app/drizzle
+      - ./db:/app/db
+      - ./src:/app/src
+      - ./drizzle.config.json:/app/drizzle.config.json
+      - ./drizzle.config.ts:/app/drizzle.config.ts
+    # Create drizzle directory, generate migrations, then migrate
+    command: sh -c "mkdir -p /app/drizzle && npx drizzle-kit generate && npx drizzle-kit migrate"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: postgresql://neondb_owner:postgres_password_123@postgres:5432/neondb?sslmode=disable
+        NEXTAUTH_SECRET: gosj4ikZn2XTUYVS1QvBwEVcqy9TYAJC4969KiRHfH4=
+        CLOUDINARY_API_SECRET: jxntyrUPbuSNTQg-Ipd5km9iMRA
+        CLOUDINARY_API_KEY: 512689255974285
+        CLOUDINARY_CLOUD_NAME: df9y24wp0
+        GOOGLE_CLIENT_SECRET: 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
+        GOOGLE_CLIENT_ID: 895709024592-ggk90fnhtj7umga0e2visv52m9gkbrns.apps.googleusercontent.com
+        NEXT_PUBLIC_API_URL: http://localhost:3000/
+        GeminiApiKey: AIzaSyAs44KUuNewiuVQynu3ywdByeJCepX0TzE
+        NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: gosj4ikZn2XTUYVS1QvBwEVcqy9TYAJC4969KiRHfH4=
+    container_name: library_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://neondb_owner:postgres_password_123@postgres:5432/neondb?sslmode=disable
+      NEXTAUTH_SECRET: gosj4ikZn2XTUYVS1QvBwEVcqy9TYAJC4969KiRHfH4=
+      NEXTAUTH_URL: http://localhost:3000
+      CLOUDINARY_API_SECRET: jxntyrUPbuSNTQg-Ipd5km9iMRA
+      CLOUDINARY_API_KEY: 512689255974285
+      CLOUDINARY_CLOUD_NAME: df9y24wp0
+      GOOGLE_CLIENT_SECRET: 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
+      GOOGLE_CLIENT_ID: 895709024592-ggk90fnhtj7umga0e2visv52m9gkbrns.apps.googleusercontent.com
+      NEXT_PUBLIC_API_URL: http://localhost:3000/
+      GeminiApiKey: AIzaSyAs44KUuNewiuVQynu3ywdByeJCepX0TzE
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: gosj4ikZn2XTUYVS1QvBwEVcqy9TYAJC4969KiRHfH4=
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: a_kadache@estin.dz
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - library_network
+    volumes:
+      - ./uploads:/app/uploads
+
+  adminer:
+    image: adminer:latest
+    container_name: library_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - library_network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  library_network:
+    driver: bridge

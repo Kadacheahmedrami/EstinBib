@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone", // ✅ Add this line
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   images: {
     remotePatterns: [
       {
@@ -49,7 +55,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "**.googleusercontent.com", // your wildcard pattern
+        hostname: "**.googleusercontent.com", // ⚠️ Wildcard not supported like this
       },
     ],
   },
