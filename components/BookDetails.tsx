@@ -30,6 +30,7 @@ interface Book {
   addedAt: Date;
   language: string;
   categories: Category[];
+  pdfUrl?: string;
 }
 
 interface BookDetailsProps {
@@ -41,6 +42,9 @@ export default function BookDetails({ book }: BookDetailsProps) {
     book.categories && book.categories.length > 0
       ? book.categories[0].name
       : "General";
+
+  // Check if PDF is available
+  const isPdfAvailable = book.pdfUrl && book.pdfUrl !== "none";
 
   return (
     <main className="bg-[#F7F6F6] py-10">
@@ -130,15 +134,20 @@ export default function BookDetails({ book }: BookDetailsProps) {
 
             {/* Action Button */}
             <div className="mt-6">
-        
-              <Link href={`/catalog/${book.id}/pdf`} passHref>
-                <div
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center w-full px-6 py-3 border border-red-500 text-red-500 font-bold rounded-xl transition-colors hover:bg-red-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300"
-                >
-                  Check PDF
+              {isPdfAvailable ? (
+                <Link href={`/catalog/${book.id}/pdf`} passHref>
+                  <div
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-full px-6 py-3 border border-red-500 text-red-500 font-bold rounded-xl transition-colors hover:bg-red-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300"
+                  >
+                    Check PDF
+                  </div>
+                </Link>
+              ) : (
+                <div className="flex items-center justify-center w-full px-6 py-3 border border-gray-400 text-gray-500 font-bold rounded-xl bg-gray-100 cursor-not-allowed">
+                  PDF will be available soon
                 </div>
-              </Link>
+              )}
             </div>
           </section>
         </article>
@@ -158,4 +167,3 @@ export default function BookDetails({ book }: BookDetailsProps) {
     </main>
   );
 }
-  

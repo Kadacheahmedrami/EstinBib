@@ -60,6 +60,10 @@ export async function addNewBook(bookData: AddBook) {
 /**
  * Get the 5 most borrowed books
  */
+
+/**
+ * Get the 5 most borrowed books
+ */
 export async function getMostBorrowedBooks() {
   const mostBorrowedBooks = await db
     .select({
@@ -77,9 +81,7 @@ export async function getMostBorrowedBooks() {
   return mostBorrowedBooks;
 }
 
-/**
- * Get details of a specific book by ID
- */
+
 export const bookDetails = async (id: string) => {
   const [result] = await db
     .select({
@@ -89,6 +91,7 @@ export const bookDetails = async (id: string) => {
       coverImage: books.coverImage,
       description: books.description,
       isbn: books.isbn,
+      pdfUrl: books.pdfUrl, // Added this line
       addedAt: books.addedAt,
       size: books.size,
       language: books.language,

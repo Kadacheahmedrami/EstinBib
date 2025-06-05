@@ -22,7 +22,7 @@ export default async function PdfPage({ params }: PageProps) {
           <p className="text-gray-600 mb-6">The requested book could not be found.</p>
           <Link
             href="/catalog"
-            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
+            className="inline-block bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 transition-colors"
           >
             Back to Catalog
           </Link>
@@ -34,7 +34,7 @@ export default async function PdfPage({ params }: PageProps) {
   // Use the book.pdfUrl if provided, otherwise fall back to a dummy PDF for demo
   const pdfUrl =
     (book as unknown as Book).pdfUrl ||
-    'null';
+  "none";
 
   return (
     <div className=" bg-gray-50">
@@ -43,16 +43,28 @@ export default async function PdfPage({ params }: PageProps) {
           {book.title} (PDF View)
         </h1>
 
-        {/* Embed PDF in an iframe */}
-        <div className="border rounded-lg overflow-hidden">
-          <iframe
-            src={pdfUrl}
-            className="w-full h-[80vh]"
-            title={`${book.title} PDF`}
-          />
-        </div>
-
-
+        {/* Check if PDF is available */}
+        {pdfUrl === "none" ? (
+          <div className="border rounded-lg bg-white p-8 text-center">
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">PDF Not Available</h2>
+            <p className="text-gray-600 mb-6">Sorry, the PDF for this book is not currently available.</p>
+            <Link
+              href={`/catalog/${id}`}
+              className="inline-block bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 transition-colors"
+            >
+              Back to Book Details
+            </Link>
+          </div>
+        ) : (
+          /* Embed PDF in an iframe */
+          <div className="border rounded-lg overflow-hidden">
+            <iframe
+              src={pdfUrl}
+              className="w-full h-[80vh]"
+              title={`${book.title} PDF`}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

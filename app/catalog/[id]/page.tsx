@@ -25,6 +25,7 @@ interface Book {
   available: boolean;
   publishedAt: Date;
   categories: Category[];
+  pdfUrl?: string;
 }
 
 interface PageProps {
