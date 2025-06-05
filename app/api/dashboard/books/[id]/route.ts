@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { books, bookCategories, categories } from "@/db/schema";
 import { db } from "@/db";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export async function GET(
   request: NextRequest,

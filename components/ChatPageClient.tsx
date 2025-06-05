@@ -139,7 +139,7 @@ export default function ChatPageClient() {
                 <div
                   className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm ${
                     message.role === "user"
-                      ? "bg-gradient-to-br from-blue-500 to-blue-600"
+                      ? "bg-gradient-to-br from-blue-900 to-blue-950"
                       : "bg-gradient-to-br from-[#e63946] to-[#c1121f]"
                   }`}
                 >
@@ -155,7 +155,7 @@ export default function ChatPageClient() {
                   <div
                     className={`p-3 sm:p-4 rounded-2xl shadow-sm backdrop-blur-sm ${
                       message.role === "user"
-                        ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white"
+                        ? "bg-gradient-to-br from-blue-900 to-blue-950 text-white"
                         : "bg-white/90 border border-gray-200/60 text-gray-800"
                     }`}
                   >
