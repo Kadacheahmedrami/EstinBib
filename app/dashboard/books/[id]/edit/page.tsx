@@ -9,26 +9,41 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2,  Camera, Check, BookOpen, Info, Hash } from 'lucide-react'
+import { Loader2, Camera, Check, BookOpen, Info, Hash, Trash2 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
 
 interface Category {
   id: string
   name: string
 }
 
+interface BookCategory {
+  id: string
+  name: string
+}
+
 interface BookData {
+  id: string
   title: string
   author: string
   isbn: string | null
+  barcode: string | null
   description: string
   coverImage: string
+  pdfUrl: string | null
   size: number
+  available: boolean
   publishedAt: string
   language: string
-  categories: { id: string }[]
+  type: 'BOOK' | 'DOCUMENT' | 'PERIODIC' | 'ARTICLE'
+  periodicalFrequency: string | null
+  periodicalIssue: string | null
+  articleJournal: string | null
+  documentType: string | null
+  categories: BookCategory[]
 }
 
 interface EditBookPageProps {
@@ -39,12 +54,15 @@ export default function EditBookPage({ params }: EditBookPageProps) {
   const router = useRouter()
   const [bookId, setBookId] = useState<string>('')
   const [categories, setCategories] = useState<Category[]>([])
-  const [form, setForm] = useState<BookData>({
-    title: '', author: '', isbn: '', description: '', coverImage: '', size: 0,
-    publishedAt: '', language: '', categories: []
+  const [form, setForm] = useState<Partial<BookData>>({
+    title: '', author: '', isbn: '', barcode: '', description: '', coverImage: '', 
+    pdfUrl: '', size: 0, available: true, publishedAt: '', language: '', 
+    type: 'BOOK', periodicalFrequency: '', periodicalIssue: '', articleJournal: '', 
+    documentType: '', categories: []
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [imageError, setImageError] = useState<string | null>(null)
@@ -73,21 +91,14 @@ export default function EditBookPage({ params }: EditBookPageProps) {
 
     Promise.all([
       fetch('/api/dashboard/categories').then(r => r.json()),
-      fetch(`/api/books/${bookId}`).then(r => r.json())
+      fetch(`/api/dashboard/books/${bookId}`).then(r => r.json())
     ]).then(([cats, data]) => {
-      // Extract the book from the API response structure
-      const book = data.book[0]
-      
       setCategories(cats)
+      
+      const book = data.book
       setForm({
-        title: book.title,
-        author: book.author,
-        isbn: book.isbn,
-        description: book.description,
-        coverImage: book.coverImage,
-        size: book.size,
+        ...book,
         publishedAt: book.publishedAt.split('T')[0],
-        language: book.language,
         categories: book.categories || []
       })
     }).catch(err => {
@@ -97,13 +108,33 @@ export default function EditBookPage({ params }: EditBookPageProps) {
   }, [bookId])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: name === 'size' ? Number(value) : value }))
+    const { name, value, type } = e.target
+    setForm(prev => ({ 
+      ...prev, 
+      [name]: type === 'number' ? Number(value) : value 
+    }))
+  }
+
+  const handleSwitchChange = (name: string, value: boolean) => {
+    setForm(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSelectChange = (name: string, value: string) => {
+    setForm(prev => ({ ...prev, [name]: value }))
   }
 
   const handleCategory = (value: string) => {
-    // 'none' means clear categories
-    setForm(prev => ({ ...prev, categories: value === 'none' ? [] : [{ id: value }] }))
+    if (value === 'none') {
+      setForm(prev => ({ ...prev, categories: [] }))
+    } else {
+      const selectedCategory = categories.find(cat => cat.id === value)
+      if (selectedCategory) {
+        setForm(prev => ({ 
+          ...prev, 
+          categories: [{ id: selectedCategory.id, name: selectedCategory.name }] 
+        }))
+      }
+    }
   }
 
   const handleImageClick = () => {
@@ -160,20 +191,24 @@ export default function EditBookPage({ params }: EditBookPageProps) {
     e.preventDefault()
     setSaving(true)
     setError(null)
+    
     try {
-      const payload: Omit<BookData, 'size'> & { size: number } = { ...form, size: Number(form.size) }
-      // If categories is empty, we'll exclude it from the payload
-      if (form.categories.length === 0) {
-        delete (payload as Partial<typeof payload>).categories
+      const payload = {
+        ...form,
+        size: Number(form.size),
+        categories: form.categories?.length ? form.categories : []
       }
       
-      const res = await fetch(`/api/books/${bookId}`, {
+      const res = await fetch(`/api/dashboard/books/${bookId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
       
-      if (!res.ok) throw new Error('Failed to update book')
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to update book')
+      }
       
       toast({
         title: "Book updated",
@@ -194,6 +229,40 @@ export default function EditBookPage({ params }: EditBookPageProps) {
     }
   }
 
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this book? This action cannot be undone.')) {
+      return
+    }
+
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/dashboard/books/${bookId}`, {
+        method: 'DELETE'
+      })
+      
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to delete book')
+      }
+      
+      toast({
+        title: "Book deleted",
+        description: "The book has been deleted successfully.",
+        variant: "default"
+      })
+      
+      router.push('/dashboard/books')
+    } catch (err) {
+      toast({
+        title: "Delete failed",
+        description: err instanceof Error ? err.message : "There was a problem deleting the book.",
+        variant: "destructive"
+      })
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24">
@@ -204,21 +273,40 @@ export default function EditBookPage({ params }: EditBookPageProps) {
   }
 
   // Get current category id or 'none' if there isn't one
-  const currentCategoryId = form.categories.length > 0 ? form.categories[0].id : 'none'
+  const currentCategoryId = form.categories?.length ? form.categories[0].id : 'none'
 
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Edit Book</h1>
-        <Button 
-          variant="outline" 
-          onClick={() => router.push('/dashboard/books')}
-        >
-          Cancel
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="destructive" 
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            {deleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </>
+            )}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => router.push('/dashboard/books')}
+          >
+            Cancel
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {/* Left column - Cover Image */}
         <div className="lg:col-span-1">
           <Card className="overflow-hidden">
@@ -227,7 +315,7 @@ export default function EditBookPage({ params }: EditBookPageProps) {
                 {form.coverImage ? (
                   <Image
                     src={form.coverImage}
-                    alt={form.title}
+                    alt={form.title || 'Book cover'}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 33vw"
@@ -270,13 +358,20 @@ export default function EditBookPage({ params }: EditBookPageProps) {
               <div className="p-4">
                 <h3 className="text-lg font-semibold mb-2">{form.title || 'Book Title'}</h3>
                 <p className="text-muted-foreground">{form.author || 'Author'}</p>
+                <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                  <span className="text-sm font-medium">Available</span>
+                  <Switch
+                    checked={form.available}
+                    onCheckedChange={(checked) => handleSwitchChange('available', checked)}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Right column - Book Details Form */}
-        <div className="lg:col-span-2">
+        <div className="md:col-span-3 lg:col-span-4">
           <Card>
             <CardContent className="p-6">
               <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab}>
@@ -305,33 +400,138 @@ export default function EditBookPage({ params }: EditBookPageProps) {
                   <TabsContent value="details" className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="title">Title</Label>
-                      <Input id="title" name="title" placeholder="Book Title" value={form.title} onChange={handleChange} required />
+                      <Input 
+                        id="title" 
+                        name="title" 
+                        placeholder="Book Title" 
+                        value={form.title || ''} 
+                        onChange={handleChange} 
+                        required 
+                      />
                     </div>
                     
                     <div className="space-y-2">
                       <Label htmlFor="author">Author</Label>
-                      <Input id="author" name="author" placeholder="Author Name" value={form.author} onChange={handleChange} required />
+                      <Input 
+                        id="author" 
+                        name="author" 
+                        placeholder="Author Name" 
+                        value={form.author || ''} 
+                        onChange={handleChange} 
+                        required 
+                      />
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="isbn">ISBN</Label>
-                      <Input id="isbn" name="isbn" placeholder="ISBN (optional)" value={form.isbn || ''} onChange={handleChange} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="isbn">ISBN</Label>
+                        <Input 
+                          id="isbn" 
+                          name="isbn" 
+                          placeholder="ISBN (optional)" 
+                          value={form.isbn || ''} 
+                          onChange={handleChange} 
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="barcode">Barcode</Label>
+                        <Input 
+                          id="barcode" 
+                          name="barcode" 
+                          placeholder="Barcode (optional)" 
+                          value={form.barcode || ''} 
+                          onChange={handleChange} 
+                        />
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select value={currentCategoryId} onValueChange={handleCategory}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">None</SelectItem>
-                          {categories.map(cat => (
-                            <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="type">Type</Label>
+                        <Select 
+                          value={form.type} 
+                          onValueChange={(value) => handleSelectChange('type', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BOOK">Book</SelectItem>
+                            <SelectItem value="DOCUMENT">Document</SelectItem>
+                            <SelectItem value="PERIODIC">Periodic</SelectItem>
+                            <SelectItem value="ARTICLE">Article</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Category</Label>
+                        <Select value={currentCategoryId} onValueChange={handleCategory}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            {categories.map(cat => (
+                              <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
+
+                    {/* Conditional fields based on type */}
+                    {form.type === 'PERIODIC' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="periodicalFrequency">Frequency</Label>
+                          <Input 
+                            id="periodicalFrequency" 
+                            name="periodicalFrequency" 
+                            placeholder="e.g., Monthly, Weekly" 
+                            value={form.periodicalFrequency || ''} 
+                            onChange={handleChange} 
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="periodicalIssue">Issue</Label>
+                          <Input 
+                            id="periodicalIssue" 
+                            name="periodicalIssue" 
+                            placeholder="Issue number/name" 
+                            value={form.periodicalIssue || ''} 
+                            onChange={handleChange} 
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {form.type === 'ARTICLE' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="articleJournal">Journal</Label>
+                        <Input 
+                          id="articleJournal" 
+                          name="articleJournal" 
+                          placeholder="Journal name" 
+                          value={form.articleJournal || ''} 
+                          onChange={handleChange} 
+                        />
+                      </div>
+                    )}
+
+                    {form.type === 'DOCUMENT' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="documentType">Document Type</Label>
+                        <Input 
+                          id="documentType" 
+                          name="documentType" 
+                          placeholder="e.g., Report, Thesis, Manual" 
+                          value={form.documentType || ''} 
+                          onChange={handleChange} 
+                        />
+                      </div>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="description" className="space-y-4">
@@ -341,7 +541,7 @@ export default function EditBookPage({ params }: EditBookPageProps) {
                         id="description" 
                         name="description" 
                         placeholder="Book Description" 
-                        value={form.description} 
+                        value={form.description || ''} 
                         onChange={handleChange} 
                         required 
                         className="min-h-[200px]" 
@@ -356,9 +556,20 @@ export default function EditBookPage({ params }: EditBookPageProps) {
                         id="coverImage" 
                         name="coverImage" 
                         placeholder="Cover Image URL" 
-                        value={form.coverImage} 
+                        value={form.coverImage || ''} 
                         onChange={handleChange} 
                         required 
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="pdfUrl">PDF URL</Label>
+                      <Input 
+                        id="pdfUrl" 
+                        name="pdfUrl" 
+                        placeholder="PDF URL (optional)" 
+                        value={form.pdfUrl || ''} 
+                        onChange={handleChange} 
                       />
                     </div>
                     
@@ -370,7 +581,7 @@ export default function EditBookPage({ params }: EditBookPageProps) {
                           name="size" 
                           type="number" 
                           placeholder="Number of Pages" 
-                          value={form.size} 
+                          value={form.size || ''} 
                           onChange={handleChange} 
                           required 
                         />
@@ -382,7 +593,7 @@ export default function EditBookPage({ params }: EditBookPageProps) {
                           id="language" 
                           name="language" 
                           placeholder="Language" 
-                          value={form.language} 
+                          value={form.language || ''} 
                           onChange={handleChange} 
                           required 
                         />
@@ -396,7 +607,7 @@ export default function EditBookPage({ params }: EditBookPageProps) {
                         name="publishedAt" 
                         type="date" 
                         placeholder="Published Date" 
-                        value={form.publishedAt} 
+                        value={form.publishedAt || ''} 
                         onChange={handleChange} 
                         required 
                       />

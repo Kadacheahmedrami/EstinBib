@@ -34,7 +34,7 @@ export default async function PdfPage({ params }: PageProps) {
   // Use the book.pdfUrl if provided, otherwise fall back to a dummy PDF for demo
   const pdfUrl =
     (book as unknown as Book).pdfUrl ||
-    "https://www.orimi.com/pdf-test.pdf";
+    'null';
 
   return (
     <div className=" bg-gray-50">
