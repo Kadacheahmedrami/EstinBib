@@ -24,20 +24,48 @@ export async function POST(
     const formData = await request.formData();
     const file = formData.get("file");
 
-    if (!file || !(file instanceof File)) {
+    // Check if file exists and is a File-like object
+    if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
+    // In Node.js environment, FormData file is a Blob-like object, not File
+    // We need to check for the properties we need
+    if (typeof file === 'string') {
+      return NextResponse.json({ error: "Invalid file format" }, { status: 400 });
+    }
+
+    // Cast to any to access blob properties in Node.js environment
+    const fileBlob = file as any;
+    
+    if (!fileBlob.stream || !fileBlob.type) {
+      return NextResponse.json({ error: "Invalid file object" }, { status: 400 });
+    }
+
+    // Validate file type
+    if (!fileBlob.type.startsWith('image/')) {
+      return NextResponse.json({ error: "File must be an image" }, { status: 400 });
+    }
+
     // Read file into buffer
-    const arrayBuffer = await file.arrayBuffer();
+    const arrayBuffer = await fileBlob.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
     // Upload to Cloudinary, placing under folder "books/{bookId}"
-    const uploadResult = await new Promise((resolve, reject) => {
+    const uploadResult = await new Promise<any>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: `books/${bookId}` },
+        { 
+          folder: `books/${bookId}`,
+          resource_type: 'image',
+          transformation: [
+            { width: 400, height: 600, crop: 'fill', quality: 'auto' }
+          ]
+        },
         (error, result) => {
-          if (error) return reject(error);
+          if (error) {
+            console.error('Cloudinary upload error:', error);
+            return reject(error);
+          }
           resolve(result);
         }
       );
@@ -45,7 +73,7 @@ export async function POST(
     });
 
     // If upload failed or no result, return error
-    if (!uploadResult || typeof uploadResult !== "object") {
+    if (!uploadResult || !uploadResult.secure_url) {
       return NextResponse.json(
         { error: "Failed to upload image to Cloudinary" },
         { status: 500 }
@@ -53,7 +81,6 @@ export async function POST(
     }
 
     // Extract secure URL from Cloudinary response
-    // @ts-ignore
     const secureUrl: string = uploadResult.secure_url;
 
     // Update book's coverImage field in database
@@ -63,13 +90,24 @@ export async function POST(
       .where(eq(books.id, bookId));
 
     return NextResponse.json(
-      { message: "Image uploaded successfully", coverImage: secureUrl },
+      { 
+        message: "Image uploaded successfully", 
+        coverImage: secureUrl,
+        public_id: uploadResult.public_id 
+      },
       { status: 200 }
     );
   } catch (error) {
     console.error("Error uploading book image:", error);
+    
+    // Provide more specific error messages
+    let errorMessage = "Internal server error";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

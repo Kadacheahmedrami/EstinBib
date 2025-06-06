@@ -14,10 +14,11 @@ services:
     networks:
       - library_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   migrate:
     build:
@@ -38,29 +39,23 @@ services:
       - ./src:/app/src
       - ./drizzle.config.json:/app/drizzle.config.json
       - ./drizzle.config.ts:/app/drizzle.config.ts
-    command: sh -c "mkdir -p /app/drizzle && npx drizzle-kit generate && npx drizzle-kit migrate"
+    command: sh -c "sleep 10 && mkdir -p /app/drizzle && npx drizzle-kit generate && npx drizzle-kit migrate"
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - DATABASE_URL=${DATABASE_URL}
-        - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-        - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-        - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-        - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-        - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-        - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-        - GeminiApiKey=${GeminiApiKey}
-        - NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}
     container_name: library_app
     restart: unless-stopped
     ports:
       - "3000:3000"
     env_file:
       - .env.docker
+    environment:
+      # Override specific environment variables for Docker
+      - NODE_ENV=production
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=http://localhost:3000/
     depends_on:
       postgres:
         condition: service_healthy
