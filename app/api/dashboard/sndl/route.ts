@@ -30,29 +30,35 @@ export async function GET(request: NextRequest) {
     
     // Add search filters based on searchType
     if (searchQuery) {
+      const searchFilters = []
+      
       if (searchType === "all" || searchType === "email") {
-        filters.push(like(users.email, `%${searchQuery}%`))
+        searchFilters.push(like(users.email, `%${searchQuery}%`))
       }
       
       if (searchType === "all" || searchType === "name") {
-        filters.push(like(users.name, `%${searchQuery}%`))
+        searchFilters.push(like(users.name, `%${searchQuery}%`))
       }
       
       if (searchType === "all" || searchType === "reason") {
-        filters.push(like(sndlDemands.requestReason, `%${searchQuery}%`))
+        searchFilters.push(like(sndlDemands.requestReason, `%${searchQuery}%`))
       }
       
-      if (searchType === "all" || searchType === "sndlEmail") {
-        filters.push(like(sndlDemands.sndlEmail, `%${searchQuery}%`))
+      // For search type "all", use OR to match any field
+      // For specific search types, the individual filters will be applied
+      if (searchType === "all") {
+        filters.push(or(...searchFilters))
+      } else {
+        filters.push(...searchFilters)
       }
     }
     
     // Construct the where clause
     const whereClause = filters.length > 0 
-      ? (searchType === "all" ? or(...filters) : and(...filters))
+      ? and(...filters)
       : undefined
 
-    // Get total count for pagination using sql.count() instead of db.fn.count()
+    // Get total count for pagination
     const totalCountResult = await db
       .select({ count: count() })
       .from(sndlDemands)
@@ -68,13 +74,10 @@ export async function GET(request: NextRequest) {
         id: sndlDemands.id,
         requestReason: sndlDemands.requestReason,
         status: sndlDemands.status,
-        sndlEmail: sndlDemands.sndlEmail,
-        sndlPassword: sndlDemands.sndlPassword,
         adminNotes: sndlDemands.adminNotes,
         requestedAt: sndlDemands.requestedAt,
         processedAt: sndlDemands.processedAt,
-        emailSent: sndlDemands.emailSent,
-        emailSentAt: sndlDemands.emailSentAt,
+        processedBy: sndlDemands.processedBy,
         user: {
           id: users.id,
           name: users.name,

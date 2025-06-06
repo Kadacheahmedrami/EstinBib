@@ -47,13 +47,10 @@ interface SNDLDemand {
   user: User
   requestReason: string
   status: string
-  sndlEmail: string | null
-  sndlPassword: string | null
   adminNotes: string | null
   requestedAt: string
   processedAt: string | null
-  emailSent: boolean
-  emailSentAt: string | null
+  processedBy: string | null
 }
 
 interface PaginationInfo {
@@ -94,7 +91,7 @@ export default function SNDLDemandsPage() {
       }
       
       // Status filter
-      if (statusFilter) {
+      if (statusFilter && statusFilter !== 'all') {
         queryParams.append('status', statusFilter)
       }
       
@@ -292,7 +289,6 @@ export default function SNDLDemandsPage() {
               <SelectItem value="name">Student Name</SelectItem>
               <SelectItem value="email">Student Email</SelectItem>
               <SelectItem value="reason">Request Reason</SelectItem>
-              <SelectItem value="sndlEmail">SNDL Email</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -347,11 +343,6 @@ export default function SNDLDemandsPage() {
             </CardHeader>
             <CardContent>
               <p className="line-clamp-3 text-sm">{demand.requestReason}</p>
-              {demand.sndlEmail && (
-                <div className="mt-2">
-                  <p className="text-sm font-medium">SNDL Email: {demand.sndlEmail}</p>
-                </div>
-              )}
             </CardContent>
             <CardFooter className="flex justify-between pt-2">
               <Button 
@@ -421,10 +412,10 @@ export default function SNDLDemandsPage() {
                     <p>{new Date(selectedDemand.processedAt).toLocaleString()}</p>
                   </div>
                 )}
-                {selectedDemand.emailSent && (
+                {selectedDemand.processedBy && (
                   <div>
-                    <h3 className="font-medium text-sm text-muted-foreground">Email Sent At</h3>
-                    <p>{selectedDemand.emailSentAt ? new Date(selectedDemand.emailSentAt).toLocaleString() : 'N/A'}</p>
+                    <h3 className="font-medium text-sm text-muted-foreground">Processed By</h3>
+                    <p>{selectedDemand.processedBy}</p>
                   </div>
                 )}
               </div>
@@ -433,20 +424,6 @@ export default function SNDLDemandsPage() {
                 <h3 className="font-medium text-sm text-muted-foreground">Request Reason</h3>
                 <p className="whitespace-pre-wrap mt-1 p-3 bg-muted rounded-md">{selectedDemand.requestReason}</p>
               </div>
-
-              {selectedDemand.sndlEmail && (
-                <div>
-                  <h3 className="font-medium text-sm text-muted-foreground">SNDL Email</h3>
-                  <p className="mt-1 p-3 bg-muted rounded-md">{selectedDemand.sndlEmail}</p>
-                </div>
-              )}
-
-              {selectedDemand.sndlPassword && (
-                <div>
-                  <h3 className="font-medium text-sm text-muted-foreground">SNDL Password</h3>
-                  <p className="mt-1 p-3 bg-muted rounded-md">{selectedDemand.sndlPassword}</p>
-                </div>
-              )}
 
               {selectedDemand.adminNotes && (
                 <div>
