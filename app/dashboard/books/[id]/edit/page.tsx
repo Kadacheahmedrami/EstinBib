@@ -144,31 +144,31 @@ export default function EditBookPage({ params }: EditBookPageProps) {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-
+  
     // Reset errors
     setImageError(null)
     setUploadingImage(true)
-
+  
     // Prepare form data for upload
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('upload_preset', 'library_covers') // Replace with your Cloudinary upload preset
-
+  
     try {
-      // Upload to Cloudinary
-      const response = await fetch('https://api.cloudinary.com/v1_1/your-cloud-name/image/upload', {
+      // Upload to your custom API route
+      const response = await fetch(`/api/dashboard/books/${bookId}/upload`, {
         method: 'POST',
         body: formData
       })
-
+  
       if (!response.ok) {
-        throw new Error('Failed to upload image')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to upload image')
       }
-
+  
       const data = await response.json()
       
-      // Update form with new image URL
-      setForm(prev => ({ ...prev, coverImage: data.secure_url }))
+      // Update form with new image URL from your API response
+      setForm(prev => ({ ...prev, coverImage: data.coverImage }))
       toast({
         title: "Image uploaded successfully",
         description: "Your book cover has been updated.",
@@ -176,7 +176,7 @@ export default function EditBookPage({ params }: EditBookPageProps) {
       })
     } catch (err) {
       console.error('Error uploading image:', err)
-      setImageError('Failed to upload image. Please try again.')
+      setImageError(err instanceof Error ? err.message : 'Failed to upload image. Please try again.')
       toast({
         title: "Upload failed",
         description: "There was a problem uploading your image.",
