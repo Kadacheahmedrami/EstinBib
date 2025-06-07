@@ -39,13 +39,13 @@ export async function requestSndlAccount(requestReason: string) {
  */
 export async function getExistingSndlRequest() {
   const session = await getServerAuthSession()
-  console.log(session?.user)
+
   if (!session) throw new Error("User not authenticated")
 
   const existing = await db.query.sndlDemands.findFirst({
     where: () => eq(sndlDemands.userId, session.user.id),
     orderBy: (sndlDemands, { desc }) => [desc(sndlDemands.requestedAt)]
   })
-  console.log(existing)
+
   return existing
 }

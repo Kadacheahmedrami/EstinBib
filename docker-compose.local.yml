@@ -21,9 +21,11 @@ services:
       start_period: 30s
 
   migrate:
-    image: c4lord/library-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: deps
     container_name: library_migrate
-    user: "0:0"
     env_file:
       - .env.docker
     depends_on:
@@ -37,33 +39,20 @@ services:
       - ./src:/app/src
       - ./drizzle.config.json:/app/drizzle.config.json
       - ./drizzle.config.ts:/app/drizzle.config.ts
-      - ./package.json:/app/package.json
-      - ./package-lock.json:/app/package-lock.json
-      - migrate_node_modules:/app/node_modules
-    working_dir: /app
-    command: >
-      sh -c "
-      sleep 10 && 
-      echo 'Installing dependencies...' &&
-      npm ci --include=dev &&
-      echo 'Creating drizzle directory...' &&
-      mkdir -p /app/drizzle &&
-      echo 'Generating migrations...' &&
-      ./node_modules/.bin/drizzle-kit generate &&
-      echo 'Running migrations...' &&
-      ./node_modules/.bin/drizzle-kit migrate &&
-      echo 'Migration completed successfully!'
-      "
+    command: sh -c "sleep 10 && mkdir -p /app/drizzle && npx drizzle-kit generate && npx drizzle-kit migrate"
 
   app:
-    image: c4lord/library-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: library_app
     restart: unless-stopped
     ports:
       - "3000:3000"
     env_file:
-      - .env.docker.exemple
+      - .env.docker
     environment:
+      # Override specific environment variables for Docker
       - NODE_ENV=production
       - NEXTAUTH_URL=http://localhost:3000
       - NEXT_PUBLIC_API_URL=http://localhost:3000/
@@ -76,7 +65,6 @@ services:
       - library_network
     volumes:
       - ./uploads:/app/uploads
-    working_dir: /app
     dns:
       - 8.8.8.8
       - 8.8.4.4
@@ -96,8 +84,6 @@ services:
 
 volumes:
   postgres_data:
-    driver: local
-  migrate_node_modules:
     driver: local
 
 networks:
